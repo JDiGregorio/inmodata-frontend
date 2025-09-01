@@ -1,6 +1,6 @@
 import React from 'react'
 import { useLocation, Link } from 'react-router'
-import { HomeIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { HomeIcon, ChevronRightIcon } from 'lucide-react'
 
 import routes from '@/routes'
 import { PermissionHelpers } from '@/hooks/usePermissions'

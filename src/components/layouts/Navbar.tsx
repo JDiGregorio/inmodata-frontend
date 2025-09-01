@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Disclosure, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/24/solid'
-import { UserIcon, ArrowLeftEndOnRectangleIcon, Bars3Icon } from '@heroicons/react/24/outline'
+import { MenuIcon, ChevronDownIcon, UserPenIcon, LogOutIcon } from 'lucide-react'
 import axios from 'axios'
 
 import { Breadcrumbs } from './Breadcrumbs'
@@ -51,7 +50,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
                                         <span className="sr-only">
                                             Open sidebar
                                         </span>
-                                        <Bars3Icon aria-hidden="true" className="size-6" />
+                                        <MenuIcon size={24} aria-hidden="true" />
                                     </button>
                                 </div>
 
@@ -92,7 +91,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
                                                     }}
                                                     className="w-full flex items-center px-4 py-2 text-sm text-gray-700 font-medium data-[focus]:bg-gray-100 data-[focus]:text-gray-900 space-x-2"
                                                 >
-                                                    <UserIcon aria-hidden="true" className="size-4 text-gray-400" />
+                                                    <UserPenIcon size={18} className="text-gray-400" />
                                                     <span>
 														Perfil
 													</span>
@@ -109,7 +108,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
                                                     }}
                                                     className="w-full flex items-center px-4 py-2 text-sm text-gray-700 font-medium data-[focus]:bg-gray-100 data-[focus]:text-gray-900 space-x-2"
                                                 >
-                                                    <ArrowLeftEndOnRectangleIcon aria-hidden="true" className="size-4 text-gray-400" />
+                                                    <LogOutIcon size={18} className="text-gray-400" />
                                                     <span>
 														Cerrar sesión
 													</span>

@@ -1,19 +1,19 @@
 import { lazy } from 'react'
 import {
     HomeIcon,
-    // UsersIcon,
-    // ClipboardDocumentCheckIcon
-} from '@heroicons/react/24/outline'
+    UsersIcon,
+    ListTodoIcon
+} from 'lucide-react' // 
 
 import { PermissionHelpers } from "@/hooks/usePermissions"
 
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
-// const UsersIndex = lazy(() => import('@/pages/User'))
-// const UserCreate = lazy(() => import('@/pages/User/create'))
-// const UserEdit = lazy(() => import('@/pages/User/edit'))
-// const RolesIndex = lazy(() => import('@/pages/Role'))
-// const RoleCreate = lazy(() => import('@/pages/Role/create'))
-// const RoleEdit = lazy(() => import('@/pages/Role/edit'))
+const UsersIndex = lazy(() => import('@/pages/User'))
+const UserCreate = lazy(() => import('@/pages/User/create'))
+const UserEdit = lazy(() => import('@/pages/User/edit'))
+const RolesIndex = lazy(() => import('@/pages/Role'))
+const RoleCreate = lazy(() => import('@/pages/Role/create'))
+const RoleEdit = lazy(() => import('@/pages/Role/edit'))
 
 const routes = (permissions: PermissionHelpers) => [
     {
@@ -26,7 +26,7 @@ const routes = (permissions: PermissionHelpers) => [
             name: 'Inicio'
         }
     },
-    /*{
+    {
         view: permissions.canView("user"),
         path: '/usuarios',
         component: UsersIndex,
@@ -54,7 +54,7 @@ const routes = (permissions: PermissionHelpers) => [
         component: RolesIndex,
         label: 'Roles',
         sidebar: {
-            icon: ClipboardDocumentCheckIcon,
+            icon: ListTodoIcon,
             name: 'Roles'
         }
     },
@@ -69,7 +69,7 @@ const routes = (permissions: PermissionHelpers) => [
         path: '/roles/:id/editar',
         component: RoleEdit,
         label: 'Editar'
-    }*/
+    }
 ]
 
 export default routes

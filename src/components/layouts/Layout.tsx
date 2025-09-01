@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react'
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
-import { XMarkIcon, Square2StackIcon } from '@heroicons/react/24/outline'
+import { XIcon, SquareStackIcon } from 'lucide-react'
 import { Routes, Route, NavLink, Navigate } from 'react-router'
 
 import Spinner from '@/components/layouts/Spinner'
@@ -38,7 +38,7 @@ const MainLayout = (): React.ReactElement => {
                                             Close sidebar
                                         </span>
 
-                                        <XMarkIcon aria-hidden="true" className="size-6 text-white" />
+                                        <XIcon aria-hidden="true" className="size-6 text-white" />
                                     </button>
                                 </div>
                             </TransitionChild>
@@ -53,7 +53,7 @@ const MainLayout = (): React.ReactElement => {
                                                     <li key={index}>
                                                         <NavLink to={route.path} onClick={() => setSidebarOpen(false)}>
                                                             {({ isActive }) => {
-                                                                const Icon = route.sidebar?.icon || Square2StackIcon
+                                                                const Icon = route.sidebar?.icon || SquareStackIcon
 
                                                                 return (
                                                                     <span className={classNames(isActive ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white', 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold')}>
@@ -85,7 +85,7 @@ const MainLayout = (): React.ReactElement => {
                                             <li key={index}>
                                                 <NavLink to={route.path}>
                                                     {({ isActive }) => {
-                                                        const Icon = route.sidebar?.icon || Square2StackIcon
+                                                        const Icon = route.sidebar?.icon || SquareStackIcon
 
                                                         return (
                                                             <span className={classNames(isActive ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white', 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold')}>
