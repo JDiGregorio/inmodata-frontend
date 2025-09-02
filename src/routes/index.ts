@@ -1,13 +1,17 @@
 import { lazy } from 'react'
 import {
     HomeIcon,
+    MapPinHouseIcon,
     UsersIcon,
     ListTodoIcon
-} from 'lucide-react' // 
+} from 'lucide-react'
 
 import { PermissionHelpers } from "@/hooks/usePermissions"
 
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
+const PropertiesIndex = lazy(() => import('@/pages/Property'))
+const PropertyCreate = lazy(() => import('@/pages/Property/create'))
+const PropertyEdit = lazy(() => import('@/pages/Property/edit'))
 const UsersIndex = lazy(() => import('@/pages/User'))
 const UserCreate = lazy(() => import('@/pages/User/create'))
 const UserEdit = lazy(() => import('@/pages/User/edit'))
@@ -25,6 +29,28 @@ const routes = (permissions: PermissionHelpers) => [
             icon: HomeIcon,
             name: 'Inicio'
         }
+    },
+    {
+        view: permissions.canView("property"),
+        path: '/inmuebles',
+        component: PropertiesIndex,
+        label: 'Inmuebles',
+        sidebar: {
+            icon: MapPinHouseIcon,
+            name: 'Inmuebles'
+        }
+    },
+    {
+        view: permissions.canCreate("property"),
+        path: '/inmuebles/crear',
+        component: PropertyCreate,
+        label: 'Crear'
+    },
+    {
+        view: permissions.canEdit("property"),
+        path: '/inmuebles/:id/editar',
+        component: PropertyEdit,
+        label: 'Editar'
     },
     {
         view: permissions.canView("user"),

@@ -1,0 +1,35 @@
+query ListProperties($first: Int!, $page: Int, $search: String) {
+    properties(first: $first, page: $page, search: $search) {
+        data {
+            id
+            name
+            latitude
+            longitude
+            riskProfile
+        }
+        paginatorInfo {
+            currentPage
+            lastPage
+            total
+        }
+    }
+}
+
+query GetPropertyById($id: ID!) {
+    propertyById(id: $id) {
+        id
+        name
+        owner
+        exactAddress
+        latitude
+        longitude
+        averageValue
+        landArea
+        improvementArea
+        landValue
+        utilizationRatio
+        averageSquareYard
+        averageSquareMeter
+        riskProfile
+    }
+}

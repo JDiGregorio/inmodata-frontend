@@ -1,0 +1,19 @@
+mutation CreateProperty($input: CreatePropertyInput!) {
+	createProperty(input: $input) {
+		id
+		name
+	}
+}
+
+mutation UpdateProperty($input: UpdatePropertyInput!) {
+	updateProperty(input: $input) {
+		id
+		name
+	}
+}
+
+mutation DeleteProperty($id: ID!) {
+	deleteProperty(id: $id) {
+		id
+	}
+}
