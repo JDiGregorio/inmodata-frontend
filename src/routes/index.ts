@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import {
     HomeIcon,
     MapPinHouseIcon,
+    LandmarkIcon,
     UsersIcon,
     ListTodoIcon
 } from 'lucide-react'
@@ -12,6 +13,9 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const PropertiesIndex = lazy(() => import('@/pages/Property'))
 const PropertyCreate = lazy(() => import('@/pages/Property/create'))
 const PropertyEdit = lazy(() => import('@/pages/Property/edit'))
+const InstitutionsIndex = lazy(() => import('@/pages/Institution'))
+const InstitutionCreate = lazy(() => import('@/pages/Institution/create'))
+const InstitutionEdit = lazy(() => import('@/pages/Institution/edit'))
 const UsersIndex = lazy(() => import('@/pages/User'))
 const UserCreate = lazy(() => import('@/pages/User/create'))
 const UserEdit = lazy(() => import('@/pages/User/edit'))
@@ -50,6 +54,28 @@ const routes = (permissions: PermissionHelpers) => [
         view: permissions.canEdit("property"),
         path: '/inmuebles/:id/editar',
         component: PropertyEdit,
+        label: 'Editar'
+    },
+    {
+        view: permissions.canView("institution"),
+        path: '/instituciones',
+        component: InstitutionsIndex,
+        label: 'Instituciones',
+        sidebar: {
+            icon: LandmarkIcon,
+            name: 'Instituciones'
+        }
+    },
+    {
+        view: permissions.canCreate("institution"),
+        path: '/instituciones/crear',
+        component: InstitutionCreate,
+        label: 'Crear'
+    },
+    {
+        view: permissions.canEdit("institution"),
+        path: '/instituciones/:id/editar',
+        component: InstitutionEdit,
         label: 'Editar'
     },
     {

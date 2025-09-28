@@ -26,6 +26,6 @@ query GetUserById($id: ID!) {
             name
         }
         permisos
-        permisos_extra
+        permisosExtra
     }
 }

@@ -1,9 +1,9 @@
 import React from 'react'
 
 import TabsPanel, { TabPanel } from '@/components/widgets/TabsPanel/TabsPanel'
-import { GeneralInformationTab } from './components/tabs/GeneralInformation.create.tab'
+import { GeneralInformationTab } from './components/GeneralInformation.create.tab'
 
-const PropertyCreate = (): React.ReactElement => {
+const InstitutionCreate = (): React.ReactElement => {
     const tabs: TabPanel[] = [
         {
             view: true,
@@ -23,4 +23,4 @@ const PropertyCreate = (): React.ReactElement => {
     )
 }
 
-export default PropertyCreate
+export default InstitutionCreate

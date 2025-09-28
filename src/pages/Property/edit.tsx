@@ -4,7 +4,8 @@ import { useParams } from 'react-router'
 import TabsPanel, { TabPanel } from '@/components/widgets/TabsPanel/TabsPanel'
 import Spinner from '@/components/layouts/Spinner'
 import Page404 from '../404'
-import { GeneralInformationTab } from './components/GeneralInformation.edit.tab'
+import { GeneralInformationTab } from './components/tabs/GeneralInformation.edit.tab'
+import { ValuationsTab } from './components/tabs/Valuations.edit.tab'
 
 import {
     Property,
@@ -14,7 +15,8 @@ import {
 const PropertyEdit = (): React.ReactElement => {
     const { id } = useParams()
 
-    const { data, loading, error } = useGetPropertyByIdQuery({
+    const { data, loading, error, refetch } = useGetPropertyByIdQuery({
+        fetchPolicy: 'network-only',
         variables: {
             id: id!
         }
@@ -43,6 +45,13 @@ const PropertyEdit = (): React.ReactElement => {
             hash: '#informacion-general',
             active: true,
             content: <GeneralInformationTab property={property} />
+        },
+        {
+            view: true,
+            name: 'Valuaciones',
+            hash: '#valuaciones',
+            active: true,
+            content: <ValuationsTab property={property} refetch={refetch} />
         }
     ]
 

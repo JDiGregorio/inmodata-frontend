@@ -164,7 +164,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
     }
 
 	return (
-		<div className="mx-auto max-w-3xl mt-6 px-4 py-5 rounded-lg bg-white shadow mb-10">
+		<div className="mx-auto max-w-3xl mt-6 px-4 py-5 rounded-lg bg-white shadow border mb-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl space-y-12">
                     <div className="space-y-6">

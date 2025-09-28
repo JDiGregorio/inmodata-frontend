@@ -68,14 +68,18 @@ const PropertiesListView = (): React.ReactElement => {
     const properties =  data?.properties.data
     const paginatorInfo = data?.properties.paginatorInfo
     const parsedColumns = properties ? properties.map(property => {
-        const risk = risks.find(risk => risk.value === property.riskProfile)
-        
+
+        const measuredAt = property.latestValuation?.measuredAt
+        const institution = property.latestValuation?.institution?.name
+
         return [
             property.id,
-            property.name ?? '-',
+            property.name,
+            institution ?? '-',
             property.latitude.toString(),
             property.longitude.toString(),
-            risk?.label ?? '-'
+            measuredAt ?? '-',
+            property.quantity.toString()
         ]
     }) : []
 
@@ -84,7 +88,7 @@ const PropertiesListView = (): React.ReactElement => {
             title="Inmuebles"
             canCreate={permissions.canCreate("property")}
             canEdit={permissions.canEdit("property")}
-            headers={['Nombre', 'Latitud', 'Longitud', 'Perfil de Riesgo']}
+            headers={['Nombre', 'Institución', 'Latitud', 'Longitud', 'Fecha de Valuación', 'Valuaciones']}
             loading={loading}
             error={error}
             data={parsedColumns}

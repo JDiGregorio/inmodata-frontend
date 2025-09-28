@@ -44,12 +44,12 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
     const { id } = useParams()
 
     useEffect(() => {
-        if (!user.permisos_extra) return;
+        if (!user.permisosExtra) return;
     
         setPermissions((prevPermissions) => {
             const updatedPermissions = { ...prevPermissions }
     
-            const permisosSet = new Set(user.permisos_extra);
+            const permisosSet = new Set(user.permisosExtra);
     
             (Object.keys(updatedPermissions) as PermissionKey[]).forEach((modelName) => {
                 (Object.keys(updatedPermissions[modelName]) as ActionType[]).forEach((key) => {
@@ -63,7 +63,7 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
     
             return updatedPermissions
         })
-    }, [user.permisos_extra])
+    }, [user.permisosExtra])
     
 
     const [ updateUser, result ] = useUpdateUserMutation({
@@ -138,7 +138,7 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
     }
 
     return (
-        <div className="mx-auto max-w-3xl mt-6 px-4 py-5 rounded-lg bg-white shadow mb-10">
+        <div className="mx-auto max-w-3xl mt-6 px-4 py-5 rounded-lg bg-white shadow border mb-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl space-y-12">
                     <div className="space-y-6">
@@ -177,7 +177,7 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
                             </Button>
                         )}
                         
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate(`/usuarios/${id}/editar#informacion-general`)}}>
+                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate(`/usuarios/${id}/editar#informacion-general`)}>
                             Cancelar
                         </Button>
                         

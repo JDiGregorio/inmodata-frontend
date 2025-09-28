@@ -3,7 +3,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+    return twMerge(clsx(inputs))
 }
 
 export function classNames(...classes: string[]): string {
@@ -37,7 +37,7 @@ export const useLoadingDots = (title: string, interval = 500) => {
 
     useEffect(() => {
         let count = 0
-        
+
         const timer = setInterval(() => {
             count = (count + 1) % 4
             setAnimatedTitle(title + ".".repeat(count))
@@ -50,3 +50,41 @@ export const useLoadingDots = (title: string, interval = 500) => {
 }
 
 export const formatDate = (date: Date) => date.toISOString().split("T")[0]
+
+export function toDateOnly(value: string): string {
+    const sep = value.includes('/') ? '/' : '-'
+    const [a, b, c] = value.split(sep).map(s => s.trim())
+
+    if (a.length === 4) {
+        const yyyy = a.padStart(4, '0')
+        const mm = b.padStart(2, '0')
+        const dd = c.padStart(2, '0')
+        return `${yyyy}-${mm}-${dd}`
+    }
+
+    throw new Error('Formato de fecha no reconocido')
+}
+
+
+export const safeDiv = (num: number, den: number) => (den ? num / den : 0)
+
+export const round6 = (n: number) => Number.isFinite(n) ? Math.round((n + Number.EPSILON) * 1e6) / 1e6 : 0
+
+
+export const isFiniteNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+
+export const isValidLatitude = (lat: unknown): lat is number => isFiniteNumber(lat) && lat >= -90 && lat <= 90
+
+export const isValidLongitude = (lng: unknown): lng is number => isFiniteNumber(lng) && lng >= -180 && lng <= 180
+
+export const isValidLatLng = (lat: unknown, lng: unknown): lat is number & (typeof lng extends number ? number : never) => isValidLatitude(lat) && isValidLongitude(lng)
+
+export const parseNumberOrUndefined = (value: string): number | undefined => {
+    if (value.trim() === '') return undefined
+    const n = Number(value)
+    return Number.isFinite(n) ? n : undefined
+}
+
+export const isLatLngLiteral = (v: any): v is {lat: number; lng: number} => v && typeof v.lat === 'number' && typeof v.lng === 'number'
+
+export const isLatLngClass = (v: any): v is google.maps.LatLng => v && typeof v.lat === 'function' && typeof v.lng === 'function'

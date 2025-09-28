@@ -5,7 +5,7 @@ import { PaginatorInfo } from "@/generated-types"
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { NavLink, useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
-import { LucideProps } from "lucide-react"
+import { LucideProps, SquarePenIcon } from "lucide-react"
 
 const LIST_ITEMS_LENGTH = 10
 
@@ -41,6 +41,7 @@ const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, can
 
     const tableHeaders = headers.map((header, index) => {
         const classNames = index === 0 ? 'sm:pl-6 pl-4 pr-3' : 'px-3'
+
         return (
             <TableHead key={`th-${index}`} scope="col" className={`py-3.5 text-left text-sm font-semibold text-gray-900 ${classNames}`}>
                 {header}
@@ -51,24 +52,22 @@ const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, can
     const tableRows = data.map((row, index) => {
         return (
             <TableRow key={`${model}-${index}`} className="even:bg-gray-50">
-                {
-                    row.map((cells, index) => {
-                        if (index !== 0) {
-                            const style = index === 1 ? "whitespace-wrap pl-4 pr-3 font-medium text-gray-900 sm:pl-6" : "max-w-xs py-4 text-sm whitespace-wrap px-3 text-gray-500"
+                {row.map((cells, index) => {
+                    if (index !== 0) {
+                        const style = index === 1 ? "whitespace-wrap pl-4 pr-3 font-medium text-gray-900 sm:pl-6" : "max-w-xs py-4 text-sm whitespace-wrap px-3 text-gray-500"
 
-                            return (
-                                <TableCell key={`cell-${index}`} className={`py-4 text-sm ${style}`}>
-                                    {cells}
-                                </TableCell>
-                            )
-                        }
-                    })
-                }
+                        return (
+                            <TableCell key={`cell-${index}`} className={`py-4 text-sm ${style}`}>
+                                {cells}
+                            </TableCell>
+                        )
+                    }
+                })}
 
                 {canEdit && (
                     <TableCell className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <NavLink to={`/${model.plural}/${row[0]}/editar`} className="text-orange-600 hover:text-orange-900">
-                            Editar&nbsp;&nbsp;
+                        <NavLink to={`/${model.plural}/${row[0]}/editar`} className="flex justify-center text-orange-600 hover:text-orange-900 items-center">
+                            <SquarePenIcon size={18} color="#646464" />
                         </NavLink>
                     </TableCell>
                 )}
@@ -147,14 +146,15 @@ const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, can
             <div className="mt-8 flow-root">
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                            <Table className="min-w-full ">
+                        <div className="overflow-hidden shadow-sm outline-1 outline-black/5 sm:rounded-lg">
+                            <Table className="min-w-full">
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         {tableHeaders}
 
-                                        <TableHead scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <TableHead scope="col" className="w-20 relative py-3.5 pl-3 pr-4 sm:pr-6">
                                             <span className="sr-only">Acciones</span>
+                                            Acciones
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>

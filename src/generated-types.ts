@@ -19,19 +19,29 @@ export type Scalars = {
   DateTime: { input: any; output: any; }
 };
 
+export type AddValuationInput = {
+  averageSquareMeter?: InputMaybe<Scalars['Float']['input']>;
+  averageSquareYard?: InputMaybe<Scalars['Float']['input']>;
+  averageValue?: InputMaybe<Scalars['Float']['input']>;
+  improvementArea?: InputMaybe<Scalars['Float']['input']>;
+  institution?: InputMaybe<UpdateInstitutionBelongsTo>;
+  landArea?: InputMaybe<Scalars['Float']['input']>;
+  landValue?: InputMaybe<Scalars['Float']['input']>;
+  measuredAt?: InputMaybe<Scalars['Date']['input']>;
+  propertyId?: InputMaybe<Scalars['ID']['input']>;
+  riskProfile?: InputMaybe<RiskAggregates>;
+  utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type CreateInstitutionInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreatePropertyInput = {
-  averageSquareMeter: Scalars['Float']['input'];
-  averageSquareYard: Scalars['Float']['input'];
-  averageValue: Scalars['Float']['input'];
   exactAddress?: InputMaybe<Scalars['String']['input']>;
-  improvementArea: Scalars['Float']['input'];
-  landArea: Scalars['Float']['input'];
-  landValue: Scalars['Float']['input'];
   latitude: Scalars['Float']['input'];
   longitude: Scalars['Float']['input'];
   owner?: InputMaybe<Scalars['String']['input']>;
-  riskProfile: RiskAggregates;
-  utilizationRatio: Scalars['Float']['input'];
 };
 
 export type CreateRoleInput = {
@@ -46,17 +56,48 @@ export type CreateUserInput = {
   roles?: InputMaybe<UpdateRolesBelongsToMany>;
 };
 
+export type Institution = {
+  __typename?: 'Institution';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+/** A paginated list of Institution items. */
+export type InstitutionPaginator = {
+  __typename?: 'InstitutionPaginator';
+  /** A list of Institution items. */
+  data: Array<Institution>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  addPropertyValuation?: Maybe<PropertyValuation>;
+  createInstitution: Institution;
   createProperty: Property;
   createRole: Role;
   createUser: User;
+  deleteInstitution?: Maybe<Institution>;
   deleteProperty?: Maybe<Property>;
   deleteRole?: Maybe<Role>;
   deleteUser?: Maybe<User>;
+  updateInstitution: Institution;
   updateProperty: Property;
   updateRole: Role;
   updateUser: User;
+  updateValuation?: Maybe<PropertyValuation>;
+};
+
+
+export type MutationAddPropertyValuationArgs = {
+  input: AddValuationInput;
+  propertyId: Scalars['ID']['input'];
+};
+
+
+export type MutationCreateInstitutionArgs = {
+  input: CreateInstitutionInput;
 };
 
 
@@ -75,6 +116,11 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationDeleteInstitutionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeletePropertyArgs = {
   id: Scalars['ID']['input'];
 };
@@ -90,6 +136,11 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationUpdateInstitutionArgs = {
+  input: UpdateInstitutionInput;
+};
+
+
 export type MutationUpdatePropertyArgs = {
   input: UpdatePropertyInput;
 };
@@ -102,6 +153,11 @@ export type MutationUpdateRoleArgs = {
 
 export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
+};
+
+
+export type MutationUpdateValuationArgs = {
+  input: UpdateValuationInput;
 };
 
 /** Allows ordering a list of records. */
@@ -155,21 +211,16 @@ export type PaginatorInfo = {
 
 export type Property = {
   __typename?: 'Property';
-  averageSquareMeter: Scalars['Float']['output'];
-  averageSquareYard: Scalars['Float']['output'];
-  averageValue: Scalars['Float']['output'];
   exactAddress?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  improvementArea: Scalars['Float']['output'];
-  landArea: Scalars['Float']['output'];
-  landValue: Scalars['Float']['output'];
+  latestValuation?: Maybe<PropertyValuation>;
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
   name?: Maybe<Scalars['String']['output']>;
   owner?: Maybe<Scalars['String']['output']>;
-  riskProfile: RiskAggregates;
+  quantity: Scalars['Int']['output'];
   user?: Maybe<User>;
-  utilizationRatio: Scalars['Float']['output'];
+  valuations?: Maybe<Array<Maybe<PropertyValuation>>>;
 };
 
 /** A paginated list of Property items. */
@@ -181,8 +232,27 @@ export type PropertyPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+export type PropertyValuation = {
+  __typename?: 'PropertyValuation';
+  averageSquareMeter: Scalars['Float']['output'];
+  averageSquareYard: Scalars['Float']['output'];
+  averageValue: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  improvementArea: Scalars['Float']['output'];
+  institution?: Maybe<Institution>;
+  landArea: Scalars['Float']['output'];
+  landValue: Scalars['Float']['output'];
+  measuredAt?: Maybe<Scalars['Date']['output']>;
+  property_id?: Maybe<Scalars['ID']['output']>;
+  riskProfile: RiskAggregates;
+  user?: Maybe<User>;
+  utilizationRatio: Scalars['Float']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  institutionById?: Maybe<Institution>;
+  institutions: InstitutionPaginator;
   properties: PropertyPaginator;
   propertyById?: Maybe<Property>;
   roleById?: Maybe<Role>;
@@ -190,6 +260,18 @@ export type Query = {
   user?: Maybe<User>;
   userById?: Maybe<User>;
   users: UserPaginator;
+};
+
+
+export type QueryInstitutionByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryInstitutionsArgs = {
+  first: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -276,20 +358,22 @@ export enum Trashed {
   Without = 'WITHOUT'
 }
 
+export type UpdateInstitutionBelongsTo = {
+  connect?: InputMaybe<Scalars['ID']['input']>;
+  disconnect?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type UpdateInstitutionInput = {
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdatePropertyInput = {
-  averageSquareMeter: Scalars['Float']['input'];
-  averageSquareYard: Scalars['Float']['input'];
-  averageValue: Scalars['Float']['input'];
   exactAddress?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
-  improvementArea: Scalars['Float']['input'];
-  landArea: Scalars['Float']['input'];
-  landValue: Scalars['Float']['input'];
   latitude: Scalars['Float']['input'];
   longitude: Scalars['Float']['input'];
   owner?: InputMaybe<Scalars['String']['input']>;
-  riskProfile: RiskAggregates;
-  utilizationRatio: Scalars['Float']['input'];
 };
 
 export type UpdateRoleInput = {
@@ -311,13 +395,27 @@ export type UpdateUserInput = {
   roles?: InputMaybe<UpdateRolesBelongsToMany>;
 };
 
+export type UpdateValuationInput = {
+  averageSquareMeter?: InputMaybe<Scalars['Float']['input']>;
+  averageSquareYard?: InputMaybe<Scalars['Float']['input']>;
+  averageValue?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['ID']['input'];
+  improvementArea?: InputMaybe<Scalars['Float']['input']>;
+  institution?: InputMaybe<UpdateInstitutionBelongsTo>;
+  landArea?: InputMaybe<Scalars['Float']['input']>;
+  landValue?: InputMaybe<Scalars['Float']['input']>;
+  measuredAt?: InputMaybe<Scalars['Date']['input']>;
+  riskProfile?: InputMaybe<RiskAggregates>;
+  utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type User = {
   __typename?: 'User';
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   permisos?: Maybe<Array<Scalars['String']['output']>>;
-  permisos_extra?: Maybe<Array<Scalars['String']['output']>>;
+  permisosExtra?: Maybe<Array<Scalars['String']['output']>>;
   roles: Array<Role>;
 };
 
@@ -351,6 +449,58 @@ export type DeletePropertyMutationVariables = Exact<{
 
 export type DeletePropertyMutation = { __typename?: 'Mutation', deleteProperty?: { __typename?: 'Property', id: string } | null };
 
+export type ListInstitutionsQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ListInstitutionsQuery = { __typename?: 'Query', institutions: { __typename?: 'InstitutionPaginator', data: Array<{ __typename?: 'Institution', id: string, name: string }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+
+export type GetInstitutionByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetInstitutionByIdQuery = { __typename?: 'Query', institutionById?: { __typename?: 'Institution', id: string, name: string } | null };
+
+export type CreateInstitutionMutationVariables = Exact<{
+  input: CreateInstitutionInput;
+}>;
+
+
+export type CreateInstitutionMutation = { __typename?: 'Mutation', createInstitution: { __typename?: 'Institution', id: string, name: string } };
+
+export type UpdateInstitutionMutationVariables = Exact<{
+  input: UpdateInstitutionInput;
+}>;
+
+
+export type UpdateInstitutionMutation = { __typename?: 'Mutation', updateInstitution: { __typename?: 'Institution', id: string, name: string } };
+
+export type AddPropertyValuationMutationVariables = Exact<{
+  propertyId: Scalars['ID']['input'];
+  input: AddValuationInput;
+}>;
+
+
+export type AddPropertyValuationMutation = { __typename?: 'Mutation', addPropertyValuation?: { __typename?: 'PropertyValuation', id: string } | null };
+
+export type UpdatePropertyValuationMutationVariables = Exact<{
+  input: UpdateValuationInput;
+}>;
+
+
+export type UpdatePropertyValuationMutation = { __typename?: 'Mutation', updateValuation?: { __typename?: 'PropertyValuation', id: string } | null };
+
+export type DeleteInstitutionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteInstitutionMutation = { __typename?: 'Mutation', deleteInstitution?: { __typename?: 'Institution', id: string } | null };
+
 export type ListPropertiesQueryVariables = Exact<{
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -358,14 +508,14 @@ export type ListPropertiesQueryVariables = Exact<{
 }>;
 
 
-export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, latitude: number, longitude: number, riskProfile: RiskAggregates }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', measuredAt?: any | null, institution?: { __typename?: 'Institution', name: string } | null } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
 
 export type GetPropertyByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, latitude: number, longitude: number, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -416,7 +566,7 @@ export type UpdateUserMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisos_extra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } };
+export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } };
 
 export type DeleteUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -439,7 +589,7 @@ export type GetUserByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisos_extra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
+export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
 
 
 export const CreatePropertyDocument = gql`
@@ -543,6 +693,265 @@ export function useDeletePropertyMutation(baseOptions?: Apollo.MutationHookOptio
 export type DeletePropertyMutationHookResult = ReturnType<typeof useDeletePropertyMutation>;
 export type DeletePropertyMutationResult = Apollo.MutationResult<DeletePropertyMutation>;
 export type DeletePropertyMutationOptions = Apollo.BaseMutationOptions<DeletePropertyMutation, DeletePropertyMutationVariables>;
+export const ListInstitutionsDocument = gql`
+    query ListInstitutions($first: Int!, $page: Int, $search: String) {
+  institutions(first: $first, page: $page, search: $search) {
+    data {
+      id
+      name
+    }
+    paginatorInfo {
+      currentPage
+      lastPage
+      total
+    }
+  }
+}
+    `;
+
+/**
+ * __useListInstitutionsQuery__
+ *
+ * To run a query within a React component, call `useListInstitutionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useListInstitutionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListInstitutionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      page: // value for 'page'
+ *      search: // value for 'search'
+ *   },
+ * });
+ */
+export function useListInstitutionsQuery(baseOptions: Apollo.QueryHookOptions<ListInstitutionsQuery, ListInstitutionsQueryVariables> & ({ variables: ListInstitutionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ListInstitutionsQuery, ListInstitutionsQueryVariables>(ListInstitutionsDocument, options);
+      }
+export function useListInstitutionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListInstitutionsQuery, ListInstitutionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ListInstitutionsQuery, ListInstitutionsQueryVariables>(ListInstitutionsDocument, options);
+        }
+export function useListInstitutionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ListInstitutionsQuery, ListInstitutionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ListInstitutionsQuery, ListInstitutionsQueryVariables>(ListInstitutionsDocument, options);
+        }
+export type ListInstitutionsQueryHookResult = ReturnType<typeof useListInstitutionsQuery>;
+export type ListInstitutionsLazyQueryHookResult = ReturnType<typeof useListInstitutionsLazyQuery>;
+export type ListInstitutionsSuspenseQueryHookResult = ReturnType<typeof useListInstitutionsSuspenseQuery>;
+export type ListInstitutionsQueryResult = Apollo.QueryResult<ListInstitutionsQuery, ListInstitutionsQueryVariables>;
+export const GetInstitutionByIdDocument = gql`
+    query GetInstitutionById($id: ID!) {
+  institutionById(id: $id) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useGetInstitutionByIdQuery__
+ *
+ * To run a query within a React component, call `useGetInstitutionByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetInstitutionByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetInstitutionByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetInstitutionByIdQuery(baseOptions: Apollo.QueryHookOptions<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables> & ({ variables: GetInstitutionByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>(GetInstitutionByIdDocument, options);
+      }
+export function useGetInstitutionByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>(GetInstitutionByIdDocument, options);
+        }
+export function useGetInstitutionByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>(GetInstitutionByIdDocument, options);
+        }
+export type GetInstitutionByIdQueryHookResult = ReturnType<typeof useGetInstitutionByIdQuery>;
+export type GetInstitutionByIdLazyQueryHookResult = ReturnType<typeof useGetInstitutionByIdLazyQuery>;
+export type GetInstitutionByIdSuspenseQueryHookResult = ReturnType<typeof useGetInstitutionByIdSuspenseQuery>;
+export type GetInstitutionByIdQueryResult = Apollo.QueryResult<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>;
+export const CreateInstitutionDocument = gql`
+    mutation CreateInstitution($input: CreateInstitutionInput!) {
+  createInstitution(input: $input) {
+    id
+    name
+  }
+}
+    `;
+export type CreateInstitutionMutationFn = Apollo.MutationFunction<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
+
+/**
+ * __useCreateInstitutionMutation__
+ *
+ * To run a mutation, you first call `useCreateInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateInstitutionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createInstitutionMutation, { data, loading, error }] = useCreateInstitutionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateInstitutionMutation, CreateInstitutionMutationVariables>(CreateInstitutionDocument, options);
+      }
+export type CreateInstitutionMutationHookResult = ReturnType<typeof useCreateInstitutionMutation>;
+export type CreateInstitutionMutationResult = Apollo.MutationResult<CreateInstitutionMutation>;
+export type CreateInstitutionMutationOptions = Apollo.BaseMutationOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
+export const UpdateInstitutionDocument = gql`
+    mutation UpdateInstitution($input: UpdateInstitutionInput!) {
+  updateInstitution(input: $input) {
+    id
+    name
+  }
+}
+    `;
+export type UpdateInstitutionMutationFn = Apollo.MutationFunction<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
+
+/**
+ * __useUpdateInstitutionMutation__
+ *
+ * To run a mutation, you first call `useUpdateInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateInstitutionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateInstitutionMutation, { data, loading, error }] = useUpdateInstitutionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>(UpdateInstitutionDocument, options);
+      }
+export type UpdateInstitutionMutationHookResult = ReturnType<typeof useUpdateInstitutionMutation>;
+export type UpdateInstitutionMutationResult = Apollo.MutationResult<UpdateInstitutionMutation>;
+export type UpdateInstitutionMutationOptions = Apollo.BaseMutationOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
+export const AddPropertyValuationDocument = gql`
+    mutation AddPropertyValuation($propertyId: ID!, $input: AddValuationInput!) {
+  addPropertyValuation(propertyId: $propertyId, input: $input) {
+    id
+  }
+}
+    `;
+export type AddPropertyValuationMutationFn = Apollo.MutationFunction<AddPropertyValuationMutation, AddPropertyValuationMutationVariables>;
+
+/**
+ * __useAddPropertyValuationMutation__
+ *
+ * To run a mutation, you first call `useAddPropertyValuationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddPropertyValuationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addPropertyValuationMutation, { data, loading, error }] = useAddPropertyValuationMutation({
+ *   variables: {
+ *      propertyId: // value for 'propertyId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAddPropertyValuationMutation(baseOptions?: Apollo.MutationHookOptions<AddPropertyValuationMutation, AddPropertyValuationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddPropertyValuationMutation, AddPropertyValuationMutationVariables>(AddPropertyValuationDocument, options);
+      }
+export type AddPropertyValuationMutationHookResult = ReturnType<typeof useAddPropertyValuationMutation>;
+export type AddPropertyValuationMutationResult = Apollo.MutationResult<AddPropertyValuationMutation>;
+export type AddPropertyValuationMutationOptions = Apollo.BaseMutationOptions<AddPropertyValuationMutation, AddPropertyValuationMutationVariables>;
+export const UpdatePropertyValuationDocument = gql`
+    mutation UpdatePropertyValuation($input: UpdateValuationInput!) {
+  updateValuation(input: $input) {
+    id
+  }
+}
+    `;
+export type UpdatePropertyValuationMutationFn = Apollo.MutationFunction<UpdatePropertyValuationMutation, UpdatePropertyValuationMutationVariables>;
+
+/**
+ * __useUpdatePropertyValuationMutation__
+ *
+ * To run a mutation, you first call `useUpdatePropertyValuationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePropertyValuationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePropertyValuationMutation, { data, loading, error }] = useUpdatePropertyValuationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePropertyValuationMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePropertyValuationMutation, UpdatePropertyValuationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePropertyValuationMutation, UpdatePropertyValuationMutationVariables>(UpdatePropertyValuationDocument, options);
+      }
+export type UpdatePropertyValuationMutationHookResult = ReturnType<typeof useUpdatePropertyValuationMutation>;
+export type UpdatePropertyValuationMutationResult = Apollo.MutationResult<UpdatePropertyValuationMutation>;
+export type UpdatePropertyValuationMutationOptions = Apollo.BaseMutationOptions<UpdatePropertyValuationMutation, UpdatePropertyValuationMutationVariables>;
+export const DeleteInstitutionDocument = gql`
+    mutation DeleteInstitution($id: ID!) {
+  deleteInstitution(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteInstitutionMutationFn = Apollo.MutationFunction<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
+
+/**
+ * __useDeleteInstitutionMutation__
+ *
+ * To run a mutation, you first call `useDeleteInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteInstitutionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteInstitutionMutation, { data, loading, error }] = useDeleteInstitutionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>(DeleteInstitutionDocument, options);
+      }
+export type DeleteInstitutionMutationHookResult = ReturnType<typeof useDeleteInstitutionMutation>;
+export type DeleteInstitutionMutationResult = Apollo.MutationResult<DeleteInstitutionMutation>;
+export type DeleteInstitutionMutationOptions = Apollo.BaseMutationOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
 export const ListPropertiesDocument = gql`
     query ListProperties($first: Int!, $page: Int, $search: String) {
   properties(first: $first, page: $page, search: $search) {
@@ -551,7 +960,13 @@ export const ListPropertiesDocument = gql`
       name
       latitude
       longitude
-      riskProfile
+      latestValuation {
+        measuredAt
+        institution {
+          name
+        }
+      }
+      quantity
     }
     paginatorInfo {
       currentPage
@@ -605,14 +1020,27 @@ export const GetPropertyByIdDocument = gql`
     exactAddress
     latitude
     longitude
-    averageValue
-    landArea
-    improvementArea
-    landValue
-    utilizationRatio
-    averageSquareYard
-    averageSquareMeter
-    riskProfile
+    quantity
+    valuations {
+      id
+      averageValue
+      measuredAt
+      landArea
+      improvementArea
+      landValue
+      utilizationRatio
+      averageSquareYard
+      averageSquareMeter
+      riskProfile
+      institution {
+        id
+        name
+      }
+      user {
+        id
+        name
+      }
+    }
   }
 }
     `;
@@ -888,7 +1316,7 @@ export const UpdateUserDocument = gql`
       name
     }
     permisos
-    permisos_extra
+    permisosExtra
   }
 }
     `;
@@ -1016,7 +1444,7 @@ export const GetUserByIdDocument = gql`
       name
     }
     permisos
-    permisos_extra
+    permisosExtra
   }
 }
     `;

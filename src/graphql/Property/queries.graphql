@@ -5,7 +5,13 @@ query ListProperties($first: Int!, $page: Int, $search: String) {
             name
             latitude
             longitude
-            riskProfile
+            latestValuation {
+                measuredAt
+                institution {
+                    name
+                }
+            }
+            quantity
         }
         paginatorInfo {
             currentPage
@@ -23,13 +29,26 @@ query GetPropertyById($id: ID!) {
         exactAddress
         latitude
         longitude
-        averageValue
-        landArea
-        improvementArea
-        landValue
-        utilizationRatio
-        averageSquareYard
-        averageSquareMeter
-        riskProfile
+        quantity
+        valuations {
+            id
+            averageValue
+            measuredAt
+            landArea
+            improvementArea
+            landValue
+            utilizationRatio
+            averageSquareYard
+            averageSquareMeter
+            riskProfile
+            institution {
+                id
+                name
+            }
+            user {
+                id
+                name
+            }
+        }
     }
 }
