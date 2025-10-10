@@ -1,0 +1,19 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: inmodata-frontend:prod
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=web
+            - traefik.http.routers.front.rule=Host(`admin.inmodata.hn`)
+            - traefik.http.routers.front.entrypoints=websecure
+            - traefik.http.routers.front.tls.certresolver=lehttp
+            - traefik.http.services.front.loadbalancer.server.port=80
+        networks: [ web ]
+        restart: unless-stopped
+
+networks:
+    web:
+        external: true
