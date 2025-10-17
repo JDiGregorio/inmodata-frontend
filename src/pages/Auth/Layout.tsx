@@ -1,6 +1,5 @@
 import { ComponentType } from 'react'
 import moment from 'moment'
-// import { Mail, Lock } from "lucide-react"
 
 import logo from '@/assets/logo.png'
 import banner from '@/assets/banner.png'
