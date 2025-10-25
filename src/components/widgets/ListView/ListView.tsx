@@ -1,50 +1,49 @@
-import React from "react"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { PaginationLinks } from "./PaginationLinks"
-import { PaginatorInfo } from "@/generated-types"
+import React from 'react'
+import { NavLink, useNavigate } from 'react-router'
+import { LucideProps, SquarePenIcon } from 'lucide-react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { NavLink, useNavigate } from "react-router"
-import { Button } from "@/components/ui/button"
-import { LucideProps, SquarePenIcon } from "lucide-react"
+
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
+import { PaginationLinks } from './PaginationLinks'
+import { Button } from '@/components/ui/button'
+
+import { classNames } from '@/lib/utils'
+import { alignClass, caseClass, ellipsis, colStyle } from './ListView.helpers'
+
+import { ModelDefinition, Header, DataRow } from './ListView.types'
+import { PaginatorInfo } from '@/generated-types'
 
 const LIST_ITEMS_LENGTH = 10
 
-export interface ModelDefinition {
-    singular: string,
-    plural: string
-}
-
 export interface StatDefinition {
-    id: number
-    name: string
-    stat: number | undefined
-    icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>
-    bgColor: string
+    id: number;
+    name: string;
+    stat: number | undefined;
+    icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
+    bgColor: string;
 }
 
-export interface ListViewProps {
-    title: string
-    canCreate: boolean
-    canEdit: boolean
-    handlePageChanged: (page: number) => void
-    data: string[][]
-    headers: string[]
-    paginatorInfo: Pick<PaginatorInfo, 'currentPage' | 'lastPage' | 'total'>
-    searchQuery: string
-    setSearchQuery: (query: string) => void
-    model: ModelDefinition
-    stats?: StatDefinition[]
+export interface ListViewProps<T> {
+    model: ModelDefinition;
+    stats?: StatDefinition[];
+    title: string;
+    canCreate: boolean;
+    canEdit: boolean;
+    headers: Header[];
+    data: DataRow<T>[];
+    searchQuery: string;
+    paginatorInfo: Pick<PaginatorInfo, 'currentPage' | 'lastPage' | 'total'>;
+    setSearchQuery: (query: string) => void;
+    handlePageChanged: (page: number) => void;
 }
 
-const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, canCreate, canEdit, stats, setSearchQuery, handlePageChanged }: ListViewProps): React.ReactElement => {
+const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data, paginatorInfo,  searchQuery, setSearchQuery, handlePageChanged }: ListViewProps<T>): React.ReactElement => {
     const navigate = useNavigate()
 
     const tableHeaders = headers.map((header, index) => {
-        const classNames = index === 0 ? 'sm:pl-6 pl-4 pr-3' : 'px-3'
-
         return (
-            <TableHead key={`th-${index}`} scope="col" className={`py-3.5 text-left text-sm font-semibold text-gray-900 ${classNames}`}>
-                {header}
+            <TableHead key={`th-${index}`} scope="col" className={`px-4 py-2 text-xs text-black font-medium uppercase ${alignClass(header.align)} ${ellipsis}`}>
+               {header.label}
             </TableHead>
         )
     })
@@ -52,21 +51,32 @@ const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, can
     const tableRows = data.map((row, index) => {
         return (
             <TableRow key={`${model}-${index}`} className="even:bg-gray-50">
-                {row.map((cells, index) => {
-                    if (index !== 0) {
-                        const style = index === 1 ? "whitespace-wrap pl-4 pr-3 font-medium text-gray-900 sm:pl-6" : "max-w-xs py-4 text-sm whitespace-wrap px-3 text-gray-500"
+                {headers.map(header =>  {
+                    const raw = row.values[header.key]
+                    const prefix = typeof header.prefix === "function" ? header.prefix(raw, row.values) : (header.prefix ?? "")
+                    const suffix = typeof header.suffix === "function" ? header.suffix(raw, row.values) : (header.suffix ?? "")
+                    const display = `${prefix ?? ""}${raw ?? ""}${suffix ?? ""}`
 
-                        return (
-                            <TableCell key={`cell-${index}`} className={`py-4 text-sm ${style}`}>
-                                {cells}
-                            </TableCell>
-                        )
-                    }
+                    return (
+                        <TableCell
+                            key={header.key}
+                            style={colStyle(header)}
+                            className={classNames(
+                                "px-4 py-2 text-[0.8rem] text-gray-800 font-normal",
+                                ellipsis,
+                                alignClass(header.align),
+                                caseClass(header.textCase)
+                            )}
+                            title={String(display)}
+                        >
+                            {display}
+                        </TableCell>
+                    )
                 })}
 
                 {canEdit && (
                     <TableCell className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <NavLink to={`/${model.plural}/${row[0]}/editar`} className="flex justify-center text-orange-600 hover:text-orange-900 items-center">
+                        <NavLink to={`/${model.plural}/${row.values.id}/editar`} className="flex justify-center text-orange-600 hover:text-orange-900 items-center">
                             <SquarePenIcon size={18} color="#646464" />
                         </NavLink>
                     </TableCell>
@@ -147,12 +157,20 @@ const ListView = ({ headers, data, model, paginatorInfo, title, searchQuery, can
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                         <div className="overflow-hidden shadow-sm outline-1 outline-black/5 sm:rounded-lg">
-                            <Table className="min-w-full">
+                            <Table className="min-w-full table-fixed">
+                                <colgroup>
+                                    {headers.map(header => (
+                                        <col key={header.key} style={colStyle(header)} />
+                                    ))}
+
+                                    <col key="col-__options" style={{ width: "60px" }} />
+                                </colgroup>
+
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         {tableHeaders}
 
-                                        <TableHead scope="col" className="w-20 relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <TableHead scope="col" className="px-4 py-2 text-xs text-black text-center font-medium uppercase whitespace-nowrap w-[60px] min-w-[60px] max-w-[60px]">
                                             <span className="sr-only">Acciones</span>
                                             Acciones
                                         </TableHead>

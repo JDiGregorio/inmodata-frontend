@@ -508,7 +508,7 @@ export type ListPropertiesQueryVariables = Exact<{
 }>;
 
 
-export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', measuredAt?: any | null, institution?: { __typename?: 'Institution', name: string } | null } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', measuredAt?: any | null, institution?: { __typename?: 'Institution', name: string } | null } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
 
 export type GetPropertyByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -958,6 +958,7 @@ export const ListPropertiesDocument = gql`
     data {
       id
       name
+      exactAddress
       latitude
       longitude
       latestValuation {

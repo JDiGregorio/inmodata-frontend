@@ -5,9 +5,11 @@ import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/Lis
 import { defineModel } from '@/utils/modelUtils'
 import { usePermissions } from '@/hooks/usePermissions'
 
+import type { Header } from '@/components/widgets/ListView/ListView.types'
 import {
     RiskAggregates,
-    useListPropertiesQuery
+    Property,
+    useListPropertiesQuery,
 } from '@/generated-types'
 
 const Properties = (): React.ReactElement => {
@@ -65,6 +67,16 @@ const PropertiesListView = (): React.ReactElement => {
         refetch(args)
     }
 
+    const headers: Header[] = [
+        { key: "name", label: "Nombre", sortable: false, filterable: false, width: 100, align: "center"  },
+        { key: "exactAddress", label: "Dirección", sortable: false, filterable: false, width: "16rem", align: "left"  },
+        { key: "institution", label: "Institución", sortable: false, filterable: false, width: "7rem", align: "center"  },
+        { key: "latitude", label: "Latitud", sortable: false, filterable: false, width: 100, align: "center"  },
+        { key: "longitude", label: "Longitud", sortable: false, filterable: false, width: 100, align: "center"  },
+        { key: "measuredAt", label: "Fecha de Valuación", sortable: false, filterable: false, width: 120, align: "center"  },
+        { key: "quantity", label: "Valuaciones", sortable: false, filterable: false, width: 100, align: "center"  }
+    ]
+
     const properties =  data?.properties.data
     const paginatorInfo = data?.properties.paginatorInfo
     const parsedColumns = properties ? properties.map(property => {
@@ -72,28 +84,31 @@ const PropertiesListView = (): React.ReactElement => {
         const measuredAt = property.latestValuation?.measuredAt
         const institution = property.latestValuation?.institution?.name
 
-        return [
-            property.id,
-            property.name,
-            institution ?? '-',
-            property.latitude.toString(),
-            property.longitude.toString(),
-            measuredAt ?? '-',
-            property.quantity.toString()
-        ]
+        return {
+            values: {
+                id: property.id,
+                name: property.name ?? '',
+                exactAddress: property.exactAddress ?? '',
+                institution: institution ?? '',
+                latitude: property.latitude,
+                longitude: property.longitude,
+                measuredAt: measuredAt ?? '',
+                quantity: property.quantity
+            }
+        }
     }) : []
 
     return (
-        <SearchableTable 
+        <SearchableTable<Property>
+            model={defineModel('inmueble')}
             title="Inmuebles"
             canCreate={permissions.canCreate("property")}
             canEdit={permissions.canEdit("property")}
-            headers={['Nombre', 'Institución', 'Latitud', 'Longitud', 'Fecha de Valuación', 'Valuaciones']}
+            headers={headers}
+            data={parsedColumns}
             loading={loading}
             error={error}
-            data={parsedColumns}
             paginatorInfo={paginatorInfo}
-            model={defineModel('inmueble')}
             refetch={handleRefetching}
         />
     )

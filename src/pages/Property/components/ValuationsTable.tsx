@@ -65,7 +65,7 @@ export const ValuationsTable = ({ valuations, setModalOpen, handleUpdate }: Valu
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                            Banco
+                                            Institución
                                         </TableHead>
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             Fecha de Valuación

@@ -5,7 +5,11 @@ import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/Lis
 import { defineModel } from '@/utils/modelUtils'
 import { usePermissions } from '@/hooks/usePermissions'
 
-import { useListInstitutionsQuery } from '@/generated-types'
+import type { Header } from '@/components/widgets/ListView/ListView.types'
+import {
+	Institution,
+	useListInstitutionsQuery
+} from '@/generated-types'
 
 const Institutions = (): React.ReactElement => {
 	return (
@@ -28,24 +32,32 @@ const InstitutionsListView = (): React.ReactElement => {
 		refetch(args)
 	}
 
+	const headers: Header[] = [
+		{ key: "name", label: "Nombre", sortable: false, filterable: false, width: "16rem", align: "left"  }
+	]
+
 	const institutions =  data?.institutions.data
 	const paginatorInfo = data?.institutions.paginatorInfo
-	const parsedColumns = institutions ? institutions.map(institution => [
-		institution.id,
-		institution.name
-	]) : []
+	const parsedColumns = institutions ? institutions.map(institution => {
+		return {
+			values: {
+				id: institution.id,
+				name: institution.name
+			}
+		}
+	}) : []
 
 	return (
-		<SearchableTable
+		<SearchableTable<Institution>
+			model={defineModel('institucion')}
 			title={'Instituciones'}
 			canCreate={permissions.canCreate("institution")}
 			canEdit={permissions.canEdit("institution")}
-			headers={['Nombre']}
+			headers={headers}
+			data={parsedColumns}
 			loading={loading}
 			error={error}
-			data={parsedColumns}
 			paginatorInfo={paginatorInfo}
-			model={defineModel('institucione')}
 			refetch={handleRefetching}
 		/>
 	)

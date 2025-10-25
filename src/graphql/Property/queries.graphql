@@ -3,6 +3,7 @@ query ListProperties($first: Int!, $page: Int, $search: String) {
         data {
             id
             name
+            exactAddress
             latitude
             longitude
             latestValuation {
