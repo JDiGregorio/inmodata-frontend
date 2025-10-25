@@ -49,7 +49,7 @@ const Login = () => {
     return (
         <div className="space-y-10">
             <div className="space-y-1">
-                <h2 className="text-2xl font-semibold tracking-tight">
+                <h2 id="login-title" className="text-2xl font-semibold tracking-tight">
                     Bienvenido de nuevo
                 </h2>
 
@@ -119,11 +119,11 @@ const Login = () => {
                     </Button>
                 </form>
 
-                <div className="flex justify-center items-center">
+                {/*<div className="flex justify-center items-center">
                     <p className="text-xs text-zinc-500">
                         Al continuar, acepta nuestros <a href="#" className="underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-400">Terminos</a> & <a href="#" className="underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-400">Política de Privacidad.</a>.
                     </p>
-                </div>
+                </div>*/}
             </div>
         </div>
     )
