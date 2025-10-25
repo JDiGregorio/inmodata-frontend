@@ -10,8 +10,9 @@ import { useLogin } from '@/hooks/useLogin'
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [remember, setRemember] = useState(false)
-    
+
     const { authenticate, loading } = useLogin()
 
     useEffect(() => {
@@ -25,7 +26,7 @@ const Login = () => {
         }
     }, [])
 
-	const handlePressEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const handlePressEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             handleLogin()
         }
@@ -33,12 +34,12 @@ const Login = () => {
 
     const handleLogin = () => {
         if (remember) {
-			localStorage.setItem("isRemembered", "true")
-			localStorage.setItem("email", email)
-		} else {
-			localStorage.setItem("isRemembered", "false")
-			localStorage.removeItem("email")
-		}
+            localStorage.setItem("isRemembered", "true")
+            localStorage.setItem("email", email)
+        } else {
+            localStorage.setItem("isRemembered", "false")
+            localStorage.removeItem("email")
+        }
 
         authenticate({
             email: email,
@@ -57,10 +58,14 @@ const Login = () => {
                     Inicia sesión en tu cuenta de Inmodata
                 </p>
             </div>
-            
+
             <div className="space-y-4">
-                <form className="space-y-6">   
-                    <div className="space-y-6">
+                <form className="space-y-6" onSubmit={handleLogin} noValidate>
+                    <fieldset className="space-y-6">
+                        <legend className="sr-only">
+                            Credenciales
+                        </legend>
+
                         <div className="grid w-full items-center gap-1.5">
                             <Label htmlFor="email">
                                 Correo electrónico
@@ -73,6 +78,9 @@ const Login = () => {
                                 autoComplete="email"
                                 placeholder="Correo electrónico"
                                 required
+                                spellCheck={false}
+                                autoCapitalize="none"
+                                enterKeyHint="next"
                                 onChange={(e) => setEmail(e.target.value)}
                                 onKeyDown={handlePressEnter}
                             />
@@ -83,16 +91,24 @@ const Login = () => {
                                 Contraseña
                             </Label>
 
-                            <Input
-                                type="password"
-                                id="password"
-                                value={password}
-                                autoComplete="current-password"
-                                placeholder="Contraseña"
-                                required
-                                onChange={(e) => setPassword(e.target.value)}
-                                onKeyDown={handlePressEnter}
-                            />
+                            <div className="relative">
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    value={password}
+                                    autoComplete="current-password"
+                                    placeholder="Contraseña"
+                                    required
+                                    enterKeyHint="go"
+                                    className="pr-12"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    onKeyDown={handlePressEnter}
+                                />
+
+                                <button type="button" className="absolute inset-y-0 right-0 px-3 text-sm text-gray-400 hover:text-zinc-900 focus:outline-none"  onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword}>
+                                    {showPassword ? "Ocultar" : "Mostrar"}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="w-full flex items-center justify-between">
@@ -111,9 +127,9 @@ const Login = () => {
                                 </label>
                             </div>
                         </div>
-                    </div>
-            
-                    <Button  type="button" variant={"default"} onClick={handleLogin} disabled={loading} className="w-full cursor-pointer">
+                    </fieldset>
+
+                    <Button type="button" variant={"default"} onClick={handleLogin} disabled={loading} aria-busy={loading} aria-describedby="form-status" className="w-full cursor-pointer">
                         {loading && <Loader2 aria-hidden="true" className="animate-spin -ml-0.5 mr-1.5 h-5 w-5" />}
                         {loading ? "Iniciando sesión" : "Iniciar sesión"}
                     </Button>
