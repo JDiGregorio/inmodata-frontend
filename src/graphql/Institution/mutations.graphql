@@ -1,19 +1,19 @@
-mutation CreateProperty($input: CreatePropertyInput!) {
-	createProperty(input: $input) {
+mutation CreateInstitution($input: CreateInstitutionInput!) {
+	createInstitution(input: $input) {
 		id
 		name
 	}
 }
 
-mutation UpdateProperty($input: UpdatePropertyInput!) {
-	updateProperty(input: $input) {
+mutation UpdateInstitution($input: UpdateInstitutionInput!) {
+	updateInstitution(input: $input) {
 		id
 		name
 	}
 }
 
-mutation DeleteProperty($id: ID!) {
-	deleteProperty(id: $id) {
+mutation DeleteInstitution($id: ID!) {
+	deleteInstitution(id: $id) {
 		id
 	}
 }

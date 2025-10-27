@@ -47,7 +47,7 @@ export const DateInput = ({ id, value, placeholder, disabled, onChange }: DateIn
                     </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="z-40 overflow-hidden p-0" align="start">
+                <PopoverContent className="z-50 overflow-hidden p-0" align="start">
                     <Calendar
                         mode="single"
                         selected={value}

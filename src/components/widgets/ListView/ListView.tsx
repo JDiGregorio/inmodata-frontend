@@ -163,14 +163,14 @@ const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data,
                                         <col key={header.key} style={colStyle(header)} />
                                     ))}
 
-                                    <col key="col-__options" style={{ width: "60px" }} />
+                                    <col key="col-__options" style={{ width: "70px" }} />
                                 </colgroup>
 
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         {tableHeaders}
 
-                                        <TableHead scope="col" className="px-4 py-2 text-xs text-black text-center font-medium uppercase whitespace-nowrap w-[60px] min-w-[60px] max-w-[60px]">
+                                        <TableHead scope="col" className="px-4 py-2 text-xs text-black text-center font-medium uppercase whitespace-nowrap">
                                             <span className="sr-only">Acciones</span>
                                             Acciones
                                         </TableHead>

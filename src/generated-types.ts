@@ -82,6 +82,7 @@ export type Mutation = {
   deleteProperty?: Maybe<Property>;
   deleteRole?: Maybe<Role>;
   deleteUser?: Maybe<User>;
+  deleteValuation?: Maybe<PropertyValuation>;
   updateInstitution: Institution;
   updateProperty: Property;
   updateRole: Role;
@@ -132,6 +133,11 @@ export type MutationDeleteRoleArgs = {
 
 
 export type MutationDeleteUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteValuationArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -428,26 +434,26 @@ export type UserPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
-export type CreatePropertyMutationVariables = Exact<{
-  input: CreatePropertyInput;
+export type CreateInstitutionMutationVariables = Exact<{
+  input: CreateInstitutionInput;
 }>;
 
 
-export type CreatePropertyMutation = { __typename?: 'Mutation', createProperty: { __typename?: 'Property', id: string, name?: string | null } };
+export type CreateInstitutionMutation = { __typename?: 'Mutation', createInstitution: { __typename?: 'Institution', id: string, name: string } };
 
-export type UpdatePropertyMutationVariables = Exact<{
-  input: UpdatePropertyInput;
+export type UpdateInstitutionMutationVariables = Exact<{
+  input: UpdateInstitutionInput;
 }>;
 
 
-export type UpdatePropertyMutation = { __typename?: 'Mutation', updateProperty: { __typename?: 'Property', id: string, name?: string | null } };
+export type UpdateInstitutionMutation = { __typename?: 'Mutation', updateInstitution: { __typename?: 'Institution', id: string, name: string } };
 
-export type DeletePropertyMutationVariables = Exact<{
+export type DeleteInstitutionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeletePropertyMutation = { __typename?: 'Mutation', deleteProperty?: { __typename?: 'Property', id: string } | null };
+export type DeleteInstitutionMutation = { __typename?: 'Mutation', deleteInstitution?: { __typename?: 'Institution', id: string } | null };
 
 export type ListInstitutionsQueryVariables = Exact<{
   first: Scalars['Int']['input'];
@@ -465,19 +471,19 @@ export type GetInstitutionByIdQueryVariables = Exact<{
 
 export type GetInstitutionByIdQuery = { __typename?: 'Query', institutionById?: { __typename?: 'Institution', id: string, name: string } | null };
 
-export type CreateInstitutionMutationVariables = Exact<{
-  input: CreateInstitutionInput;
+export type CreatePropertyMutationVariables = Exact<{
+  input: CreatePropertyInput;
 }>;
 
 
-export type CreateInstitutionMutation = { __typename?: 'Mutation', createInstitution: { __typename?: 'Institution', id: string, name: string } };
+export type CreatePropertyMutation = { __typename?: 'Mutation', createProperty: { __typename?: 'Property', id: string, name?: string | null } };
 
-export type UpdateInstitutionMutationVariables = Exact<{
-  input: UpdateInstitutionInput;
+export type UpdatePropertyMutationVariables = Exact<{
+  input: UpdatePropertyInput;
 }>;
 
 
-export type UpdateInstitutionMutation = { __typename?: 'Mutation', updateInstitution: { __typename?: 'Institution', id: string, name: string } };
+export type UpdatePropertyMutation = { __typename?: 'Mutation', updateProperty: { __typename?: 'Property', id: string, name?: string | null } };
 
 export type AddPropertyValuationMutationVariables = Exact<{
   propertyId: Scalars['ID']['input'];
@@ -494,12 +500,19 @@ export type UpdatePropertyValuationMutationVariables = Exact<{
 
 export type UpdatePropertyValuationMutation = { __typename?: 'Mutation', updateValuation?: { __typename?: 'PropertyValuation', id: string } | null };
 
-export type DeleteInstitutionMutationVariables = Exact<{
+export type DeletePropertyMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteInstitutionMutation = { __typename?: 'Mutation', deleteInstitution?: { __typename?: 'Institution', id: string } | null };
+export type DeletePropertyMutation = { __typename?: 'Mutation', deleteProperty?: { __typename?: 'Property', id: string } | null };
+
+export type DeleteValuationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteValuationMutation = { __typename?: 'Mutation', deleteValuation?: { __typename?: 'PropertyValuation', id: string } | null };
 
 export type ListPropertiesQueryVariables = Exact<{
   first: Scalars['Int']['input'];
@@ -515,7 +528,7 @@ export type GetPropertyByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -592,107 +605,107 @@ export type GetUserByIdQueryVariables = Exact<{
 export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
 
 
-export const CreatePropertyDocument = gql`
-    mutation CreateProperty($input: CreatePropertyInput!) {
-  createProperty(input: $input) {
+export const CreateInstitutionDocument = gql`
+    mutation CreateInstitution($input: CreateInstitutionInput!) {
+  createInstitution(input: $input) {
     id
     name
   }
 }
     `;
-export type CreatePropertyMutationFn = Apollo.MutationFunction<CreatePropertyMutation, CreatePropertyMutationVariables>;
+export type CreateInstitutionMutationFn = Apollo.MutationFunction<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
 
 /**
- * __useCreatePropertyMutation__
+ * __useCreateInstitutionMutation__
  *
- * To run a mutation, you first call `useCreatePropertyMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePropertyMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateInstitutionMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createPropertyMutation, { data, loading, error }] = useCreatePropertyMutation({
+ * const [createInstitutionMutation, { data, loading, error }] = useCreateInstitutionMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useCreatePropertyMutation(baseOptions?: Apollo.MutationHookOptions<CreatePropertyMutation, CreatePropertyMutationVariables>) {
+export function useCreateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePropertyMutation, CreatePropertyMutationVariables>(CreatePropertyDocument, options);
+        return Apollo.useMutation<CreateInstitutionMutation, CreateInstitutionMutationVariables>(CreateInstitutionDocument, options);
       }
-export type CreatePropertyMutationHookResult = ReturnType<typeof useCreatePropertyMutation>;
-export type CreatePropertyMutationResult = Apollo.MutationResult<CreatePropertyMutation>;
-export type CreatePropertyMutationOptions = Apollo.BaseMutationOptions<CreatePropertyMutation, CreatePropertyMutationVariables>;
-export const UpdatePropertyDocument = gql`
-    mutation UpdateProperty($input: UpdatePropertyInput!) {
-  updateProperty(input: $input) {
+export type CreateInstitutionMutationHookResult = ReturnType<typeof useCreateInstitutionMutation>;
+export type CreateInstitutionMutationResult = Apollo.MutationResult<CreateInstitutionMutation>;
+export type CreateInstitutionMutationOptions = Apollo.BaseMutationOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
+export const UpdateInstitutionDocument = gql`
+    mutation UpdateInstitution($input: UpdateInstitutionInput!) {
+  updateInstitution(input: $input) {
     id
     name
   }
 }
     `;
-export type UpdatePropertyMutationFn = Apollo.MutationFunction<UpdatePropertyMutation, UpdatePropertyMutationVariables>;
+export type UpdateInstitutionMutationFn = Apollo.MutationFunction<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
 
 /**
- * __useUpdatePropertyMutation__
+ * __useUpdateInstitutionMutation__
  *
- * To run a mutation, you first call `useUpdatePropertyMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdatePropertyMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdateInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateInstitutionMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updatePropertyMutation, { data, loading, error }] = useUpdatePropertyMutation({
+ * const [updateInstitutionMutation, { data, loading, error }] = useUpdateInstitutionMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpdatePropertyMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePropertyMutation, UpdatePropertyMutationVariables>) {
+export function useUpdateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdatePropertyMutation, UpdatePropertyMutationVariables>(UpdatePropertyDocument, options);
+        return Apollo.useMutation<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>(UpdateInstitutionDocument, options);
       }
-export type UpdatePropertyMutationHookResult = ReturnType<typeof useUpdatePropertyMutation>;
-export type UpdatePropertyMutationResult = Apollo.MutationResult<UpdatePropertyMutation>;
-export type UpdatePropertyMutationOptions = Apollo.BaseMutationOptions<UpdatePropertyMutation, UpdatePropertyMutationVariables>;
-export const DeletePropertyDocument = gql`
-    mutation DeleteProperty($id: ID!) {
-  deleteProperty(id: $id) {
+export type UpdateInstitutionMutationHookResult = ReturnType<typeof useUpdateInstitutionMutation>;
+export type UpdateInstitutionMutationResult = Apollo.MutationResult<UpdateInstitutionMutation>;
+export type UpdateInstitutionMutationOptions = Apollo.BaseMutationOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
+export const DeleteInstitutionDocument = gql`
+    mutation DeleteInstitution($id: ID!) {
+  deleteInstitution(id: $id) {
     id
   }
 }
     `;
-export type DeletePropertyMutationFn = Apollo.MutationFunction<DeletePropertyMutation, DeletePropertyMutationVariables>;
+export type DeleteInstitutionMutationFn = Apollo.MutationFunction<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
 
 /**
- * __useDeletePropertyMutation__
+ * __useDeleteInstitutionMutation__
  *
- * To run a mutation, you first call `useDeletePropertyMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeletePropertyMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteInstitutionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteInstitutionMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deletePropertyMutation, { data, loading, error }] = useDeletePropertyMutation({
+ * const [deleteInstitutionMutation, { data, loading, error }] = useDeleteInstitutionMutation({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useDeletePropertyMutation(baseOptions?: Apollo.MutationHookOptions<DeletePropertyMutation, DeletePropertyMutationVariables>) {
+export function useDeleteInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePropertyMutation, DeletePropertyMutationVariables>(DeletePropertyDocument, options);
+        return Apollo.useMutation<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>(DeleteInstitutionDocument, options);
       }
-export type DeletePropertyMutationHookResult = ReturnType<typeof useDeletePropertyMutation>;
-export type DeletePropertyMutationResult = Apollo.MutationResult<DeletePropertyMutation>;
-export type DeletePropertyMutationOptions = Apollo.BaseMutationOptions<DeletePropertyMutation, DeletePropertyMutationVariables>;
+export type DeleteInstitutionMutationHookResult = ReturnType<typeof useDeleteInstitutionMutation>;
+export type DeleteInstitutionMutationResult = Apollo.MutationResult<DeleteInstitutionMutation>;
+export type DeleteInstitutionMutationOptions = Apollo.BaseMutationOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
 export const ListInstitutionsDocument = gql`
     query ListInstitutions($first: Int!, $page: Int, $search: String) {
   institutions(first: $first, page: $page, search: $search) {
@@ -784,74 +797,74 @@ export type GetInstitutionByIdQueryHookResult = ReturnType<typeof useGetInstitut
 export type GetInstitutionByIdLazyQueryHookResult = ReturnType<typeof useGetInstitutionByIdLazyQuery>;
 export type GetInstitutionByIdSuspenseQueryHookResult = ReturnType<typeof useGetInstitutionByIdSuspenseQuery>;
 export type GetInstitutionByIdQueryResult = Apollo.QueryResult<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>;
-export const CreateInstitutionDocument = gql`
-    mutation CreateInstitution($input: CreateInstitutionInput!) {
-  createInstitution(input: $input) {
+export const CreatePropertyDocument = gql`
+    mutation CreateProperty($input: CreatePropertyInput!) {
+  createProperty(input: $input) {
     id
     name
   }
 }
     `;
-export type CreateInstitutionMutationFn = Apollo.MutationFunction<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
+export type CreatePropertyMutationFn = Apollo.MutationFunction<CreatePropertyMutation, CreatePropertyMutationVariables>;
 
 /**
- * __useCreateInstitutionMutation__
+ * __useCreatePropertyMutation__
  *
- * To run a mutation, you first call `useCreateInstitutionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateInstitutionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreatePropertyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePropertyMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createInstitutionMutation, { data, loading, error }] = useCreateInstitutionMutation({
+ * const [createPropertyMutation, { data, loading, error }] = useCreatePropertyMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useCreateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>) {
+export function useCreatePropertyMutation(baseOptions?: Apollo.MutationHookOptions<CreatePropertyMutation, CreatePropertyMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateInstitutionMutation, CreateInstitutionMutationVariables>(CreateInstitutionDocument, options);
+        return Apollo.useMutation<CreatePropertyMutation, CreatePropertyMutationVariables>(CreatePropertyDocument, options);
       }
-export type CreateInstitutionMutationHookResult = ReturnType<typeof useCreateInstitutionMutation>;
-export type CreateInstitutionMutationResult = Apollo.MutationResult<CreateInstitutionMutation>;
-export type CreateInstitutionMutationOptions = Apollo.BaseMutationOptions<CreateInstitutionMutation, CreateInstitutionMutationVariables>;
-export const UpdateInstitutionDocument = gql`
-    mutation UpdateInstitution($input: UpdateInstitutionInput!) {
-  updateInstitution(input: $input) {
+export type CreatePropertyMutationHookResult = ReturnType<typeof useCreatePropertyMutation>;
+export type CreatePropertyMutationResult = Apollo.MutationResult<CreatePropertyMutation>;
+export type CreatePropertyMutationOptions = Apollo.BaseMutationOptions<CreatePropertyMutation, CreatePropertyMutationVariables>;
+export const UpdatePropertyDocument = gql`
+    mutation UpdateProperty($input: UpdatePropertyInput!) {
+  updateProperty(input: $input) {
     id
     name
   }
 }
     `;
-export type UpdateInstitutionMutationFn = Apollo.MutationFunction<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
+export type UpdatePropertyMutationFn = Apollo.MutationFunction<UpdatePropertyMutation, UpdatePropertyMutationVariables>;
 
 /**
- * __useUpdateInstitutionMutation__
+ * __useUpdatePropertyMutation__
  *
- * To run a mutation, you first call `useUpdateInstitutionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateInstitutionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdatePropertyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePropertyMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateInstitutionMutation, { data, loading, error }] = useUpdateInstitutionMutation({
+ * const [updatePropertyMutation, { data, loading, error }] = useUpdatePropertyMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpdateInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>) {
+export function useUpdatePropertyMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePropertyMutation, UpdatePropertyMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>(UpdateInstitutionDocument, options);
+        return Apollo.useMutation<UpdatePropertyMutation, UpdatePropertyMutationVariables>(UpdatePropertyDocument, options);
       }
-export type UpdateInstitutionMutationHookResult = ReturnType<typeof useUpdateInstitutionMutation>;
-export type UpdateInstitutionMutationResult = Apollo.MutationResult<UpdateInstitutionMutation>;
-export type UpdateInstitutionMutationOptions = Apollo.BaseMutationOptions<UpdateInstitutionMutation, UpdateInstitutionMutationVariables>;
+export type UpdatePropertyMutationHookResult = ReturnType<typeof useUpdatePropertyMutation>;
+export type UpdatePropertyMutationResult = Apollo.MutationResult<UpdatePropertyMutation>;
+export type UpdatePropertyMutationOptions = Apollo.BaseMutationOptions<UpdatePropertyMutation, UpdatePropertyMutationVariables>;
 export const AddPropertyValuationDocument = gql`
     mutation AddPropertyValuation($propertyId: ID!, $input: AddValuationInput!) {
   addPropertyValuation(propertyId: $propertyId, input: $input) {
@@ -919,39 +932,72 @@ export function useUpdatePropertyValuationMutation(baseOptions?: Apollo.Mutation
 export type UpdatePropertyValuationMutationHookResult = ReturnType<typeof useUpdatePropertyValuationMutation>;
 export type UpdatePropertyValuationMutationResult = Apollo.MutationResult<UpdatePropertyValuationMutation>;
 export type UpdatePropertyValuationMutationOptions = Apollo.BaseMutationOptions<UpdatePropertyValuationMutation, UpdatePropertyValuationMutationVariables>;
-export const DeleteInstitutionDocument = gql`
-    mutation DeleteInstitution($id: ID!) {
-  deleteInstitution(id: $id) {
+export const DeletePropertyDocument = gql`
+    mutation DeleteProperty($id: ID!) {
+  deleteProperty(id: $id) {
     id
   }
 }
     `;
-export type DeleteInstitutionMutationFn = Apollo.MutationFunction<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
+export type DeletePropertyMutationFn = Apollo.MutationFunction<DeletePropertyMutation, DeletePropertyMutationVariables>;
 
 /**
- * __useDeleteInstitutionMutation__
+ * __useDeletePropertyMutation__
  *
- * To run a mutation, you first call `useDeleteInstitutionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteInstitutionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeletePropertyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePropertyMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deleteInstitutionMutation, { data, loading, error }] = useDeleteInstitutionMutation({
+ * const [deletePropertyMutation, { data, loading, error }] = useDeletePropertyMutation({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useDeleteInstitutionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>) {
+export function useDeletePropertyMutation(baseOptions?: Apollo.MutationHookOptions<DeletePropertyMutation, DeletePropertyMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>(DeleteInstitutionDocument, options);
+        return Apollo.useMutation<DeletePropertyMutation, DeletePropertyMutationVariables>(DeletePropertyDocument, options);
       }
-export type DeleteInstitutionMutationHookResult = ReturnType<typeof useDeleteInstitutionMutation>;
-export type DeleteInstitutionMutationResult = Apollo.MutationResult<DeleteInstitutionMutation>;
-export type DeleteInstitutionMutationOptions = Apollo.BaseMutationOptions<DeleteInstitutionMutation, DeleteInstitutionMutationVariables>;
+export type DeletePropertyMutationHookResult = ReturnType<typeof useDeletePropertyMutation>;
+export type DeletePropertyMutationResult = Apollo.MutationResult<DeletePropertyMutation>;
+export type DeletePropertyMutationOptions = Apollo.BaseMutationOptions<DeletePropertyMutation, DeletePropertyMutationVariables>;
+export const DeleteValuationDocument = gql`
+    mutation DeleteValuation($id: ID!) {
+  deleteValuation(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteValuationMutationFn = Apollo.MutationFunction<DeleteValuationMutation, DeleteValuationMutationVariables>;
+
+/**
+ * __useDeleteValuationMutation__
+ *
+ * To run a mutation, you first call `useDeleteValuationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteValuationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteValuationMutation, { data, loading, error }] = useDeleteValuationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteValuationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteValuationMutation, DeleteValuationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteValuationMutation, DeleteValuationMutationVariables>(DeleteValuationDocument, options);
+      }
+export type DeleteValuationMutationHookResult = ReturnType<typeof useDeleteValuationMutation>;
+export type DeleteValuationMutationResult = Apollo.MutationResult<DeleteValuationMutation>;
+export type DeleteValuationMutationOptions = Apollo.BaseMutationOptions<DeleteValuationMutation, DeleteValuationMutationVariables>;
 export const ListPropertiesDocument = gql`
     query ListProperties($first: Int!, $page: Int, $search: String) {
   properties(first: $first, page: $page, search: $search) {
@@ -1022,6 +1068,9 @@ export const GetPropertyByIdDocument = gql`
     latitude
     longitude
     quantity
+    latestValuation {
+      id
+    }
     valuations {
       id
       averageValue

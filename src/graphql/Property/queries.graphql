@@ -31,6 +31,9 @@ query GetPropertyById($id: ID!) {
         latitude
         longitude
         quantity
+        latestValuation {
+            id
+        }
         valuations {
             id
             averageValue

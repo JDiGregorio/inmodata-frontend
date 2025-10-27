@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { ComboBox } from '@/components/widgets/ComboBox/ComboBox'
 import { DateInput } from '@/components/widgets/DateInput/DateInput'
 import { Button } from '@/components/ui/button'
+import { AlertConfirm } from '@/components/widgets/Dialog/AlertConfirm'
 import { toast } from '@/utils/toast'
 
 import { cn, safeDiv, round6, toDateOnly } from '@/lib/utils'
@@ -21,7 +22,8 @@ import {
     useListInstitutionsQuery,
     ListInstitutionsQuery,
     useAddPropertyValuationMutation,
-    useUpdatePropertyValuationMutation
+    useUpdatePropertyValuationMutation,
+    useDeleteValuationMutation
 } from '@/generated-types'
 
 interface ValuationModalProps {
@@ -29,6 +31,7 @@ interface ValuationModalProps {
     title: string;
     valuation: Valuation;
     property: Property;
+    canDelete: boolean;
     setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleUpdate: (mutation: Partial<Valuation>, view?: string) => void
     refetch: () => void;
@@ -36,7 +39,7 @@ interface ValuationModalProps {
 
 const FACTOR_UTILIZATION = 1.43426
 
-export const ValuationModal = ({ open, title, valuation, property, setModalOpen, handleUpdate, refetch }: ValuationModalProps): React.ReactElement => {
+export const ValuationModal = ({ open, title, valuation, property, canDelete, setModalOpen, handleUpdate, refetch }: ValuationModalProps): React.ReactElement => {
     useEffect(() => {
         const nextUtilization = round6(safeDiv((valuation.improvementArea * FACTOR_UTILIZATION), valuation.landArea))
 
@@ -71,6 +74,12 @@ export const ValuationModal = ({ open, title, valuation, property, setModalOpen,
     const [updateValuation, resultUpdate] = useUpdatePropertyValuationMutation({
         onError() {
             toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+        }
+    })
+
+    const [ deleteValuation ] = useDeleteValuationMutation({
+        onError: () => {
+            toast.error('Lo sentimos, el registro no pudo ser eliminado.')
         }
     })
 
@@ -163,11 +172,34 @@ export const ValuationModal = ({ open, title, valuation, property, setModalOpen,
         }
     }
 
+    const handleDeleteValuation = () => {
+        AlertConfirm({
+            title: `Eliminar Valuación`,
+            description: '¿Está seguro que quiere eliminar este elemento? Esta acción es irreversible.',
+            textAccept: 'Eliminar',
+            onAccept: async () => {
+                const result = await deleteValuation({
+                    variables: {
+                        id: valuation.id!
+                    }
+                })
+
+                if (result.data) {
+                    toast.success('Registro eliminado exitosamente!')
+
+                    refetch()
+
+                    handleClose(false)
+                }
+            }
+        })
+    }
+
     const institutions = useMemo(() => buildOptionsFromQueryResult<ListInstitutionsQuery, Institution>(data, 'institutions.data'), [data])
     const result = valuation.id === null ? resultCreate : resultUpdate
 
     return (
-        <Dialog open={open} onClose={(value) => handleClose(value)} className="relative">
+        <Dialog open={open} onClose={(value) => handleClose(value)} className="relative z-50">
             <DialogBackdrop className="fixed inset-0 bg-black/50" />
 
             <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -248,7 +280,7 @@ export const ValuationModal = ({ open, title, valuation, property, setModalOpen,
 
                                 <div className="sm:col-span-3 space-y-2">
                                     <Label htmlFor="landArea" data-required="*">
-                                        Área del Terreno V&#178;
+                                        Área del Terreno V&sup2;
                                     </Label>
 
                                     <Cleave
@@ -428,6 +460,12 @@ export const ValuationModal = ({ open, title, valuation, property, setModalOpen,
                     </div>
 
                     <div className="px-8 py-4 flex items-center justify-end gap-x-6 border-t border-gray-100">
+                        {canDelete && (
+                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteValuation}>
+                                Eliminar
+                            </Button>
+                        )}
+
                         <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => handleClose(false)}>
                             Cancelar
                         </Button>

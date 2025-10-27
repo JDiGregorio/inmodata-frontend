@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import { ValuationModal } from '../ValuationModal'
 import { ValuationsTable } from '../ValuationsTable'
 
+import { usePermissions } from '@/hooks/usePermissions'
+
 import { AggregateOption } from '../../index'
 
 import {
@@ -38,6 +40,8 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
     const [modalOpen, setModalOpen] = useState(false)
     const [valuation, setValuation] = useState<Valuation>(initialValuation)
 
+    const permissions = usePermissions()
+
     const handleUpdateValuation = (mutation: Partial<Valuation>, view?: string): void => {
         const newData = {
             ...valuation,
@@ -58,12 +62,16 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
                 title={`${!valuation.id ? 'Agregar' : 'Actualizar'} Valuación`}
                 valuation={valuation}
                 property={property}
+                canDelete={permissions.canDelete("valuation")}
                 setModalOpen={setModalOpen}
                 handleUpdate={handleUpdateValuation}
                 refetch={refetch}
             />
             
             <ValuationsTable
+                canCreate={permissions.canCreate("valuation")}
+                canEdit={permissions.canEdit("valuation")}
+                property={property}
                 valuations={property.valuations}
                 setModalOpen={setModalOpen}
                 handleUpdate={handleUpdateValuation}

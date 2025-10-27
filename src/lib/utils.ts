@@ -51,6 +51,19 @@ export const useLoadingDots = (title: string, interval = 500) => {
 
 export const formatDate = (date: Date) => date.toISOString().split("T")[0]
 
+export function formatMoney(value: number | string): string {
+    const num = typeof value === 'string' ? parseFloat(value) : value
+
+    if (isNaN(num)) {
+        return ''
+    }
+
+    return num.toLocaleString('es-HN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })
+}
+
 export function toDateOnly(value: string): string {
     const sep = value.includes('/') ? '/' : '-'
     const [a, b, c] = value.split(sep).map(s => s.trim())
@@ -65,11 +78,9 @@ export function toDateOnly(value: string): string {
     throw new Error('Formato de fecha no reconocido')
 }
 
-
 export const safeDiv = (num: number, den: number) => (den ? num / den : 0)
 
 export const round6 = (n: number) => Number.isFinite(n) ? Math.round((n + Number.EPSILON) * 1e6) / 1e6 : 0
-
 
 export const isFiniteNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 

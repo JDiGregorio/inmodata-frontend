@@ -6,17 +6,25 @@ import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 
 import { risks } from '../index'
+import { classNames, formatMoney } from '@/lib/utils'
 
 import { Valuation } from './tabs/Valuations.edit.tab'
-import { Maybe, PropertyValuation } from '@/generated-types'
+import {
+    Maybe,
+    Property,
+    PropertyValuation
+} from '@/generated-types'
 
 interface ValuationsTableProps {
+    canCreate: boolean;
+    canEdit: boolean;
+    property: Property;
     valuations?: Maybe<Maybe<PropertyValuation>[]> | undefined;
     setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleUpdate: (mutation: Partial<Valuation>, view?: string) => void
 }
 
-export const ValuationsTable = ({ valuations, setModalOpen, handleUpdate }: ValuationsTableProps): React.ReactElement => {
+export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setModalOpen, handleUpdate }: ValuationsTableProps): React.ReactElement => {
     const handleUpdateLine = (valuation: Maybe<PropertyValuation>) => {
         if (valuation) {
             const editValuation = {
@@ -50,11 +58,13 @@ export const ValuationsTable = ({ valuations, setModalOpen, handleUpdate }: Valu
                     </p>
                 </div>
 
-                <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                    <Button type="button" variant={'default'} size="sm" onClick={() => setModalOpen(true)} className="cursor-pointer">
-                        Añadir
-                    </Button>
-                </div>
+                {canCreate && (
+                    <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                        <Button type="button" variant={'default'} size="sm" onClick={() => setModalOpen(true)} className="cursor-pointer">
+                            Añadir
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className="mt-8 flow-root">
@@ -71,10 +81,10 @@ export const ValuationsTable = ({ valuations, setModalOpen, handleUpdate }: Valu
                                             Fecha de Valuación
                                         </TableHead>
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            Valor en LPS de V&#178;
+                                            Valor v<sup>2</sup>
                                         </TableHead>
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            Valor Promedio en LPS de M&#178;
+                                            Valor Promedio m<sup>2</sup>
                                         </TableHead>
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             Perfil de Riesgo
@@ -89,26 +99,28 @@ export const ValuationsTable = ({ valuations, setModalOpen, handleUpdate }: Valu
                                 <TableBody className="divide-y divide-gray-200 bg-white">
                                     {valuations && valuations.length > 0 ? (
                                         valuations.map((valuation, index) => (
-                                            <TableRow key={index} className="even:bg-gray-50">
+                                            <TableRow key={index} className={classNames(valuation?.id === property.latestValuation?.id ? "bg-green-50 hover:bg-green-50/100" : "even:bg-gray-50")}>
                                                 <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6">
                                                     {valuation?.institution?.name}
                                                 </TableCell>
-                                                <TableCell className="px-3 py-2 py-4 text-sm whitespace-nowrap text-gray-500">
+                                                <TableCell className="px-3 py-2 py-4 text-sm whitespace-nowrap text-center text-gray-500">
                                                     {moment(valuation?.measuredAt).format("DD/MM/YYYY")}
                                                 </TableCell>
-                                                <TableCell className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                                                    L. {valuation?.averageSquareYard}
+                                                <TableCell className="px-3 py-2 text-sm whitespace-nowrap  text-gray-500">
+                                                    L. {formatMoney(valuation?.averageSquareYard ?? 0)}
                                                 </TableCell>
                                                 <TableCell className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                                                    {valuation?.averageSquareMeter}
+                                                    L. {formatMoney(valuation?.averageSquareMeter ?? 0)}
                                                 </TableCell>
                                                 <TableCell className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
                                                     {risks.find(risk => risk.value === valuation?.riskProfile)?.label}
                                                 </TableCell>
                                                 <TableCell className="flex justify-center whitespace-nowrap py-2 pl-3 pr-4 sm:pr-6 items-center">
-                                                    <Button variant="ghost" onClick={() => handleUpdateLine(valuation)} className="text-orange-600 hover:text-orange-900 cursor-pointer">
-                                                        <SquarePenIcon size={16} color="#646464" />
-                                                    </Button>
+                                                    {canEdit && (
+                                                        <Button variant="ghost" onClick={() => handleUpdateLine(valuation)} className="text-orange-600 hover:text-orange-900 cursor-pointer">
+                                                            <SquarePenIcon size={16} color="#646464" />
+                                                        </Button>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))
