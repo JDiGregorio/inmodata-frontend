@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, ReactNode } from 'react'
 import { ApolloError } from '@apollo/client'
 
 import Spinner from '@/components/layouts/Spinner'
@@ -18,6 +18,7 @@ export interface HandleRefetchingProps {
 export interface SearchableTableProps<T> {
     model: ModelDefinition;
     title: string;
+    toolbarActions?: ReactNode;
     canCreate: boolean;
     canEdit: boolean;
     headers: Header[];
@@ -28,7 +29,7 @@ export interface SearchableTableProps<T> {
     refetch: (args: HandleRefetchingProps) => void;
 }
 
-export const SearchableTable = <T,> ({ model, title, canCreate, canEdit, headers, data, loading, error, paginatorInfo, refetch }: SearchableTableProps<T>): React.ReactElement => {
+export const SearchableTable = <T,> ({ model, title, toolbarActions, canCreate, canEdit, headers, data, loading, error, paginatorInfo, refetch }: SearchableTableProps<T>): React.ReactElement => {
     const [searchQuery, setSearchQuery] = useState("")
     const debouncedSearchTerm = useDebounce(searchQuery, 500)
     const [currentPage, setCurrentPage] = useState(1)
@@ -68,6 +69,7 @@ export const SearchableTable = <T,> ({ model, title, canCreate, canEdit, headers
         <ListView<T>
             model={model}
             title={title}
+            toolbarActions={toolbarActions}
             canCreate={canCreate}
             canEdit={canEdit}
             headers={headers}

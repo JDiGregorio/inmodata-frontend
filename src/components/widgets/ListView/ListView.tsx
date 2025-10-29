@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { LucideProps, SquarePenIcon } from 'lucide-react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
@@ -27,6 +27,7 @@ export interface ListViewProps<T> {
     model: ModelDefinition;
     stats?: StatDefinition[];
     title: string;
+    toolbarActions?: ReactNode;
     canCreate: boolean;
     canEdit: boolean;
     headers: Header[];
@@ -37,7 +38,7 @@ export interface ListViewProps<T> {
     handlePageChanged: (page: number) => void;
 }
 
-const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data, paginatorInfo,  searchQuery, setSearchQuery, handlePageChanged }: ListViewProps<T>): React.ReactElement => {
+const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit, headers, data, paginatorInfo,  searchQuery, setSearchQuery, handlePageChanged }: ListViewProps<T>): React.ReactElement => {
     const navigate = useNavigate()
 
     const tableHeaders = headers.map((header, index) => {
@@ -142,14 +143,16 @@ const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data,
                             </div>
                         </div>
                     </div>
+                    
+                    <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex items-center gap-3">
+                        {toolbarActions}
 
-                    {canCreate && (
-                        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                        {canCreate && (
                             <Button type="button" variant={'default'} size="sm" onClick={() => navigate(`/${model.plural}/crear`)} className="cursor-pointer">
                                 Añadir
                             </Button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 

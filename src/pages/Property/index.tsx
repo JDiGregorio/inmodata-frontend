@@ -1,4 +1,6 @@
 import React from 'react'
+import { ChevronDownIcon, DownloadIcon, UploadIcon } from 'lucide-react'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
 
 import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/ListView/SearchableTable'
@@ -26,38 +28,69 @@ export type AggregateOption = {
 }
 
 export const risks: AggregateOption[] = [
-	{
-		id: 1,
-		label: 'Muy Alto',
-		value: RiskAggregates.VeryHigh
-	},
-	{
-		id: 2,
-		label: 'Alto',
-		value: RiskAggregates.High
-	},
-	{
-		id: 3,
-		label: 'Medio',
-		value: RiskAggregates.Medium
-	},
-	{
-		id: 4,
-		label: 'Bajo',
-		value: RiskAggregates.Low
-	},
-	{
-		id: 5,
-		label: 'Muy Bajo',
-		value: RiskAggregates.VeryLow
-	}
+    {
+        id: 1,
+        label: 'Muy Alto',
+        value: RiskAggregates.VeryHigh
+    },
+    {
+        id: 2,
+        label: 'Alto',
+        value: RiskAggregates.High
+    },
+    {
+        id: 3,
+        label: 'Medio',
+        value: RiskAggregates.Medium
+    },
+    {
+        id: 4,
+        label: 'Bajo',
+        value: RiskAggregates.Low
+    },
+    {
+        id: 5,
+        label: 'Muy Bajo',
+        value: RiskAggregates.VeryLow
+    }
 ]
+
+function PropertiesActionsDropdown({ onDownloadTemplate,onImport } : { onDownloadTemplate: () => void; onImport: () => void; }) {
+    return (
+        <Menu as="div" className="relative inline-block text-left">
+            <MenuButton className="h-8 w-32 px-3 py-2 inline-flex items-center justify-between rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                Acciones
+                <ChevronDownIcon className="ml-2 h-4 w-4 text-gray-500" aria-hidden="true" />
+            </MenuButton>
+
+            <MenuItems transition className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded bg-white shadow-lg ring-0 data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75">
+                <MenuItem>
+                    {({ close }) => (
+                        <button type="button" onClick={() => { onDownloadTemplate(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <DownloadIcon className="h-4 w-4 text-gray-500" />
+                            Descargar formato de inmuebles
+                        </button>
+                    )}
+                </MenuItem>
+
+                <MenuItem>
+                    {({ close }) => (
+                        <button type="button" onClick={() => { onImport(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <UploadIcon className="h-4 w-4 text-gray-500" />
+                            Importar Inmuebles
+                        </button>
+                    )}
+                </MenuItem>
+            </MenuItems>
+        </Menu>
+    )
+}
 
 const PropertiesListView = (): React.ReactElement => {
     const permissions = usePermissions()
 
-    const {data, loading, error, refetch} = useListPropertiesQuery({
-        fetchPolicy:'network-only',
+    const { data, loading, error, refetch } = useListPropertiesQuery({
+        fetchPolicy: 'network-only',
         variables: {
             first: 10,
             page: 1
@@ -68,17 +101,25 @@ const PropertiesListView = (): React.ReactElement => {
         refetch(args)
     }
 
+    const handleDownloadTemplate = () => {
+        console.log('Descargar formato de inmuebles')
+    }
+
+    const handleImport = () => {
+        console.log('Importar Inmuebles')
+    }
+
     const headers: Header[] = [
-        { key: "name", label: "Nombre", sortable: false, filterable: false, width: 100, align: "center"  },
-        { key: "exactAddress", label: "Dirección", sortable: false, filterable: false, width: "16rem", align: "left"  },
-        { key: "institution", label: "Institución", sortable: false, filterable: false, width: "7rem", align: "left"  },
-        { key: "latitude", label: "Latitud", sortable: false, filterable: false, width: 100, align: "center"  },
-        { key: "longitude", label: "Longitud", sortable: false, filterable: false, width: 100, align: "center"  },
-        { key: "measuredAt", label: "Fecha de Valuación", sortable: false, filterable: false, width: 120, align: "center"  },
-        { key: "quantity", label: "Valuaciones", sortable: false, filterable: false, width: 100, align: "center"  }
+        { key: "name", label: "Nombre", sortable: false, filterable: false, width: 100, align: "center" },
+        { key: "exactAddress", label: "Dirección", sortable: false, filterable: false, width: "16rem", align: "left" },
+        { key: "institution", label: "Institución", sortable: false, filterable: false, width: "7rem", align: "left" },
+        { key: "latitude", label: "Latitud", sortable: false, filterable: false, width: 100, align: "center" },
+        { key: "longitude", label: "Longitud", sortable: false, filterable: false, width: 100, align: "center" },
+        { key: "measuredAt", label: "Fecha de Valuación", sortable: false, filterable: false, width: 120, align: "center" },
+        { key: "quantity", label: "Valuaciones", sortable: false, filterable: false, width: 100, align: "center" }
     ]
 
-    const properties =  data?.properties.data
+    const properties = data?.properties.data
     const paginatorInfo = data?.properties.paginatorInfo
     const parsedColumns = properties ? properties.map(property => {
 
@@ -103,6 +144,12 @@ const PropertiesListView = (): React.ReactElement => {
         <SearchableTable<Property>
             model={defineModel('inmueble')}
             title="Inmuebles"
+            toolbarActions={
+                <PropertiesActionsDropdown
+                    onDownloadTemplate={handleDownloadTemplate}
+                    onImport={handleImport}
+                />
+            }
             canCreate={permissions.canCreate("property")}
             canEdit={permissions.canEdit("property")}
             headers={headers}
