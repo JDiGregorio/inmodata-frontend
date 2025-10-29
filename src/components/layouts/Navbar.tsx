@@ -39,13 +39,13 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
     }
 
     return (
-        <Disclosure as="nav" className="bg-white shadow border-b border-gray-200">
+        <Disclosure as="nav" className="fixed inset-x-0 top-0 lg:pl-72  bg-white shadow border-b border-gray-200">
             {() => (
                 <>
                     <div className="mx-auto max-w-full px-2 sm:px-2 lg:px-8">
                         <div className="flex h-16 justify-between">
                             <div className="flex space-x-2">
-                                <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-xs sm:px-6 lg:hidden dark:bg-gray-900 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:border-b dark:after:border-white/10 dark:after:bg-black/10">
+                                <div className="flex items-center gap-x-6 bg-white px-4 py-4 shadow-xs sm:px-6 lg:hidden dark:bg-gray-900 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:border-b dark:after:border-white/10 dark:after:bg-black/10">
                                     <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 lg:hidden cursor-pointer">
                                         <span className="sr-only">
                                             Open sidebar

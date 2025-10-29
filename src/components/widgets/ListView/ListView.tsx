@@ -86,8 +86,8 @@ const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data,
     })
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8">
-            <div className="pt-6 space-y-6">
+        <>
+            <div className="space-y-6">
                 <div className="sm:flex-auto">
                     <h1 className="text-lg font-semibold leading-5 text-gray-900">
                         {title}
@@ -211,7 +211,7 @@ const ListView = <T,> ({ model, stats, title, canCreate, canEdit, headers, data,
                 onPageChanged={handlePageChanged}
                 itemsTotal={paginatorInfo.total}
             />
-        </div>
+        </>
     )
 }
 

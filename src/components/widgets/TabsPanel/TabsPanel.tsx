@@ -35,30 +35,27 @@ const TabsPanel = ({ tabs }: TabsPanelProps): React.ReactElement => {
     }
 
     return (
-        <div>
-            <div>
-                <div className="sm:block">
-                    <nav className="flex space-x-4" aria-label="Tabs">
-                        {tabs.map((tab) => tab.view && (
-                            <a
-                                key={tab.name}
-                                onClick={() => handleTabClick(tab.hash)}
-                                className={classNames(
-                                tab.hash === activeTab ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800',
-                                'rounded-md px-3 py-2 text-sm font-medium cursor-pointer',
-                                )}
-                                aria-current={tab.active ? 'page' : undefined}
-                            >
-                                {tab.name}
-                            </a>
-                        ))}
-                    </nav>
-                </div>
+        <>
+            <div className="sm:block">
+                <nav className="flex space-x-4" aria-label="Tabs">
+                    {tabs.map((tab) => tab.view && (
+                        <a
+                            key={tab.name}
+                            onClick={() => handleTabClick(tab.hash)}
+                            className={classNames(
+                            tab.hash === activeTab ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800',
+                            'rounded-md px-3 py-2 text-sm font-medium cursor-pointer',
+                            )}
+                            aria-current={tab.active ? 'page' : undefined}
+                        >
+                            {tab.name}
+                        </a>
+                    ))}
+                </nav>
             </div>
 
             { getActiveTabContents(activeTab) }
-
-        </div>
+        </>
     )
   }
 
