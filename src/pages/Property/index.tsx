@@ -6,7 +6,8 @@ import moment from 'moment'
 import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/ListView/SearchableTable'
 
 import { defineModel } from '@/utils/modelUtils'
-import { usePermissions } from '@/hooks/usePermissions'
+import { PermissionHelpers, usePermissions } from '@/hooks/usePermissions'
+import { useDownloadTemplate } from './components/useDownloadTemplate'
 
 import type { Header } from '@/components/widgets/ListView/ListView.types'
 import {
@@ -55,8 +56,14 @@ export const risks: AggregateOption[] = [
     }
 ]
 
-function PropertiesActionsDropdown({ onDownloadTemplate,onImport } : { onDownloadTemplate: () => void; onImport: () => void; }) {
-    return (
+const PropertiesActionsDropdown = ({ loading, progress, permissions, onDownloadTemplate, onImport } : { loading: boolean; progress: number | null; permissions: PermissionHelpers; onDownloadTemplate: () => void; onImport: () => void; }) => {
+    return loading ? ( 
+        <div className="h-8 px-3 py-2 inline-flex min-w-[8rem] justify-center items-center rounded-md border border-gray-300 bg-white">
+            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                {`Procesando${progress !== null ? ` ${progress}%` : '...'}`}
+            </span>
+        </div>
+    ) : (
         <Menu as="div" className="relative inline-block text-left">
             <MenuButton className="h-8 w-32 px-3 py-2 inline-flex items-center justify-between rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                 Acciones
@@ -64,23 +71,27 @@ function PropertiesActionsDropdown({ onDownloadTemplate,onImport } : { onDownloa
             </MenuButton>
 
             <MenuItems transition className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded bg-white shadow-lg ring-0 data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75">
-                <MenuItem>
-                    {({ close }) => (
-                        <button type="button" onClick={() => { onDownloadTemplate(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            <DownloadIcon className="h-4 w-4 text-gray-500" />
-                            Descargar formato de inmuebles
-                        </button>
-                    )}
-                </MenuItem>
+                {permissions.canView("export-format") && (
+                    <MenuItem>
+                        {({ close }) => (
+                            <button type="button" onClick={() => { onDownloadTemplate(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                <DownloadIcon className="h-4 w-4 text-gray-500" />
+                                Descargar formato de inmuebles
+                            </button>
+                        )}
+                    </MenuItem>
+                )}
 
-                <MenuItem>
-                    {({ close }) => (
-                        <button type="button" onClick={() => { onImport(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            <UploadIcon className="h-4 w-4 text-gray-500" />
-                            Importar Inmuebles
-                        </button>
-                    )}
-                </MenuItem>
+                {permissions.canView("import-data") && (
+                    <MenuItem>
+                        {({ close }) => (
+                            <button type="button" onClick={() => { onImport(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                <UploadIcon className="h-4 w-4 text-gray-500" />
+                                Importar Inmuebles
+                            </button>
+                        )}
+                    </MenuItem>
+                )}
             </MenuItems>
         </Menu>
     )
@@ -88,6 +99,7 @@ function PropertiesActionsDropdown({ onDownloadTemplate,onImport } : { onDownloa
 
 const PropertiesListView = (): React.ReactElement => {
     const permissions = usePermissions()
+    const { download, loading: loadingDownload, progress } = useDownloadTemplate()
 
     const { data, loading, error, refetch } = useListPropertiesQuery({
         fetchPolicy: 'network-only',
@@ -102,7 +114,7 @@ const PropertiesListView = (): React.ReactElement => {
     }
 
     const handleDownloadTemplate = () => {
-        console.log('Descargar formato de inmuebles')
+        download()
     }
 
     const handleImport = () => {
@@ -146,6 +158,9 @@ const PropertiesListView = (): React.ReactElement => {
             title="Inmuebles"
             toolbarActions={
                 <PropertiesActionsDropdown
+                    loading={loadingDownload}
+                    progress={progress}
+                    permissions={permissions}
                     onDownloadTemplate={handleDownloadTemplate}
                     onImport={handleImport}
                 />

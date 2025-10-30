@@ -96,6 +96,31 @@ export const parseNumberOrUndefined = (value: string): number | undefined => {
     return Number.isFinite(n) ? n : undefined
 }
 
-export const isLatLngLiteral = (v: any): v is {lat: number; lng: number} => v && typeof v.lat === 'number' && typeof v.lng === 'number'
+export const isLatLngLiteral = (v: any): v is { lat: number; lng: number } => v && typeof v.lat === 'number' && typeof v.lng === 'number'
 
 export const isLatLngClass = (v: any): v is google.maps.LatLng => v && typeof v.lat === 'function' && typeof v.lng === 'function'
+
+export function downloadBlob(blob: Blob, filenameFallback: string) {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filenameFallback
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+}
+
+export function getFilenameFromDisposition(disposition?: string | null): string | null {
+    if (!disposition) return null
+
+    const match = /filename\*?=(?:UTF-8''|")?([^\";]+)/i.exec(disposition)
+
+    if (!match) return null
+
+    try {
+        return decodeURIComponent(match[1].replace(/"/g, ''))
+    } catch {
+        return match[1].replace(/"/g, '')
+    }
+}
