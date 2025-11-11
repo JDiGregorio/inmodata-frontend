@@ -10,11 +10,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export interface DateInputProps {
-    id: string
-    value: Date | undefined | string
-    onChange: (date: string | undefined) => void
-    placeholder?: string
-    disabled?: (date: Date) => boolean
+    id: string;
+    value: Date | undefined | string;
+    onChange: (date: string | undefined) => void;
+    placeholder?: string;
+    disabled?: (date: Date) => boolean;
 }
 
 export const DateInput = ({ id, value, placeholder, disabled, onChange }: DateInputProps): React.ReactElement => {

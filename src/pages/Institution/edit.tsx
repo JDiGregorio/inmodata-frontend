@@ -17,7 +17,7 @@ const InstitutionEdit = (): React.ReactElement => {
     const { data, loading, error } = useGetInstitutionByIdQuery({
         fetchPolicy: 'network-only',
         variables: {
-            id: id!,
+            id: id!
         }
     })
 

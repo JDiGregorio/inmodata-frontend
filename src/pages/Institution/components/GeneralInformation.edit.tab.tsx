@@ -110,18 +110,18 @@ export const GeneralInformationTab = ({ institution }: { institution: Institutio
 
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end gap-x-6">
+                    <div className="mt-6 flex items-center justify-end gap-x-4">
                         {permissions.canDelete("institution") && (
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteInstitution}>
+                            <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteInstitution}>
                                 Eliminar
                             </Button>
                         )}
                         
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate('/instituciones')}>
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate('/instituciones')}>
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleUpdateInstitution} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateInstitution} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

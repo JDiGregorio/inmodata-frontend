@@ -82,12 +82,12 @@ export const GeneralInformationTab = (): React.ReactElement => {
                         </div>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end gap-x-6">
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/instituciones')}}>
+                    <div className="mt-6 flex items-center justify-end gap-x-4">
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/instituciones')}}>
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleCreateInstitution} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleCreateInstitution} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

@@ -33,7 +33,7 @@ interface ValuationModalProps {
     property: Property;
     canDelete: boolean;
     setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    handleUpdate: (mutation: Partial<Valuation>, view?: string) => void
+    handleUpdate: (mutation: Partial<Valuation>, view?: string) => void;
     refetch: () => void;
 }
 
@@ -459,18 +459,18 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                         </form>
                     </div>
 
-                    <div className="px-8 py-4 flex items-center justify-end gap-x-6 border-t border-gray-100">
-                        {canDelete && (
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteValuation}>
+                    <div className="px-8 py-4 flex items-center justify-end gap-x-4 border-t border-gray-100">
+                        {canDelete && valuation.id !== null && (
+                            <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteValuation}>
                                 Eliminar
                             </Button>
                         )}
 
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => handleClose(false)}>
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => handleClose(false)}>
                             Cancelar
                         </Button>
 
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleAddNewValuation} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleAddNewValuation} disabled={result.loading}>
                             {!valuation.id ? "Añadir" : "Actualizar"}
                         </Button>
                     </div>

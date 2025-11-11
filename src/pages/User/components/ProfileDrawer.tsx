@@ -5,6 +5,7 @@ import axios from 'axios'
 
 import { DrawerContainer } from '@/components/widgets/Drawer/DrawerContainer'
 import { ProfileForm } from './ProfileForm'
+import { Button } from '@/components/ui/button'
 import { toast } from '@/utils/toast'
 
 import { useAuthContext } from '@/hooks/useAuthContext'
@@ -16,21 +17,21 @@ import {
 import { User } from '@/contexts/AuthContext.types'
 
 interface ProfileDrawerProps {
-    open: boolean
-    onClose: (isOpen: boolean, shouldRefetch?: boolean) => void
+    open: boolean;
+    onClose: (isOpen: boolean, shouldRefetch?: boolean) => void;
 }
 
 export type Profile = Pick<User, 'id' | 'name'> & {
-    password: string
-    confirmPassword: string
+    password: string;
+    confirmPassword: string;
 }
 
 const BASE_URL = import.meta.env.APP_BASE_URL
 
 export const ProfileDrawer = ({ open, onClose }: ProfileDrawerProps): React.ReactElement => {
     const [profile, setProfile] = useState<Profile>()
-    const [passwdHasError, setPasswordHasError] = useState(false)
-    const [unmatchingPasswords, setUnmatchingPasswords] = useState(false)
+    const [passwdHasError, setPasswordHasError] = useState<boolean>(false)
+    const [unmatchingPasswords, setUnmatchingPasswords] = useState<boolean>(false)
 
     const { user, dispatch } = useAuthContext()
 
@@ -40,7 +41,7 @@ export const ProfileDrawer = ({ open, onClose }: ProfileDrawerProps): React.Reac
                 id: user.id,
                 name: user.name,
                 password: "",
-                confirmPassword: "",
+                confirmPassword: ""
             })
         }
     }, [user])
@@ -172,22 +173,16 @@ export const ProfileDrawer = ({ open, onClose }: ProfileDrawerProps): React.Reac
                         <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10">
                             <DialogPanel transition className="pointer-events-auto w-screen max-w-md transform transition duration-500 ease-in-out data-[closed]:translate-x-full sm:duration-700">
                                 <div className="flex h-full flex-col overflow-hidden bg-white shadow-xl">
-                                    <div className="p-6 pb-0">
-                                        <div className="flex items-start justify-end">
-                                            <div className="ml-3 flex h-7 items-center">
-                                                <button type="button" onClick={() => handleOnClose()} className="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-orange-500">
-                                                    <span className="absolute -inset-2.5" />
-                                                    <span className="sr-only">Close panel</span>
-                                                    <XMarkIcon aria-hidden="true" className="h-6 w-6" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div className="py-4 px-6 w-full flex justify-between items-center border-b border-gray-200">
+                                        <p className="text-sm text-black font-medium">
+                                            Perfil de Usuario
+                                        </p>
 
-                                    <div className="border-b border-gray-200">
-                                        <div className="px-6">
-                                            <p className="pb-4 text-sm font-medium">Perfil de usuario</p>
-                                        </div>
+                                        <Button type="button" variant={'ghost'} onClick={() => handleOnClose()} className="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-0 cursor-pointer">
+                                            <span className="absolute -inset-2.5" />
+                                            <span className="sr-only">Close panel</span>
+                                            <XMarkIcon aria-hidden="true" className="h-6 w-6" />
+                                        </Button>
                                     </div>
 
                                     <DrawerContainer footer={true} onSubmit={handleActualizarUsuario} onClose={() => handleOnClose()} disabled={result.loading}>

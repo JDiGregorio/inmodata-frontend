@@ -148,7 +148,7 @@ const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit
                         {toolbarActions}
 
                         {canCreate && (
-                            <Button type="button" variant={'default'} size="sm" onClick={() => navigate(`/${model.plural}/crear`)} className="cursor-pointer">
+                            <Button type="button" variant={'default'} size="default" onClick={() => navigate(`/${model.plural}/crear`)} className="bg-green-700 hover:bg-green-900 cursor-pointer">
                                 Añadir
                             </Button>
                         )}
@@ -160,7 +160,7 @@ const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                         <div className="overflow-hidden shadow-sm outline-1 outline-black/5 sm:rounded-lg">
-                            <Table className="min-w-full table-fixed">
+                            <Table className="min-w-full table-fixed overflow-hidden">
                                 <colgroup>
                                     {headers.map(header => (
                                         <col key={header.key} style={colStyle(header)} />

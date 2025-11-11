@@ -45,7 +45,7 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
     const handleUpdateValuation = (mutation: Partial<Valuation>, view?: string): void => {
         const newData = {
             ...valuation,
-            ...mutation,
+            ...mutation
         }
 
         setValuation(newData)

@@ -138,7 +138,7 @@ export const ExcelImportUploader = ({ onUploaded, onError }: ExcelImportUploader
                         const mbps = mb / elapsedSeconds
                         setSpeed(mbps)
                     }
-                },
+                }
             })
 
             setStatus('done')

@@ -1,17 +1,18 @@
-import { classNames } from "@/lib/utils"
-import React, { useEffect, useState } from "react"
-import { useLocation, useNavigate } from "react-router"
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
+
+import { classNames } from '@/lib/utils'
 
 export interface TabPanel {
-    view: boolean
-    name: string
-    hash: string
-    active: boolean
-    content: React.ReactElement
+    view: boolean;
+    name: string;
+    hash: string;
+    active: boolean;
+    content: React.ReactElement;
 }
 
 interface TabsPanelProps {
-    tabs: TabPanel[]
+    tabs: TabPanel[];
 }
 
 const TabsPanel = ({ tabs }: TabsPanelProps): React.ReactElement => {
@@ -54,7 +55,7 @@ const TabsPanel = ({ tabs }: TabsPanelProps): React.ReactElement => {
                 </nav>
             </div>
 
-            { getActiveTabContents(activeTab) }
+            {getActiveTabContents(activeTab)}
         </>
     )
   }

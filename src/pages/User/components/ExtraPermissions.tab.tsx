@@ -18,15 +18,15 @@ import {
 } from '@/generated-types'
 
 export type Permission = {
-    description: string
-    add: boolean
-    delete: boolean
-    edit: boolean
-    view: boolean
+    description: string;
+    add: boolean;
+    delete: boolean;
+    edit: boolean;
+    view: boolean;
 }
   
 type InitialPermissions = {
-    [key: string]: Permission
+    [key: string]: Permission;
 }
 
 type ActionType = 'description' | 'add' | 'delete' | 'edit' | 'view'
@@ -65,7 +65,6 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
         })
     }, [user.permisosExtra])
     
-
     const [ updateUser, result ] = useUpdateUserMutation({
         onError: () => {
             toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
@@ -170,18 +169,18 @@ export const ExtraPermissionsTab = ({ user }: {user: User}): React.ReactElement 
                         />
                     </div>
 
-                    <div className="flex items-center justify-end gap-x-6">
+                    <div className="flex items-center justify-end gap-x-4">
                         {userPermissions.canDelete("user") && (
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleEliminarUsuario}>
+                            <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleEliminarUsuario}>
                                 Eliminar
                             </Button>
                         )}
                         
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate(`/usuarios/${id}/editar#informacion-general`)}>
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate(`/usuarios/${id}/editar#informacion-general`)}>
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleUpdateRolePermissions} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateRolePermissions} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

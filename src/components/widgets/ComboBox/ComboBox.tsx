@@ -4,30 +4,30 @@ import { CheckIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/20/sol
 import { filter } from 'lodash'
 
 type Styles = {
-    container: string
+    container: string;
 }
 
 interface Identifiable {
-    id: number | string
-    secondaryText?: string
+    id: number | string;
+    secondaryText?: string;
 }
 
 export interface ComboBoxProps<T extends Identifiable> {
-    label?: string
-    styles?: Styles
-    options: T[]
-    searchQuery?: string
-    id: string
-    placeholder?: string
-    selectedOption: T | undefined | null
-    creatable?: boolean
-    loading?: boolean
-    onChange: (item: T | null) => void
-    displayValue: (item: T) => string
-    displaySecondary?: (item: T) => string | undefined
-    onInputChange?: (query: string) => void
-    onCreate?: (inputValue: string) => void
-    onClear?: () => void
+    label?: string;
+    styles?: Styles;
+    options: T[];
+    searchQuery?: string;
+    id: string;
+    placeholder?: string;
+    selectedOption: T | undefined | null;
+    creatable?: boolean;
+    loading?: boolean;
+    onChange: (item: T | null) => void;
+    displayValue: (item: T) => string;
+    displaySecondary?: (item: T) => string | undefined;
+    onInputChange?: (query: string) => void;
+    onCreate?: (inputValue: string) => void;
+    onClear?: () => void;
 }
 
 export const ComboBox = <T extends Identifiable>({

@@ -10,8 +10,8 @@ axios.defaults.withCredentials = true
 axios.defaults.withXSRFToken = true
 
 export interface Authenticate {
-    email: string
-    password: string
+    email: string;
+    password: string;
 }
 
 export const useLogin = (): {

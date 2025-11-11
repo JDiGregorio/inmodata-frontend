@@ -4,11 +4,11 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-rea
 import React, { useEffect, useState } from "react"
 
 interface PaginationLinksProps {
-    itemsPerPage: number
-    itemsTotal: number
-    currentPage: number
-    lastPage: number
-    onPageChanged: (page: number) => void
+    itemsPerPage: number;
+    itemsTotal: number;
+    currentPage: number;
+    lastPage: number;
+    onPageChanged: (page: number) => void;
 }
 
 export function PaginationLinks({ currentPage, itemsPerPage, itemsTotal, lastPage, onPageChanged }: PaginationLinksProps) {

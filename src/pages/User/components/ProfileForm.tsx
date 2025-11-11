@@ -7,10 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Profile } from './ProfileDrawer'
 
 interface ProfileForm {
-	profile: Profile
-	pwdHasError: boolean
-	unmatching: boolean
-	handleUpdateUser: (mutation: Partial<Profile>) => void
+	profile: Profile;
+	pwdHasError: boolean;
+	unmatching: boolean;
+	handleUpdateUser: (mutation: Partial<Profile>) => void;
 }
 
 export const ProfileForm = ({ profile, pwdHasError, unmatching, handleUpdateUser }: ProfileForm): React.ReactElement => {
@@ -70,7 +70,7 @@ export const ProfileForm = ({ profile, pwdHasError, unmatching, handleUpdateUser
 
 					<div className="space-y-2">
 						<Label htmlFor="confirm-password" data-required="*">
-							Confirmar contraseña
+							Confirmar Contraseña
 						</Label>
 
 						<Input

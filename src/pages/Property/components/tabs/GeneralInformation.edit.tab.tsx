@@ -229,18 +229,18 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                             />
                         </div>
 
-                        <div className="flex items-center justify-end gap-x-6">
+                        <div className="flex items-center justify-end gap-x-4">
                             {permissions.canDelete("user") && (
-                                <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteProperty}>
+                                <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteProperty}>
                                     Eliminar
                                 </Button>
                             )}
 
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/inmuebles')}}>
+                            <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/inmuebles')}}>
                                 Cancelar
                             </Button>
 
-                            <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleUpdateProperty} disabled={result.loading}>
+                            <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateProperty} disabled={result.loading}>
                                 Guardar
                             </Button>
                         </div>

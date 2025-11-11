@@ -1,9 +1,9 @@
 import React from 'react'
 
 interface PillProps {
-    id: string
-    value: string
-    onRemove?: (key: string) => void
+    id: string;
+    value: string;
+    onRemove?: (key: string) => void;
 }
 
 export const Pill = ({ id, value, onRemove }: PillProps): React.ReactElement => {

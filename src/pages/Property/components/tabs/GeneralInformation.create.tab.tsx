@@ -192,12 +192,12 @@ export const GeneralInformationTab = (): React.ReactElement => {
                             />
                         </div>
 
-                        <div className="flex items-center justify-end gap-x-6">
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => { navigate('/inmuebles') }}>
+                        <div className="flex items-center justify-end gap-x-4">
+                            <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => { navigate('/inmuebles') }}>
                                 Cancelar
                             </Button>
 
-                            <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleCreateProperty} disabled={result.loading}>
+                            <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleCreateProperty} disabled={result.loading}>
                                 Crear
                             </Button>
                         </div>

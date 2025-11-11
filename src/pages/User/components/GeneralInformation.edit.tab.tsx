@@ -27,18 +27,18 @@ import {
 const BASE_URL = import.meta.env.APP_BASE_URL
 
 export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElement => {
-    const [name, setName] = useState(user.name)
-    const [email, setEmail] = useState(user.email)
+    const [name, setName] = useState<string>(user.name)
+    const [email, setEmail] = useState<string>(user.email)
     const [password, setPassword] = useState<string | null>(null)
-    const [confirmPassword, setConfirmPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState<string>('')
     const _role = user.roles ? user.roles[0] : null
     const [role, setRole] = useState<Role | null>(_role)
-    const [passwdHasError, setPasswordHasError] = useState(false)
-    const [unmatchingPasswords, setUnmatchingPasswords] = useState(false)
+    const [passwdHasError, setPasswordHasError] = useState<boolean>(false)
+    const [unmatchingPasswords, setUnmatchingPasswords] = useState<boolean>(false)
 
     const { user: _user, dispatch } = useAuthContext()
 
-    const [searchRoleQuery, setSearchRoleQuery] = useState('')
+    const [searchRoleQuery, setSearchRoleQuery] = useState<string>('')
     const debouncedSearchRoleTerm = useDebounce(searchRoleQuery, 500)
     const { data, loading } = useListRolesQuery({
         fetchPolicy: 'network-only',
@@ -318,18 +318,18 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                         </div>
                     </div>
         
-                    <div className="flex items-center justify-end gap-x-6">
+                    <div className="flex items-center justify-end gap-x-4">
                         {permissions.canDelete("user") && (
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteUser}>
+                            <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteUser}>
                                 Eliminar
                             </Button>
                         )}
 
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/usuarios')}}>
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={()=> {navigate('/usuarios')}}>
                             Cancelar
                         </Button>
 
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleUpdateUser} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateUser} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

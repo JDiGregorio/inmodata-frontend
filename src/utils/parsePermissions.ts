@@ -1,9 +1,9 @@
 type Permission = {
-    description: string
-    add: boolean
-    delete: boolean
-    edit: boolean
-    view: boolean
+    description: string;
+    add: boolean;
+    delete: boolean;
+    edit: boolean;
+    view: boolean;
 }
 
 export const parsePermissions = (permissions: {[key: string]: Permission}) => {

@@ -1,6 +1,6 @@
 export interface ModelDefinition {
-    singular: string,
-    plural: string
+    singular: string;
+    plural: string;
 }
 
 export type Align = "left" | "center" | "right"

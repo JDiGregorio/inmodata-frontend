@@ -3,15 +3,16 @@ import { Loader2 } from 'lucide-react'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 
 import { useLogin } from '@/hooks/useLogin'
 
 const Login = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
-    const [remember, setRemember] = useState(false)
+    const [email, setEmail] = useState<string>('')
+    const [password, setPassword] = useState<string>('')
+    const [showPassword, setShowPassword] = useState<boolean>(false)
+    const [remember, setRemember] = useState<boolean>(false)
 
     const { authenticate, loading } = useLogin()
 
@@ -113,13 +114,12 @@ const Login = () => {
 
                         <div className="w-full flex items-center justify-between">
                             <div className="w-full flex items-center">
-                                <input
-                                    type="checkbox"
+                                <Checkbox
                                     id="remember-me"
                                     name="remember-me"
                                     checked={remember}
-                                    onChange={({ target }) => setRemember(target.checked)}
-                                    className="h-4 w-4 rounded cursor-pointer border-gray-300 text-gray-400 hover:text-gray-500 focus:ring-0"
+                                    onCheckedChange={(checked) => setRemember(checked === true)}
+                                    className="h-4 w-4 p-2 rounded bg-gray-100 border-gray-300 cursor-pointer data-[state=checked]:border-red-700 data-[state=checked]:bg-red-700 data-[state=checked]:text-white data-[state=checked]:p-2"
                                 />
 
                                 <label htmlFor="remember-me" className="w-full ml-2 block text-sm text-gray-900">
@@ -129,17 +129,11 @@ const Login = () => {
                         </div>
                     </fieldset>
 
-                    <Button type="button" variant={"default"} onClick={handleLogin} disabled={loading} aria-busy={loading} aria-describedby="form-status" className="w-full cursor-pointer">
+                    <Button type="button" variant={"default"} onClick={handleLogin} disabled={loading} aria-busy={loading} aria-describedby="form-status" className="w-full cursor-pointer bg-red-700 hover:bg-red-800">
                         {loading && <Loader2 aria-hidden="true" className="animate-spin -ml-0.5 mr-1.5 h-5 w-5" />}
                         {loading ? "Iniciando sesión" : "Iniciar sesión"}
                     </Button>
                 </form>
-
-                {/*<div className="flex justify-center items-center">
-                    <p className="text-xs text-zinc-500">
-                        Al continuar, acepta nuestros <a href="#" className="underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-400">Terminos</a> & <a href="#" className="underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-400">Política de Privacidad.</a>.
-                    </p>
-                </div>*/}
             </div>
         </div>
     )

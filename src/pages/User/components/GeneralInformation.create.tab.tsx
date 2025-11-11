@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { XCircleIcon } from '@heroicons/react/20/solid' // lucide-react
+import { XCircleIcon } from '@heroicons/react/20/solid'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -19,15 +19,15 @@ import {
 } from '@/generated-types'
 
 export const GeneralInformationTab = (): React.ReactElement => {
-    const [name, setName] = useState('')
+    const [name, setName] = useState<string>('')
     const [email, setEmail] = useState<string | null>(null)
     const [password, setPassword] = useState<string | null>(null)
-    const [confirmPassword, setConfirmPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState<string>('')
     const [role, setRole] = useState<Role | undefined | null>(null)
-    const [passwdHasError, setPasswordHasError] = useState(false)
-    const [unmatchingPasswords, setUnmatchingPasswords] = useState(false)
+    const [passwdHasError, setPasswordHasError] = useState<boolean>(false)
+    const [unmatchingPasswords, setUnmatchingPasswords] = useState<boolean>(false)
 
-    const [searchRoleQuery, setSearchRoleQuery] = useState('')
+    const [searchRoleQuery, setSearchRoleQuery] = useState<string>('')
     const debouncedSearchRoleTerm = useDebounce(searchRoleQuery, 500)
     const { data, loading } = useListRolesQuery({
         fetchPolicy: 'network-only',
@@ -260,12 +260,12 @@ export const GeneralInformationTab = (): React.ReactElement => {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-x-6">
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => { navigate('/usuarios') }}>
+                        <div className="flex items-center justify-end gap-x-4">
+                            <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => { navigate('/usuarios') }}>
                                 Cancelar
                             </Button>
 
-                            <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleCreateUser} disabled={result.loading}>
+                            <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleCreateUser} disabled={result.loading}>
                                 Crear
                             </Button>
                         </div>

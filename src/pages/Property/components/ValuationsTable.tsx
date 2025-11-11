@@ -21,7 +21,7 @@ interface ValuationsTableProps {
     property: Property;
     valuations?: Maybe<Maybe<PropertyValuation>[]> | undefined;
     setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    handleUpdate: (mutation: Partial<Valuation>, view?: string) => void
+    handleUpdate: (mutation: Partial<Valuation>, view?: string) => void;
 }
 
 export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setModalOpen, handleUpdate }: ValuationsTableProps): React.ReactElement => {
@@ -46,7 +46,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 mb-10">
+        <div className="mb-10">
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
                     <h1 className="text-base font-semibold text-gray-900">
@@ -60,7 +60,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
 
                 {canCreate && (
                     <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                        <Button type="button" variant={'default'} size="sm" onClick={() => setModalOpen(true)} className="cursor-pointer">
+                        <Button type="button" variant={'default'} size="default" onClick={() => setModalOpen(true)} className="cursor-pointer bg-green-700 hover:bg-green-900">
                             Añadir
                         </Button>
                     </div>
@@ -69,7 +69,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
 
             <div className="mt-8 flow-root">
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 ">
                         <div className="overflow-hidden shadow-sm outline-1 outline-black/5 sm:rounded-lg">
                             <Table className="relative min-w-full divide-y divide-gray-300">
                                 <TableHeader className="bg-gray-50">

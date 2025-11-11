@@ -9,19 +9,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Pill } from '../Pill'
 
 interface Identifiable {
-    id: string
+    id: string;
 }
 
 interface SelectMultipleProps<T> {
-    searchPlaceholder: string
-    emptyMessage?: string
-    options: T[]
-    selectedOptions: T[] | undefined | null
-    loading?: boolean
-    onInputChange: (query: string) => void
-    displayValue: (item: T) => string
-    onOptionDelete: (id: string) => void
-    onOptionSelected: (item: T) => void
+    searchPlaceholder: string;
+    emptyMessage?: string;
+    options: T[];
+    selectedOptions: T[] | undefined | null;
+    loading?: boolean;
+    onInputChange: (query: string) => void;
+    displayValue: (item: T) => string;
+    onOptionDelete: (id: string) => void;
+    onOptionSelected: (item: T) => void;
 }
 
 export const SelectMultiple = <T extends Identifiable>({

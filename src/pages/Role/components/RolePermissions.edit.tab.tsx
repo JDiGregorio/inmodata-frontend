@@ -23,15 +23,15 @@ import {
 type ActionType = 'description' | 'add' | 'delete' | 'edit' | 'view'
 
 type Permission = {
-    description: string
-    add: boolean
-    delete: boolean
-    edit: boolean
-    view: boolean
+    description: string;
+    add: boolean;
+    delete: boolean;
+    edit: boolean;
+    view: boolean;
 }
 
 type InitialPermissions = {
-	[key: string]: Permission
+	[key: string]: Permission;
 }
 
 type PermissionKey = keyof typeof initialPermissions
@@ -212,18 +212,18 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
                         />
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end gap-x-6">
+                    <div className="mt-6 flex items-center justify-end gap-x-4">
                         {userPermissions.canDelete("role") && (
-                            <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteRole}>
+                            <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteRole}>
                                 Eliminar
                             </Button>
                         )}
                         
-                        <Button type="button" variant={'ghost'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate('/roles')}>
+                        <Button type="button" variant={'outline'} size={'default'} className={'w-auto px-4 cursor-pointer'} onClick={() => navigate('/roles')}>
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'sm'} className={'w-auto px-4 cursor-pointer'} onClick={handleUpdateRole} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateRole} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

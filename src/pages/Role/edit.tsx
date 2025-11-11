@@ -17,7 +17,7 @@ const RoleEdit = (): React.ReactElement => {
     const { data, loading, error } = useGetRoleByIdQuery({
         fetchPolicy: 'network-only',
         variables: {
-            id: id!,
+            id: id!
         }
     })
 

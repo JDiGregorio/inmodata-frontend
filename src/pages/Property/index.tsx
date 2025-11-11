@@ -24,9 +24,9 @@ const Properties = (): React.ReactElement => {
 }
 
 export type AggregateOption = {
-    id: number
-    value: RiskAggregates
-    label: string
+    id: number;
+    value: RiskAggregates;
+    label: string;
 }
 
 export const risks: AggregateOption[] = [
@@ -59,14 +59,14 @@ export const risks: AggregateOption[] = [
 
 const PropertiesActionsDropdown = ({ loading, progress, permissions, onDownloadTemplate, onImport } : { loading: boolean; progress: number | null; permissions: PermissionHelpers; onDownloadTemplate: () => void; onImport: () => void; }) => {
     return loading ? ( 
-        <div className="h-8 px-3 py-2 inline-flex min-w-[8rem] justify-center items-center rounded-md border border-gray-300 bg-white">
+        <div className="h-9 px-3 py-2 inline-flex min-w-[8rem] justify-center items-center rounded-md border border-gray-300 bg-white">
             <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 {`Procesando${progress !== null ? ` ${progress}%` : '...'}`}
             </span>
         </div>
     ) : (
         <Menu as="div" className="relative inline-block text-left">
-            <MenuButton className="h-8 w-32 px-3 py-2 inline-flex items-center justify-between rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+            <MenuButton className="h-9 w-32 px-3 py-2 inline-flex items-center justify-between rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                 Acciones
                 <ChevronDownIcon className="ml-2 h-4 w-4 text-gray-500" aria-hidden="true" />
             </MenuButton>

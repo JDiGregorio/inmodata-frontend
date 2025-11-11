@@ -74,10 +74,8 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasP
                     mapId="7e4a3d97341b511756649b5f"
                     onClick={handleMapClick}
                     disableDefaultUI={true}
-                    zoomControl={true}
-                   
-                    fullscreenControl={true}
-                    
+                    zoomControl={true}                 
+                    fullscreenControl={true}                  
                 >
                     {hasPoint && (
                         <AdvancedMarker
