@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ChevronDownIcon, DownloadIcon, UploadIcon } from 'lucide-react'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
 
 import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/ListView/SearchableTable'
+import { ImportModal } from './components/ImportModal'
 
 import { defineModel } from '@/utils/modelUtils'
 import { PermissionHelpers, usePermissions } from '@/hooks/usePermissions'
@@ -98,6 +99,7 @@ const PropertiesActionsDropdown = ({ loading, progress, permissions, onDownloadT
 }
 
 const PropertiesListView = (): React.ReactElement => {
+    const [modal, setModal] = useState<boolean>(false)
     const permissions = usePermissions()
     const { download, loading: loadingDownload, progress } = useDownloadTemplate()
 
@@ -118,7 +120,7 @@ const PropertiesListView = (): React.ReactElement => {
     }
 
     const handleImport = () => {
-        console.log('Importar Inmuebles')
+        setModal(true)
     }
 
     const headers: Header[] = [
@@ -153,27 +155,34 @@ const PropertiesListView = (): React.ReactElement => {
     }) : []
 
     return (
-        <SearchableTable<Property>
-            model={defineModel('inmueble')}
-            title="Inmuebles"
-            toolbarActions={
-                <PropertiesActionsDropdown
-                    loading={loadingDownload}
-                    progress={progress}
-                    permissions={permissions}
-                    onDownloadTemplate={handleDownloadTemplate}
-                    onImport={handleImport}
-                />
-            }
-            canCreate={permissions.canCreate("property")}
-            canEdit={permissions.canEdit("property")}
-            headers={headers}
-            data={parsedColumns}
-            loading={loading}
-            error={error}
-            paginatorInfo={paginatorInfo}
-            refetch={handleRefetching}
-        />
+        <>
+            <SearchableTable<Property>
+                model={defineModel('inmueble')}
+                title="Inmuebles"
+                toolbarActions={
+                    <PropertiesActionsDropdown
+                        loading={loadingDownload}
+                        progress={progress}
+                        permissions={permissions}
+                        onDownloadTemplate={handleDownloadTemplate}
+                        onImport={handleImport}
+                    />
+                }
+                canCreate={permissions.canCreate("property")}
+                canEdit={permissions.canEdit("property")}
+                headers={headers}
+                data={parsedColumns}
+                loading={loading}
+                error={error}
+                paginatorInfo={paginatorInfo}
+                refetch={handleRefetching}
+            />
+
+            <ImportModal
+                open={modal}
+                setModalOpen={setModal}
+            />
+        </>
     )
 }
 

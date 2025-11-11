@@ -20,7 +20,7 @@ export function useDownloadTemplate() {
         abortRef.current = controller
 
         try {
-            const res = await axios.get(`${BASE_URL}/api/properties/template`, {
+            const res = await axios.get(`${BASE_URL}/api/properties/export`, {
                 responseType: 'blob',
                 signal: controller.signal,
                 onDownloadProgress: (e) => {
