@@ -22,6 +22,7 @@ import {
 export const GeneralInformationTab = ({ property }: { property: Property }): React.ReactElement => {
     const [owner, setOwner] = useState<string | null | undefined>(property.owner)
     const [exactAddress, setExactAddress] = useState<string | null | undefined>(property.exactAddress)
+    const [cadastralKey, setCadastralKey] = useState<string | null | undefined>(property.cadastralKey)
     const [latitude, setLatitude] = useState<number | undefined>(property.latitude)
     const [longitude, setLongitude] = useState<number | undefined>(property.longitude)
 
@@ -59,6 +60,7 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                     id: property.id,
                     owner: owner,
                     exactAddress: exactAddress,
+                    cadastralKey: cadastralKey,
                     latitude: latitude,
                     longitude: longitude
                 }
@@ -66,13 +68,7 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
         })
 
         if (result.data) {
-            toast.success('Registro creado exitosamente!')
-
-            const newUserId = result.data?.updateProperty.id
-
-            navigate(`/inmuebles/${newUserId}/editar`, {
-                replace: true
-            })
+            toast.success('Registro actualizado exitosamente!')
         }
     }
 
@@ -132,6 +128,23 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                                         value={owner || ''}
                                         placeholder="Nombre"
                                         onChange={(e) => setOwner(e.target.value)}
+                                        autoComplete="off"
+                                        className="placeholder:text-gray-300"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-6 space-y-2">
+                                    <Label htmlFor="cadastralKey">
+                                        Clave Catastral
+                                    </Label>
+
+                                    <Input
+                                        type="text"
+                                        id="cadastralKey"
+                                        name="cadastralKey"
+                                        value={cadastralKey || ''}
+                                        placeholder="Clave Catastral"
+                                        onChange={(e) => setCadastralKey(e.target.value)}
                                         autoComplete="off"
                                         className="placeholder:text-gray-300"
                                     />

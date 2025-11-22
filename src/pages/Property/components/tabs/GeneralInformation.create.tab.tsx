@@ -18,6 +18,7 @@ import {
 export const GeneralInformationTab = (): React.ReactElement => {
     const [owner, setOwner] = useState<string | null>(null)
     const [exactAddress, setExactAddress] = useState<string | null>(null)
+    const [cadastralKey, setCadastralKey] = useState<string | null>(null)
     const [latitude, setLatitude] = useState<number | undefined>()
     const [longitude, setLongitude] = useState<number | undefined>()
 
@@ -45,6 +46,7 @@ export const GeneralInformationTab = (): React.ReactElement => {
                 input: {
                     owner: owner,
                     exactAddress: exactAddress,
+                    cadastralKey: cadastralKey,
                     latitude: latitude,
                     longitude: longitude,
                 }
@@ -95,6 +97,23 @@ export const GeneralInformationTab = (): React.ReactElement => {
                                         value={owner || ''}
                                         placeholder="Nombre"
                                         onChange={(e) => setOwner(e.target.value)}
+                                        autoComplete="off"
+                                        className="placeholder:text-gray-300"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-6 space-y-2">
+                                    <Label htmlFor="cadastralKey">
+                                        Clave Catastral
+                                    </Label>
+
+                                    <Input
+                                        type="text"
+                                        id="cadastralKey"
+                                        name="cadastralKey"
+                                        value={cadastralKey || ''}
+                                        placeholder="Clave Catastral"
+                                        onChange={(e) => setCadastralKey(e.target.value)}
                                         autoComplete="off"
                                         className="placeholder:text-gray-300"
                                     />

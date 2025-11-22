@@ -38,6 +38,7 @@ export type CreateInstitutionInput = {
 };
 
 export type CreatePropertyInput = {
+  cadastralKey?: InputMaybe<Scalars['String']['input']>;
   exactAddress?: InputMaybe<Scalars['String']['input']>;
   latitude: Scalars['Float']['input'];
   longitude: Scalars['Float']['input'];
@@ -217,6 +218,7 @@ export type PaginatorInfo = {
 
 export type Property = {
   __typename?: 'Property';
+  cadastralKey?: Maybe<Scalars['String']['output']>;
   exactAddress?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   latestValuation?: Maybe<PropertyValuation>;
@@ -375,6 +377,7 @@ export type UpdateInstitutionInput = {
 };
 
 export type UpdatePropertyInput = {
+  cadastralKey?: InputMaybe<Scalars['String']['input']>;
   exactAddress?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   latitude: Scalars['Float']['input'];
@@ -521,14 +524,14 @@ export type ListPropertiesQueryVariables = Exact<{
 }>;
 
 
-export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', measuredAt?: any | null, institution?: { __typename?: 'Institution', name: string } | null } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typename?: 'PropertyPaginator', data: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', measuredAt?: any | null, institution?: { __typename?: 'Institution', name: string } | null } | null }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
 
 export type GetPropertyByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -1005,6 +1008,7 @@ export const ListPropertiesDocument = gql`
       id
       name
       exactAddress
+      cadastralKey
       latitude
       longitude
       latestValuation {
@@ -1065,6 +1069,7 @@ export const GetPropertyByIdDocument = gql`
     name
     owner
     exactAddress
+    cadastralKey
     latitude
     longitude
     quantity

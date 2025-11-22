@@ -4,6 +4,7 @@ query ListProperties($first: Int!, $page: Int, $search: String) {
             id
             name
             exactAddress
+            cadastralKey
             latitude
             longitude
             latestValuation {
@@ -28,6 +29,7 @@ query GetPropertyById($id: ID!) {
         name
         owner
         exactAddress
+        cadastralKey
         latitude
         longitude
         quantity
