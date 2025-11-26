@@ -30,6 +30,9 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
             const editValuation = {
                 id: valuation.id,
                 institution: valuation.institution,
+                owner: valuation.owner,
+                phone: valuation.phone,
+                sector: valuation.sector,
                 measuredAt: valuation.measuredAt,
                 averageValue: valuation.averageValue,
                 landArea: valuation.landArea,

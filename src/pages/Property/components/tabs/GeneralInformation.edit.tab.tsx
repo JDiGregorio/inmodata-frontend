@@ -20,7 +20,6 @@ import {
 } from '@/generated-types'
 
 export const GeneralInformationTab = ({ property }: { property: Property }): React.ReactElement => {
-    const [owner, setOwner] = useState<string | null | undefined>(property.owner)
     const [exactAddress, setExactAddress] = useState<string | null | undefined>(property.exactAddress)
     const [cadastralKey, setCadastralKey] = useState<string | null | undefined>(property.cadastralKey)
     const [latitude, setLatitude] = useState<number | undefined>(property.latitude)
@@ -58,7 +57,6 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
             variables: {
                 input: {
                     id: property.id,
-                    owner: owner,
                     exactAddress: exactAddress,
                     cadastralKey: cadastralKey,
                     latitude: latitude,
@@ -116,23 +114,6 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                             </div>
 
                             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                                <div className="sm:col-span-6 space-y-2">
-                                    <Label htmlFor="owner">
-                                        Propietario
-                                    </Label>
-
-                                    <Input
-                                        type="text"
-                                        id="owner"
-                                        name="owner"
-                                        value={owner || ''}
-                                        placeholder="Nombre"
-                                        onChange={(e) => setOwner(e.target.value)}
-                                        autoComplete="off"
-                                        className="placeholder:text-gray-300"
-                                    />
-                                </div>
-
                                 <div className="sm:col-span-6 space-y-2">
                                     <Label htmlFor="cadastralKey">
                                         Clave Catastral

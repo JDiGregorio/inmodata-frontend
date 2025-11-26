@@ -4,7 +4,9 @@ import Cleave from 'cleave.js/react'
 import { XIcon } from 'lucide-react'
 
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { ComboBox } from '@/components/widgets/ComboBox/ComboBox'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DateInput } from '@/components/widgets/DateInput/DateInput'
 import { Button } from '@/components/ui/button'
 import { AlertConfirm } from '@/components/widgets/Dialog/AlertConfirm'
@@ -94,6 +96,16 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
             return
         }
 
+        if (!valuation.owner) {
+            toast.error('Es necesario agregar el propietario.')
+            return
+        }
+
+        if (!valuation.sector) {
+            toast.error('Es necesario seleccionar el sector.')
+            return
+        }
+
         if (!valuation.measuredAt || valuation.measuredAt.length === 0) {
             toast.error('Es necesario seleccionar la fecha de valuación.')
             return
@@ -130,8 +142,11 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                 variables: {
                     propertyId: property.id,
                     input: {
-                        institution: _institution,
                         measuredAt: formatted,
+                        institution: _institution,
+                        owner: valuation.owner,
+                        phone: valuation.phone,
+                        sector: valuation.sector,
                         averageValue: valuation.averageValue,
                         landArea: valuation.landArea,
                         improvementArea: valuation.improvementArea,
@@ -149,6 +164,9 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                     input: {
                         id: valuation.id,
                         institution: _institution,
+                        owner: valuation.owner,
+                        phone: valuation.phone,
+                        sector: valuation.sector,
                         averageValue: valuation.averageValue,
                         landArea: valuation.landArea,
                         improvementArea: valuation.improvementArea,
@@ -219,12 +237,53 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                         <form className="space-y-6">
                             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                                 <div className="sm:col-span-3 space-y-2">
-                                    <Label htmlFor="role" data-required="*">
+                                    <Label htmlFor="owner">
+                                        Propietario
+                                    </Label>
+
+                                    <Input
+                                        type="text"
+                                        id="owner"
+                                        name="owner"
+                                        value={valuation.owner || ''}
+                                        placeholder="Propietario"
+                                        onChange={({ target }) => handleUpdate({ owner: target.value })}
+                                        autoComplete="off"
+                                        className="placeholder:text-gray-300"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-3 space-y-2">
+                                    <Label htmlFor="phone">
+                                        Teléfono
+                                    </Label>
+
+                                    <Cleave
+                                        id="phone"
+                                        className={cn(
+                                            "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                            "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                            "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300"                                                            
+                                        )}
+                                        placeholder="9503-1023"
+                                        options={{
+                                            numericOnly: true,
+                                            delimiter: '-',
+                                            blocks: [4, 4],
+                                        }}
+                                        value={valuation.phone || ''}
+                                        onChange={({ target }) => handleUpdate({ phone: target.value })}
+                                        autoComplete="off"
+                                    />
+                                </div>
+
+                                <div className="sm:col-span-3 space-y-2">
+                                    <Label htmlFor="institution" data-required="*">
                                         Institución
                                     </Label>
 
                                     <ComboBox
-                                        id="role"
+                                        id="institution"
                                         placeholder={'Selecccione una institución..'}
                                         options={institutions}
                                         loading={loading}
@@ -234,6 +293,26 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                         selectedOption={valuation.institution}
                                         displayValue={(institution) => institution.name}
                                     />
+                                </div>
+
+                                <div className="sm:col-span-3 space-y-2">
+                                    <Label htmlFor="sector" data-required="*">
+                                        Sector
+                                    </Label>
+
+                                    <Select name="sector" onValueChange={(value) => handleUpdate({ sector: value })} value={valuation.sector || ''}>
+                                        <SelectTrigger id="sector" className="w-full focus:ring-0 focus:ring-offset-0">
+                                            <SelectValue placeholder="Seleccionar" />
+                                        </SelectTrigger>
+                
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="financiero">
+                                                    Financiero
+                                                </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="sm:col-span-3 space-y-2">

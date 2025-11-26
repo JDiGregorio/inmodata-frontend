@@ -28,8 +28,11 @@ export type AddValuationInput = {
   landArea?: InputMaybe<Scalars['Float']['input']>;
   landValue?: InputMaybe<Scalars['Float']['input']>;
   measuredAt?: InputMaybe<Scalars['Date']['input']>;
+  owner?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
   propertyId?: InputMaybe<Scalars['ID']['input']>;
   riskProfile?: InputMaybe<RiskAggregates>;
+  sector?: InputMaybe<Scalars['String']['input']>;
   utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -42,7 +45,6 @@ export type CreatePropertyInput = {
   exactAddress?: InputMaybe<Scalars['String']['input']>;
   latitude: Scalars['Float']['input'];
   longitude: Scalars['Float']['input'];
-  owner?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateRoleInput = {
@@ -251,8 +253,11 @@ export type PropertyValuation = {
   landArea: Scalars['Float']['output'];
   landValue: Scalars['Float']['output'];
   measuredAt?: Maybe<Scalars['Date']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
   property_id?: Maybe<Scalars['ID']['output']>;
   riskProfile: RiskAggregates;
+  sector?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
   utilizationRatio: Scalars['Float']['output'];
 };
@@ -382,7 +387,6 @@ export type UpdatePropertyInput = {
   id: Scalars['ID']['input'];
   latitude: Scalars['Float']['input'];
   longitude: Scalars['Float']['input'];
-  owner?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateRoleInput = {
@@ -414,7 +418,10 @@ export type UpdateValuationInput = {
   landArea?: InputMaybe<Scalars['Float']['input']>;
   landValue?: InputMaybe<Scalars['Float']['input']>;
   measuredAt?: InputMaybe<Scalars['Date']['input']>;
+  owner?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
   riskProfile?: InputMaybe<RiskAggregates>;
+  sector?: InputMaybe<Scalars['String']['input']>;
   utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -531,7 +538,7 @@ export type GetPropertyByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, owner?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, owner?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -1067,7 +1074,6 @@ export const GetPropertyByIdDocument = gql`
   propertyById(id: $id) {
     id
     name
-    owner
     exactAddress
     cadastralKey
     latitude
@@ -1078,6 +1084,9 @@ export const GetPropertyByIdDocument = gql`
     }
     valuations {
       id
+      owner
+      phone
+      sector
       averageValue
       measuredAt
       landArea

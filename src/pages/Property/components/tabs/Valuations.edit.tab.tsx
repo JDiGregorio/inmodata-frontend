@@ -25,6 +25,9 @@ export type Valuation = Omit<PropertyValuation, 'id' | 'riskProfile'> & {
 export const initialValuation = {
     id: null,
     institution: null,
+    owner: null,
+    phone: null,
+    sector: null,
     measuredAt: undefined,
     averageValue: 0,
     landArea: 0,

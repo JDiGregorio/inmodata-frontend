@@ -27,7 +27,6 @@ query GetPropertyById($id: ID!) {
     propertyById(id: $id) {
         id
         name
-        owner
         exactAddress
         cadastralKey
         latitude
@@ -38,6 +37,9 @@ query GetPropertyById($id: ID!) {
         }
         valuations {
             id
+            owner
+            phone
+            sector
             averageValue
             measuredAt
             landArea

@@ -16,7 +16,6 @@ import {
 } from '@/generated-types'
 
 export const GeneralInformationTab = (): React.ReactElement => {
-    const [owner, setOwner] = useState<string | null>(null)
     const [exactAddress, setExactAddress] = useState<string | null>(null)
     const [cadastralKey, setCadastralKey] = useState<string | null>(null)
     const [latitude, setLatitude] = useState<number | undefined>()
@@ -44,7 +43,6 @@ export const GeneralInformationTab = (): React.ReactElement => {
         const result = await createProperty({
             variables: {
                 input: {
-                    owner: owner,
                     exactAddress: exactAddress,
                     cadastralKey: cadastralKey,
                     latitude: latitude,
@@ -85,22 +83,7 @@ export const GeneralInformationTab = (): React.ReactElement => {
                             </div>
 
                             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                                <div className="sm:col-span-6 space-y-2">
-                                    <Label htmlFor="owner">
-                                        Propietario
-                                    </Label>
-
-                                    <Input
-                                        type="text"
-                                        id="owner"
-                                        name="owner"
-                                        value={owner || ''}
-                                        placeholder="Nombre"
-                                        onChange={(e) => setOwner(e.target.value)}
-                                        autoComplete="off"
-                                        className="placeholder:text-gray-300"
-                                    />
-                                </div>
+                                
 
                                 <div className="sm:col-span-6 space-y-2">
                                     <Label htmlFor="cadastralKey">
