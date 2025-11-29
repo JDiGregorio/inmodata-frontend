@@ -38,6 +38,7 @@ query GetPropertyById($id: ID!) {
         valuations {
             id
             owner
+            applicant
             phone
             sector
             averageValue

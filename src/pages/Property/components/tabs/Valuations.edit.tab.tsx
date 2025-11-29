@@ -26,6 +26,7 @@ export const initialValuation = {
     id: null,
     institution: null,
     owner: null,
+    applicant: null,
     phone: null,
     sector: null,
     measuredAt: undefined,
