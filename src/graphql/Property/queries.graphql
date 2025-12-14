@@ -61,3 +61,15 @@ query GetPropertyById($id: ID!) {
         }
     }
 }
+
+query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMeters: Int!) {
+    propertiesWithinRadius(latitude: $latitude, longitude: $longitude, radiusMeters: $radiusMeters) {
+        id
+        name
+        cadastralKey
+        latitude
+        longitude
+        srid
+        distancia
+    }
+}

@@ -34,7 +34,7 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
         }
     })
 
-    const [ deleteProperty ] = useDeletePropertyMutation({
+    const [deleteProperty] = useDeletePropertyMutation({
         onError: () => {
             toast.error('Lo sentimos, el registro no pudo ser eliminado.')
         }

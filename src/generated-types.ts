@@ -222,6 +222,7 @@ export type PaginatorInfo = {
 export type Property = {
   __typename?: 'Property';
   cadastralKey?: Maybe<Scalars['String']['output']>;
+  distancia?: Maybe<Scalars['Float']['output']>;
   exactAddress?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   latestValuation?: Maybe<PropertyValuation>;
@@ -229,6 +230,7 @@ export type Property = {
   longitude: Scalars['Float']['output'];
   name?: Maybe<Scalars['String']['output']>;
   quantity: Scalars['Int']['output'];
+  srid?: Maybe<Scalars['Int']['output']>;
   user?: Maybe<User>;
   valuations?: Maybe<Array<Maybe<PropertyValuation>>>;
 };
@@ -268,6 +270,7 @@ export type Query = {
   institutionById?: Maybe<Institution>;
   institutions: InstitutionPaginator;
   properties: PropertyPaginator;
+  propertiesWithinRadius: Array<Property>;
   propertyById?: Maybe<Property>;
   roleById?: Maybe<Role>;
   roles: RolePaginator;
@@ -293,6 +296,13 @@ export type QueryPropertiesArgs = {
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPropertiesWithinRadiusArgs = {
+  latitude: Scalars['Float']['input'];
+  longitude: Scalars['Float']['input'];
+  radiusMeters?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -541,6 +551,15 @@ export type GetPropertyByIdQueryVariables = Exact<{
 
 
 export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+
+export type GetPropertiesWithinRadiusQueryVariables = Exact<{
+  latitude: Scalars['Float']['input'];
+  longitude: Scalars['Float']['input'];
+  radiusMeters: Scalars['Int']['input'];
+}>;
+
+
+export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, srid?: number | null, distancia?: number | null }> };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -1144,6 +1163,58 @@ export type GetPropertyByIdQueryHookResult = ReturnType<typeof useGetPropertyByI
 export type GetPropertyByIdLazyQueryHookResult = ReturnType<typeof useGetPropertyByIdLazyQuery>;
 export type GetPropertyByIdSuspenseQueryHookResult = ReturnType<typeof useGetPropertyByIdSuspenseQuery>;
 export type GetPropertyByIdQueryResult = Apollo.QueryResult<GetPropertyByIdQuery, GetPropertyByIdQueryVariables>;
+export const GetPropertiesWithinRadiusDocument = gql`
+    query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMeters: Int!) {
+  propertiesWithinRadius(
+    latitude: $latitude
+    longitude: $longitude
+    radiusMeters: $radiusMeters
+  ) {
+    id
+    name
+    cadastralKey
+    latitude
+    longitude
+    srid
+    distancia
+  }
+}
+    `;
+
+/**
+ * __useGetPropertiesWithinRadiusQuery__
+ *
+ * To run a query within a React component, call `useGetPropertiesWithinRadiusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPropertiesWithinRadiusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPropertiesWithinRadiusQuery({
+ *   variables: {
+ *      latitude: // value for 'latitude'
+ *      longitude: // value for 'longitude'
+ *      radiusMeters: // value for 'radiusMeters'
+ *   },
+ * });
+ */
+export function useGetPropertiesWithinRadiusQuery(baseOptions: Apollo.QueryHookOptions<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables> & ({ variables: GetPropertiesWithinRadiusQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>(GetPropertiesWithinRadiusDocument, options);
+      }
+export function useGetPropertiesWithinRadiusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>(GetPropertiesWithinRadiusDocument, options);
+        }
+export function useGetPropertiesWithinRadiusSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>(GetPropertiesWithinRadiusDocument, options);
+        }
+export type GetPropertiesWithinRadiusQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusQuery>;
+export type GetPropertiesWithinRadiusLazyQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusLazyQuery>;
+export type GetPropertiesWithinRadiusSuspenseQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusSuspenseQuery>;
+export type GetPropertiesWithinRadiusQueryResult = Apollo.QueryResult<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>;
 export const CreateRoleDocument = gql`
     mutation CreateRole($input: CreateRoleInput!) {
   createRole(input: $input) {
