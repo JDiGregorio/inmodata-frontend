@@ -4,6 +4,7 @@ import { NavLink } from 'react-router'
 import { MapPinHouseIcon, ArrowUpRightIcon } from 'lucide-react'
 
 import { Circle } from './Circle'
+import { toast } from '@/utils/toast'
 
 import markerPrimary from '@/assets/marker9.png'
 import markerSecondary from '@/assets/marker10.png'
@@ -43,6 +44,13 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasP
         },
         skip: !hasPoint
     })
+
+    useEffect(() => {
+        const response = data?.propertiesWithinRadius
+        if (response && response.length > 0) {
+            toast.warning("Existen inmuebles cercanos a menos de 25 metros ya registrados, por favor valide que el que quiere ingresar no sea el mismo.")
+        }
+    }, [data])
 
     useEffect(() => {
         if (map && hasPoint && point) {
