@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Map, AdvancedMarker, useMap, InfoWindow } from '@vis.gl/react-google-maps'
 import { NavLink } from 'react-router'
 import { MapPinHouseIcon, ArrowUpRightIcon } from 'lucide-react'
@@ -17,6 +17,7 @@ import {
 
 export type InmuebleMapPreviewProps = {
     defaultZoom?: number;
+    currentPropertyId?: string | number;
     latitude: number | undefined;
     longitude: number | undefined;
     hasPoint: boolean;
@@ -28,7 +29,7 @@ const DEFAULT_CENTER = { lat: 15.7695458, lng: -86.7902957 }
 const FOCUS_ZOOM = 18
 const RADIUS_METER = 25
 
-export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasPoint, mapHeightClassName = "h-80", onLatLngChange }: InmuebleMapPreviewProps): React.ReactElement => {
+export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitude, longitude, hasPoint, mapHeightClassName = "h-80", onLatLngChange }: InmuebleMapPreviewProps): React.ReactElement => {
     const [selectedId, setSelectedId] = useState<string | null>(null)
     
     const map = useMap()
@@ -46,8 +47,10 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasP
     })
 
     useEffect(() => {
-        const response = data?.propertiesWithinRadius
-        if (response && response.length > 0) {
+        const items = data?.propertiesWithinRadius ?? []
+        const nearby = currentPropertyId !== null ? items.filter(point => String(point.id) !== String(currentPropertyId)) : items
+
+        if (nearby.length > 0) {
             toast.warning("Existen inmuebles cercanos a menos de 25 metros ya registrados, por favor valide que el que quiere ingresar no sea el mismo.")
         }
     }, [data])
@@ -99,6 +102,16 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasP
         }
     }, [onLatLngChange])
 
+    const nearby = useMemo(() => {
+        const items = data?.propertiesWithinRadius ?? []
+
+        if (currentPropertyId == null) {
+            return items
+        }
+
+        return items.filter(point => String(point.id) !== String(currentPropertyId))
+    }, [data, currentPropertyId])
+
     return (
         <div className="mx-auto max-w-4xl space-y-6">
             <div className={`overflow-hidden rounded border bg-white shadow ${mapHeightClassName}`}>
@@ -135,7 +148,7 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, latitude, longitude, hasP
                     )}
 
                     {hasPoint && !loading && (
-                        (data?.propertiesWithinRadius ?? []).map((point: any) => {
+                        nearby.map((point: any) => {
                             const position = { lat: point.latitude, lng: point.longitude };
 
                             return (

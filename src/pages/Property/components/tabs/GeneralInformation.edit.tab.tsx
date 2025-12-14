@@ -213,6 +213,7 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                             </div>
 
                             <InmuebleMapPreview
+                                currentPropertyId={property.id}
                                 latitude={latitude}
                                 longitude={longitude}
                                 hasPoint={hasPoint}
