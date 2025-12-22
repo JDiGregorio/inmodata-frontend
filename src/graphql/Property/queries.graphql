@@ -67,9 +67,8 @@ query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMe
         id
         name
         cadastralKey
+        exactAddress
         latitude
         longitude
-        srid
-        distancia
     }
 }

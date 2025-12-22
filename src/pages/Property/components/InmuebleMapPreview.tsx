@@ -26,12 +26,13 @@ export type InmuebleMapPreviewProps = {
 }
 
 const DEFAULT_CENTER = { lat: 15.7695458, lng: -86.7902957 }
-const FOCUS_ZOOM = 18
+const FOCUS_ZOOM = 20
 const RADIUS_METER = 25
 
-export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitude, longitude, hasPoint, mapHeightClassName = "h-80", onLatLngChange }: InmuebleMapPreviewProps): React.ReactElement => {
+export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitude, longitude, hasPoint, mapHeightClassName = "h-95", onLatLngChange }: InmuebleMapPreviewProps): React.ReactElement => {
     const [selectedId, setSelectedId] = useState<string | null>(null)
-    
+    const [showFullAddress, setShowFullAddress] = useState<boolean>(false)
+
     const map = useMap()
     const point = hasPoint ? { lat: latitude!, lng: longitude! } : undefined
 
@@ -54,6 +55,10 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitu
             toast.warning("Existen inmuebles cercanos a menos de 25 metros ya registrados, por favor valide que el que quiere ingresar no sea el mismo.")
         }
     }, [data])
+
+    useEffect(() => {
+        setShowFullAddress(false)
+    }, [selectedId])
 
     useEffect(() => {
         if (map && hasPoint && point) {
@@ -122,8 +127,8 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitu
                     mapId="7e4a3d97341b511756649b5f"
                     onClick={handleMapClick}
                     disableDefaultUI={true}
-                    zoomControl={true}                 
-                    fullscreenControl={true}                  
+                    zoomControl={true}
+                    fullscreenControl={true}
                 >
                     {hasPoint && (
                         <AdvancedMarker
@@ -136,14 +141,14 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitu
                     )}
 
                     {hasPoint && (
-                        <Circle 
+                        <Circle
                             center={point}
                             radius={RADIUS_METER}
                             fillColor='#BF0411'
-                            fillOpacity={0.2} 
+                            fillOpacity={0.2}
                             strokeColor='#BF0411'
                             strokeOpacity={0.8}
-                            strokeWeight={1}  
+                            strokeWeight={1}
                         />
                     )}
 
@@ -175,22 +180,43 @@ export const InmuebleMapPreview = ({ defaultZoom = 13, currentPropertyId, latitu
                                             minWidth={250}
                                             className="px-0 py-0"
                                         >
-                                            <div className="pt-2 space-y-6 border-t border-gray-200">
-                                                <div className="px-2 flex justify-between">
-                                                    <p className="text-md font-medium text-black">
-                                                        Clave Catastral:
-                                                    </p>
-                                                    <p className="text-md text-gray-500">
-                                                        {point.cadastral_key ?? "-"}
-                                                    </p>
-                                                </div>
+                                            <div className="max-w-[320px]">
+                                                <div className="pt-2 space-y-6 border-t border-gray-200">
+                                                    <div className="space-y-2">
+                                                        <div className="px-2 flex justify-between gap-3">
+                                                            <p className="text-md font-medium text-black">
+                                                                Clave Catastral:
+                                                            </p>
 
-                                                <NavLink to={`/inmuebles/${point.id}/editar#informacion-general`} className="flex justify-center text-gray-600 hover:text-gray-900 items-center uppercase space-x-2">
-                                                    <span className="font-medium text-blue-900 hover:text-blue-600">
-                                                        Ver inmueble
-                                                    </span>
-                                                    <ArrowUpRightIcon size={15} />
-                                                </NavLink>
+                                                            <p className="text-md text-gray-500 truncate max-w-[160px]">
+                                                                {point.cadastral_key ?? "-"}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="px-2 flex flex-col gap-1">
+                                                            <p className="text-md font-medium text-black">
+                                                                Dirección
+                                                            </p>
+
+                                                            <p className={["text-md text-gray-500 break-words", showFullAddress ? "" : "line-clamp-2"].join(" ")}>
+                                                                {point.exactAddress ?? "-"}
+                                                            </p>
+
+                                                            {point.exactAddress && point.exactAddress.length > 60 && (
+                                                                <button type="button" onClick={() => setShowFullAddress(v => !v)} className="self-start text-sm font-medium text-blue-900 hover:text-blue-600 cursor-pointer">
+                                                                    {showFullAddress ? "Ver menos" : "Ver más"}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <NavLink to={`/inmuebles/${point.id}/editar#informacion-general`} className="flex justify-center text-gray-600 hover:text-gray-900 items-center uppercase space-x-2">
+                                                        <span className="font-medium text-blue-900 hover:text-blue-600">
+                                                            Ver inmueble
+                                                        </span>
+                                                        <ArrowUpRightIcon size={15} />
+                                                    </NavLink>
+                                                </div>
                                             </div>
                                         </InfoWindow>
                                     )}

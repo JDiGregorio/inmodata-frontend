@@ -222,7 +222,6 @@ export type PaginatorInfo = {
 export type Property = {
   __typename?: 'Property';
   cadastralKey?: Maybe<Scalars['String']['output']>;
-  distancia?: Maybe<Scalars['Float']['output']>;
   exactAddress?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   latestValuation?: Maybe<PropertyValuation>;
@@ -230,7 +229,6 @@ export type Property = {
   longitude: Scalars['Float']['output'];
   name?: Maybe<Scalars['String']['output']>;
   quantity: Scalars['Int']['output'];
-  srid?: Maybe<Scalars['Int']['output']>;
   user?: Maybe<User>;
   valuations?: Maybe<Array<Maybe<PropertyValuation>>>;
 };
@@ -559,7 +557,7 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, srid?: number | null, distancia?: number | null }> };
+export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -1173,10 +1171,9 @@ export const GetPropertiesWithinRadiusDocument = gql`
     id
     name
     cadastralKey
+    exactAddress
     latitude
     longitude
-    srid
-    distancia
   }
 }
     `;
