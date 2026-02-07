@@ -126,7 +126,6 @@ const PropertiesListView = (): React.ReactElement => {
     const headers: Header[] = [
         { key: "name", label: "Nombre", sortable: false, filterable: false, width: 100, align: "center" },
         { key: "exactAddress", label: "Dirección", sortable: false, filterable: false, width: "16rem", align: "left" },
-        { key: "institution", label: "Institución", sortable: false, filterable: false, width: "7rem", align: "left" },
         { key: "latitude", label: "Latitud", sortable: false, filterable: false, width: 100, align: "center" },
         { key: "longitude", label: "Longitud", sortable: false, filterable: false, width: 100, align: "center" },
         { key: "measuredAt", label: "Fecha de Valuación", sortable: false, filterable: false, width: 120, align: "center" },
@@ -138,14 +137,12 @@ const PropertiesListView = (): React.ReactElement => {
     const parsedColumns = properties ? properties.map(property => {
 
         const measuredAt = property.latestValuation?.measuredAt
-        const institution = property.latestValuation?.institution?.name
 
         return {
             values: {
                 id: property.id,
                 name: property.name ?? '',
                 exactAddress: property.exactAddress ?? '',
-                institution: institution ?? '',
                 latitude: property.latitude,
                 longitude: property.longitude,
                 measuredAt: moment(measuredAt).format("DD/MM/YYYY") ?? '',

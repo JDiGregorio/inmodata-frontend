@@ -79,6 +79,9 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            Sector
+                                        </TableHead>
+                                        <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                             Institución
                                         </TableHead>
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -104,8 +107,11 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                     {valuations && valuations.length > 0 ? (
                                         valuations.map((valuation, index) => (
                                             <TableRow key={index} className={classNames(valuation?.id === property.latestValuation?.id ? "bg-green-50 hover:bg-green-50/100" : "even:bg-gray-50")}>
+                                                <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 capitalize">
+                                                    {valuation?.sector ?? "-"}
+                                                </TableCell>
                                                 <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6">
-                                                    {valuation?.institution?.name}
+                                                    {valuation?.institution?.name ?? "-"}
                                                 </TableCell>
                                                 <TableCell className="px-3 py-2 py-4 text-sm whitespace-nowrap text-center text-gray-500">
                                                     {moment(valuation?.measuredAt).format("DD/MM/YYYY")}

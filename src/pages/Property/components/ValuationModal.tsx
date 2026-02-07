@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { AlertConfirm } from '@/components/widgets/Dialog/AlertConfirm'
 import { toast } from '@/utils/toast'
 
-import { cn, safeDiv, round6, toDateOnly } from '@/lib/utils'
+import { cn, safeDiv, round6, toDateOnly, classNames } from '@/lib/utils'
 import { useDebounce } from '@/utils/useDebounce'
 import { buildOptionsFromQueryResult } from '@/components/widgets/ComboBox/ComboBox.utils'
 import { risks } from '../index'
@@ -44,19 +44,20 @@ const FACTOR_UTILIZATION = 1.43426
 
 export const ValuationModal = ({ open, title, valuation, property, canDelete, setModalOpen, handleUpdate, refetch }: ValuationModalProps): React.ReactElement => {
     useEffect(() => {
-        const nextUtilization = round6(safeDiv((valuation.improvementArea * FACTOR_UTILIZATION), valuation.landArea))
+        if (valuation.sector === "financiero") {
+            const nextUtilization = round6(safeDiv((valuation.improvementArea * FACTOR_UTILIZATION), valuation.landArea))
 
-        const nextAvgYard = round6(safeDiv(valuation.landValue, valuation.landArea))
+            const nextAvgYard = round6(safeDiv(valuation.landValue, valuation.landArea))
 
-        const nextAvgMeter = round6(safeDiv((valuation.averageValue - valuation.landValue), valuation.improvementArea))
+            const nextAvgMeter = round6(safeDiv((valuation.averageValue - valuation.landValue), valuation.improvementArea))
 
-        handleUpdate({
-			utilizationRatio: nextUtilization,
-            averageSquareYard: nextAvgYard,
-            averageSquareMeter: nextAvgMeter
-		})
-
-    }, [valuation.improvementArea, valuation.landArea, valuation.averageValue, valuation.landValue])
+            handleUpdate({
+                utilizationRatio: nextUtilization,
+                averageSquareYard: nextAvgYard,
+                averageSquareMeter: nextAvgMeter
+            })
+        }
+    }, [valuation.sector, valuation.improvementArea, valuation.landArea, valuation.averageValue, valuation.landValue])
 
     const [searchInstitutionQuery, setSearchInstitutionQuery] = useState('')
     const debouncedSearchInstitutionTerm = useDebounce(searchInstitutionQuery, 500)
@@ -92,20 +93,6 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
     }
 
     const handleAddNewValuation = async () => {
-        if (!valuation.institution) {
-            toast.error('Es necesario seleccionar la institución.')
-            return
-        }
-
-        if (!valuation.owner) {
-            toast.error('Es necesario agregar el propietario.')
-            return
-        }
-
-        if (!valuation.applicant) {
-            toast.error('Es necesario agregar el solicitante.')
-            return
-        }
 
         if (!valuation.sector) {
             toast.error('Es necesario seleccionar el sector.')
@@ -117,24 +104,48 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
             return
         }
 
-        if (!valuation.averageValue || valuation.averageValue === 0) {
-            toast.error('Es necesario agregar el valor estimado del inmueble.')
-            return
-        }
-
-        if (!valuation.landArea || valuation.landArea === 0) {
-            toast.error('Es necesario agregar el área del terreno.')
-            return
-        }
-
-        if (!valuation.landValue || valuation.landValue === 0) {
-            toast.error('Es necesario agregar el valor solo del terreno.')
-            return
-        }
-
         if (!valuation.riskProfile) {
             toast.error('Es necesario seleccionar el perfil de riesgo.')
             return
+        }
+
+        if (valuation.sector === "financiero") {
+            if (!valuation.institution) {
+                toast.error('Es necesario seleccionar la institución.')
+                return
+            }
+
+            if (!valuation.owner) {
+                toast.error('Es necesario agregar el propietario.')
+                return
+            }
+
+            if (!valuation.applicant) {
+                toast.error('Es necesario agregar el solicitante.')
+                return
+            }
+
+            if (!valuation.averageValue || valuation.averageValue === 0) {
+                toast.error('Es necesario agregar el valor estimado del inmueble.')
+                return
+            }
+
+            if (!valuation.landArea || valuation.landArea === 0) {
+                toast.error('Es necesario agregar el área del terreno.')
+                return
+            }
+
+            if (!valuation.landValue || valuation.landValue === 0) {
+                toast.error('Es necesario agregar el valor solo del terreno.')
+                return
+            }
+        }
+
+        if (valuation.sector === "control") {
+            if (!valuation.averageSquareYard || valuation.averageSquareYard === 0) {
+                toast.error('Es necesario agregar el valor de L/V2.')
+                return
+            }
         }
 
         const formatted = toDateOnly(valuation.measuredAt)
@@ -246,82 +257,6 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                             <form className="space-y-6">
                                 <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                                     <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="owner">
-                                            Propietario
-                                        </Label>
-
-                                        <Input
-                                            type="text"
-                                            id="owner"
-                                            name="owner"
-                                            value={valuation.owner || ''}
-                                            placeholder="Propietario"
-                                            onChange={({ target }) => handleUpdate({ owner: target.value })}
-                                            autoComplete="off"
-                                            className="placeholder:text-gray-300"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="applicant">
-                                            Solicitante
-                                        </Label>
-
-                                        <Input
-                                            type="text"
-                                            id="applicant"
-                                            name="applicant"
-                                            value={valuation.applicant || ''}
-                                            placeholder="Solicitante"
-                                            onChange={({ target }) => handleUpdate({ applicant: target.value })}
-                                            autoComplete="off"
-                                            className="placeholder:text-gray-300"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="phone">
-                                            Teléfono
-                                        </Label>
-
-                                        <Cleave
-                                            id="phone"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300"                                                            
-                                            )}
-                                            placeholder="9503-1023"
-                                            options={{
-                                                numericOnly: true,
-                                                delimiter: '-',
-                                                blocks: [4, 4],
-                                            }}
-                                            value={valuation.phone || ''}
-                                            onChange={({ target }) => handleUpdate({ phone: target.value })}
-                                            autoComplete="off"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="institution" data-required="*">
-                                            Institución
-                                        </Label>
-
-                                        <ComboBox
-                                            id="institution"
-                                            placeholder={'Selecccione una institución..'}
-                                            options={institutions}
-                                            loading={loading}
-                                            creatable={false}
-                                            onChange={(institution) => handleUpdate({ institution: institution })}
-                                            onInputChange={(value) => setSearchInstitutionQuery(value)}
-                                            selectedOption={valuation.institution}
-                                            displayValue={(institution) => institution.name}
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 space-y-2">
                                         <Label htmlFor="sector" data-required="*">
                                             Sector
                                         </Label>
@@ -336,8 +271,8 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                     <SelectItem value="financiero">
                                                         Financiero
                                                     </SelectItem>
-                                                    <SelectItem value="sondeo">
-                                                        Sondeo
+                                                    <SelectItem value="control">
+                                                        Control
                                                     </SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
@@ -356,148 +291,228 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                             onChange={(date) => handleUpdate({ measuredAt: date })}
                                         />
                                     </div>
+                                    
+                                    {(valuation.sector === null || valuation.sector === "financiero") && (
+                                        <>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="owner">
+                                                    Propietario
+                                                </Label>
 
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="averageValue" data-required="*">
-                                            Valor Estimado del Inmueble
-                                        </Label>
+                                                <Input
+                                                    type="text"
+                                                    id="owner"
+                                                    name="owner"
+                                                    value={valuation.owner || ''}
+                                                    placeholder="Propietario"
+                                                    onChange={({ target }) => handleUpdate({ owner: target.value })}
+                                                    autoComplete="off"
+                                                    className="placeholder:text-gray-300"
+                                                />
+                                            </div>
 
-                                        <Cleave
-                                            id="averageValue"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right"
-                                            )}
-                                            placeholder="0.00"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2,
-                                                numeralDecimalMark: ".",
-                                                delimiter: ","
-                                            }}
-                                            value={valuation.averageValue || ''}
-                                            onChange={(e) => {
-                                                const value = parseFloat(e.target.rawValue || "0")
-                                                handleUpdate({ averageValue: value })
-                                            }}
-                                        />
-                                    </div>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="applicant">
+                                                    Solicitante
+                                                </Label>
 
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="landArea" data-required="*">
-                                            Área del Terreno V&sup2;
-                                        </Label>
+                                                <Input
+                                                    type="text"
+                                                    id="applicant"
+                                                    name="applicant"
+                                                    value={valuation.applicant || ''}
+                                                    placeholder="Solicitante"
+                                                    onChange={({ target }) => handleUpdate({ applicant: target.value })}
+                                                    autoComplete="off"
+                                                    className="placeholder:text-gray-300"
+                                                />
+                                            </div>
 
-                                        <Cleave
-                                            id="landArea"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right"
-                                            )}
-                                            placeholder="0"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2,
-                                                noImmediatePrefix: false,
-                                                rawValueTrimPrefix: false
-                                            }}
-                                            value={valuation.landArea || ''}
-                                            onChange={(e) => {
-                                                const value = parseInt(e.target.rawValue || "0")
-                                                handleUpdate({ landArea: value })
-                                            }}
-                                        />
-                                    </div>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="phone">
+                                                    Teléfono
+                                                </Label>
 
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="improvementArea" data-required="*">
-                                            Área de Mejoras M&#178;
-                                        </Label>
+                                                <Cleave
+                                                    id="phone"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300"                                                            
+                                                    )}
+                                                    placeholder="9503-1023"
+                                                    options={{
+                                                        numericOnly: true,
+                                                        delimiter: '-',
+                                                        blocks: [4, 4],
+                                                    }}
+                                                    value={valuation.phone || ''}
+                                                    onChange={({ target }) => handleUpdate({ phone: target.value })}
+                                                    autoComplete="off"
+                                                />
+                                            </div>
 
-                                        <Cleave
-                                            id="improvementArea"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right"
-                                            )}
-                                            placeholder="0"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2
-                                            }}
-                                            value={valuation.improvementArea || ''}
-                                            onChange={(e) => {
-                                                const value = parseInt(e.target.rawValue || "0", 10)
-                                                handleUpdate({ improvementArea: value })
-                                            }}
-                                        />
-                                    </div>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="institution" data-required="*">
+                                                    Institución
+                                                </Label>
 
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="landValue" data-required="*">
-                                            Valor del Terreno
-                                        </Label>
+                                                <ComboBox
+                                                    id="institution"
+                                                    placeholder={'Selecccione una institución..'}
+                                                    options={institutions}
+                                                    loading={loading}
+                                                    creatable={false}
+                                                    onChange={(institution) => handleUpdate({ institution: institution })}
+                                                    onInputChange={(value) => setSearchInstitutionQuery(value)}
+                                                    selectedOption={valuation.institution}
+                                                    displayValue={(institution) => institution.name}
+                                                />
+                                            </div>
 
-                                        <Cleave
-                                            id="landValue"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right"
-                                            )}
-                                            placeholder="0.00"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2,
-                                                numeralDecimalMark: ".",
-                                                delimiter: ","
-                                            }}
-                                            value={valuation.landValue || ''}
-                                            onChange={(e) => {
-                                                const value = parseFloat(e.target.rawValue || "0")
-                                                handleUpdate({ landValue: value })
-                                            }}
-                                        />
-                                    </div>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="averageValue" data-required="*">
+                                                    Valor Estimado del Inmueble
+                                                </Label>
 
-                                    <div className="sm:col-span-6 space-y-2">
-                                        <Label htmlFor="utilizationRatio">
-                                            Ratio de Utilización
-                                        </Label>
+                                                <Cleave
+                                                    id="averageValue"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                        "text-right"
+                                                    )}
+                                                    placeholder="0.00"
+                                                    options={{
+                                                        numeral: true,
+                                                        numeralThousandsGroupStyle: 'thousand',
+                                                        numeralDecimalScale: 2,
+                                                        numeralDecimalMark: ".",
+                                                        delimiter: ","
+                                                    }}
+                                                    value={valuation.averageValue || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.rawValue || "0")
+                                                        handleUpdate({ averageValue: value })
+                                                    }}
+                                                />
+                                            </div>
 
-                                        <Cleave
-                                            id="utilizationRatio"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right disabled:opacity-100"                                                            
-                                            )}
-                                            disabled
-                                            placeholder="0.00"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2,
-                                                numeralDecimalMark: ".",
-                                                delimiter: ","
-                                            }}
-                                            value={valuation.utilizationRatio || ''}
-                                        />
-                                    </div>
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="landArea" data-required="*">
+                                                    Área del Terreno V&sup2;
+                                                </Label>
 
-                                    <div className="sm:col-span-3 space-y-2">
+                                                <Cleave
+                                                    id="landArea"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                        "text-right"
+                                                    )}
+                                                    placeholder="0"
+                                                    options={{
+                                                        numeral: true,
+                                                        numeralThousandsGroupStyle: 'thousand',
+                                                        numeralDecimalScale: 2,
+                                                        noImmediatePrefix: false,
+                                                        rawValueTrimPrefix: false
+                                                    }}
+                                                    value={valuation.landArea || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseInt(e.target.rawValue || "0")
+                                                        handleUpdate({ landArea: value })
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="improvementArea" data-required="*">
+                                                    Área de Mejoras M&#178;
+                                                </Label>
+
+                                                <Cleave
+                                                    id="improvementArea"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                        "text-right"
+                                                    )}
+                                                    placeholder="0"
+                                                    options={{
+                                                        numeral: true,
+                                                        numeralThousandsGroupStyle: 'thousand',
+                                                        numeralDecimalScale: 2
+                                                    }}
+                                                    value={valuation.improvementArea || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseInt(e.target.rawValue || "0", 10)
+                                                        handleUpdate({ improvementArea: value })
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="sm:col-span-3 space-y-2">
+                                                <Label htmlFor="landValue" data-required="*">
+                                                    Valor del Terreno
+                                                </Label>
+
+                                                <Cleave
+                                                    id="landValue"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                        "text-right"
+                                                    )}
+                                                    placeholder="0.00"
+                                                    options={{
+                                                        numeral: true,
+                                                        numeralThousandsGroupStyle: 'thousand',
+                                                        numeralDecimalScale: 2,
+                                                        numeralDecimalMark: ".",
+                                                        delimiter: ","
+                                                    }}
+                                                    value={valuation.landValue || ''}
+                                                    onChange={(e) => {
+                                                        const value = parseFloat(e.target.rawValue || "0")
+                                                        handleUpdate({ landValue: value })
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="sm:col-span-6 space-y-2">
+                                                <Label htmlFor="utilizationRatio">
+                                                    Ratio de Utilización
+                                                </Label>
+
+                                                <Cleave
+                                                    id="utilizationRatio"
+                                                    className={cn(
+                                                        "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                        "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                        "text-right disabled:opacity-100"                                                            
+                                                    )}
+                                                    disabled
+                                                    placeholder="0.00"
+                                                    options={{
+                                                        numeral: true,
+                                                        numeralThousandsGroupStyle: 'thousand',
+                                                        numeralDecimalScale: 2,
+                                                        numeralDecimalMark: ".",
+                                                        delimiter: ","
+                                                    }}
+                                                    value={valuation.utilizationRatio || ''}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className={classNames(valuation.sector === "control" ? "sm:col-span-6" : "sm:col-span-3", "space-y-2")}>
                                         <Label htmlFor="averageSquareYard">
                                             L/v&#178;
                                         </Label>
@@ -510,7 +525,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                 "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
                                                 "text-right disabled:opacity-100"                                                            
                                             )}
-                                            disabled
+                                            disabled={(valuation.sector === null || valuation.sector === "financiero")}
                                             placeholder="0.00"
                                             options={{
                                                 numeral: true,
@@ -520,34 +535,40 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                 delimiter: ","
                                             }}
                                             value={valuation.averageSquareYard || ''}
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 space-y-2">
-                                        <Label htmlFor="averageSquareMeter">
-                                            L/m&#178; Promedio
-                                        </Label>
-
-                                        <Cleave
-                                            id="averageSquareMeter"
-                                            className={cn(
-                                                "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
-                                                "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
-                                                "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
-                                                "text-right disabled:opacity-100"                                                            
-                                            )}
-                                            disabled
-                                            placeholder="0.00"
-                                            options={{
-                                                numeral: true,
-                                                numeralThousandsGroupStyle: 'thousand',
-                                                numeralDecimalScale: 2,
-                                                numeralDecimalMark: ".",
-                                                delimiter: ","
+                                            onChange={(e) => {
+                                                const value = parseFloat(e.target.rawValue || "0")
+                                                handleUpdate({ averageSquareYard: value })
                                             }}
-                                            value={valuation.averageSquareMeter || ''}
                                         />
                                     </div>
+                                    
+                                    {(valuation.sector === null || valuation.sector === "financiero") && (
+                                        <div className="sm:col-span-3 space-y-2">
+                                            <Label htmlFor="averageSquareMeter">
+                                                L/m&#178; Promedio
+                                            </Label>
+
+                                            <Cleave
+                                                id="averageSquareMeter"
+                                                className={cn(
+                                                    "file:text-slate-950 placeholder:text-slate-500 selection:bg-slate-900 selection:text-slate-50 dark:bg-slate-200/30 border-slate-200 flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-slate-50 dark:placeholder:text-slate-400 dark:selection:bg-slate-50 dark:selection:text-slate-900 dark:dark:bg-slate-800/30 dark:border-slate-800",
+                                                    "focus-visible:border-slate-950 focus-visible:ring-slate-950/50 focus-visible:ring-[3px] dark:focus-visible:border-slate-300 dark:focus-visible:ring-slate-300/50",
+                                                    "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 placeholder:text-gray-300",
+                                                    "text-right disabled:opacity-100"                                                            
+                                                )}
+                                                disabled
+                                                placeholder="0.00"
+                                                options={{
+                                                    numeral: true,
+                                                    numeralThousandsGroupStyle: 'thousand',
+                                                    numeralDecimalScale: 2,
+                                                    numeralDecimalMark: ".",
+                                                    delimiter: ","
+                                                }}
+                                                value={valuation.averageSquareMeter || ''}
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="sm:col-span-6 space-y-2">
                                         <Label htmlFor="riskProfile" data-required="*">
