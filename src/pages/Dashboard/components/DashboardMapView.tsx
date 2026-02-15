@@ -1,6 +1,8 @@
 "use client"
 import * as React from 'react'
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { Map, AdvancedMarker, InfoWindow, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
+import { ExpandIcon, Minimize2Icon, SearchIcon, XIcon } from 'lucide-react'
 
 type Point = {
     id: string;
@@ -12,6 +14,7 @@ type Point = {
 
 const DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 15.7597, lng: -86.7822 }
 const DEFAULT_ZOOM = 13
+const MAP_ID = '7e4a3d97341b511756649b5f'
 
 const TEST_POINTS: Point[] = [
     {
@@ -37,52 +40,78 @@ const TEST_POINTS: Point[] = [
     }
 ]
 
-function PlacesSearch({ onPlaceSelected }: { onPlaceSelected: (place: google.maps.places.PlaceResult) => void; }) {
+type SelectedPlace = {
+    position: google.maps.LatLngLiteral;
+    name?: string;
+    address?: string;
+}
+
+function PlacesSearch({ onPlaceSelected }: { onPlaceSelected: (place: SelectedPlace) => void; }) {
     const map = useMap()
     const placesLib = useMapsLibrary("places")
-    const inputRef = React.useRef<HTMLInputElement | null>(null)
+    const inputContainerRef = React.useRef<HTMLDivElement | null>(null)
 
     React.useEffect(() => {
-        if (!placesLib || !map || !inputRef.current) {
+        if (!placesLib || !map || !inputContainerRef.current || !google.maps.places.PlaceAutocompleteElement) {
             return
         }
 
-        const autocomplete = new placesLib.Autocomplete(inputRef.current, {
-            fields: ["geometry", "formatted_address", "name"]
+        const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
+            requestedLanguage: 'es'
         })
 
-        autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace()
+        placeAutocomplete.className = 'block w-full [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-gray-300'
+        placeAutocomplete.setAttribute('aria-label', 'Buscar lugar')
+        inputContainerRef.current.replaceChildren(placeAutocomplete)
 
-            if (!place?.geometry?.location) {
+        const handlePlaceSelect = async (event: Event) => {
+            const selectedEvent = event as Event & {
+                placePrediction?: google.maps.places.PlacePrediction;
+            }
+            const prediction = selectedEvent.placePrediction
+
+            if (!prediction) {
                 return
             }
 
-            onPlaceSelected(place)
+            const place = prediction.toPlace()
+            await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] })
 
-            const loc = place.geometry.location
+            if (!place.location) {
+                return
+            }
 
-            map.panTo({ lat: loc.lat(), lng: loc.lng() })
+            const position = place.location.toJSON()
+
+            onPlaceSelected({
+                position,
+                name: place.displayName ?? undefined,
+                address: place.formattedAddress ?? undefined
+            })
+
+            map.panTo(position)
             map.setZoom(16)
-        })
+        }
+
+        placeAutocomplete.addEventListener('gmp-placeselect', handlePlaceSelect)
 
         return () => {
-            // no-op (Google no expone un "destroy" oficial del Autocomplete)
+            placeAutocomplete.removeEventListener('gmp-placeselect', handlePlaceSelect)
+            placeAutocomplete.remove()
         }
     }, [placesLib, map, onPlaceSelected])
 
     return (
         <div className="absolute left-4 top-4 z-10 w-[min(520px,calc(100%-2rem))]">
             <div className="rounded-xl bg-white/95 shadow-lg ring-1 ring-black/5 p-3">
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="mb-1 block text-xs font-medium text-gray-600">
                     Buscar lugar
                 </label>
 
-                <input
-                    ref={inputRef}
-                    placeholder="Escribe una dirección o lugar (ej: La Ceiba, Atlántida)"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300"
-                />
+                <div className="relative">
+                    <SearchIcon className="pointer-events-none absolute left-2.5 top-2.5 z-10 size-4 text-gray-400" />
+                    <div ref={inputContainerRef} className="[&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full [&>gmp-place-autocomplete>input]:pl-8" />
+                </div>
 
                 <p className="mt-2 text-xs text-gray-500">
                     Tip: selecciona una sugerencia para centrar el mapa.
@@ -158,10 +187,10 @@ function RightPanel({ point, onClose } : { point: Point | null; onClose: () => v
     );
 }
 
-function MapCanvas() {
+function MapCanvas({ expanded, onToggleExpand }: { expanded: boolean; onToggleExpand: () => void; }) {
     const [points] = React.useState<Point[]>(TEST_POINTS)
     const [selectedId, setSelectedId] = React.useState<string | null>(null)
-    const [searchPlace, setSearchPlace] = React.useState<google.maps.places.PlaceResult | null>(null)
+    const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
 
     const selectedPoint = React.useMemo(() => points.find((p) => p.id === selectedId) ?? null, [points, selectedId])
 
@@ -175,13 +204,21 @@ function MapCanvas() {
 
             <RightPanel point={selectedPoint} onClose={() => setSelectedId(null)} />
 
+            <button
+                type="button"
+                onClick={onToggleExpand}
+                className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white"
+            >
+                {expanded ? <Minimize2Icon className="size-4" /> : <ExpandIcon className="size-4" />}
+                {expanded ? 'Salir de vista ampliada' : 'Expandir mapa'}
+            </button>
+
             <Map
                 defaultCenter={DEFAULT_CENTER}
                 defaultZoom={DEFAULT_ZOOM}
                 gestureHandling="greedy"
                 disableDefaultUI={false}
-                // Si quieres Advanced Markers sin warnings, agrega un mapId válido:
-                // mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID}
+                mapId={MAP_ID}
                 style={{ width: "100%", height: "100%" }}
             >
                 {points.map((p) => (
@@ -206,12 +243,9 @@ function MapCanvas() {
                     </InfoWindow>
                 )}
 
-                {searchPlace?.geometry?.location && (
+                {searchPlace?.position && (
                     <AdvancedMarker
-                        position={{
-                            lat: searchPlace.geometry.location.lat(),
-                            lng: searchPlace.geometry.location.lng()
-                        }}
+                        position={searchPlace.position}
                     />
                 )}
             </Map>
@@ -220,7 +254,29 @@ function MapCanvas() {
 }
 
 export default function DashboardMapView() {
+    const [expanded, setExpanded] = React.useState(false)
+
     return (
-        <MapCanvas />
+        <>
+            <MapCanvas expanded={false} onToggleExpand={() => setExpanded(true)} />
+
+            <Dialog open={expanded} onClose={setExpanded} className="relative z-50">
+                <DialogBackdrop className="fixed inset-0 bg-black/50" />
+
+                <div className="fixed inset-0 p-3 sm:p-6">
+                    <DialogPanel className="relative h-full w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+                        <button
+                            type="button"
+                            onClick={() => setExpanded(false)}
+                            className="absolute right-3 top-3 z-20 rounded-lg bg-white/95 p-2 text-gray-600 shadow ring-1 ring-black/5 transition hover:bg-white"
+                        >
+                            <XIcon className="size-4" />
+                        </button>
+
+                        <MapCanvas expanded onToggleExpand={() => setExpanded(false)} />
+                    </DialogPanel>
+                </div>
+            </Dialog>
+        </>
     )
 }
