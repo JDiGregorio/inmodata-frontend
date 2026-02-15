@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { Map, AdvancedMarker, InfoWindow, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
-import { ExpandIcon, Minimize2Icon, SearchIcon, XIcon } from 'lucide-react'
+import { ExpandIcon, Minimize2Icon, XIcon } from 'lucide-react'
 
 type Point = {
     id: string;
@@ -60,7 +60,7 @@ function PlacesSearch({ onPlaceSelected }: { onPlaceSelected: (place: SelectedPl
             requestedLanguage: 'es'
         })
 
-        placeAutocomplete.className = 'block w-full [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-gray-300'
+        placeAutocomplete.className = 'bg-white boder text-gray-700 block w-full [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-gray-300'
         placeAutocomplete.setAttribute('aria-label', 'Buscar lugar')
         inputContainerRef.current.replaceChildren(placeAutocomplete)
 
@@ -102,20 +102,13 @@ function PlacesSearch({ onPlaceSelected }: { onPlaceSelected: (place: SelectedPl
     }, [placesLib, map, onPlaceSelected])
 
     return (
-        <div className="absolute left-4 top-4 z-10 w-[min(520px,calc(100%-2rem))]">
-            <div className="rounded-xl bg-white/95 shadow-lg ring-1 ring-black/5 p-3">
-                <label className="mb-1 block text-xs font-medium text-gray-600">
-                    Buscar lugar
-                </label>
+        <div className="absolute left-48 top-2 z-10 w-[min(520px,calc(100%-2rem))]">
+            <div className="rounded bg-white/95 shadow-lg ring-1 ring-black/5">
 
                 <div className="relative">
-                    <SearchIcon className="pointer-events-none absolute left-2.5 top-2.5 z-10 size-4 text-gray-400" />
-                    <div ref={inputContainerRef} className="[&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full [&>gmp-place-autocomplete>input]:pl-8" />
+                  
+                    <div ref={inputContainerRef} className="[&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full [&>gmp-place-autocomplete>input]:pl-8 bg-white text-gray-700" />
                 </div>
-
-                <p className="mt-2 text-xs text-gray-500">
-                    Tip: selecciona una sugerencia para centrar el mapa.
-                </p>
             </div>
         </div>
     )
