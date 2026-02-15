@@ -55,7 +55,11 @@ const UserEdit = (): React.ReactElement => {
     ]
 
     return (
-        <TabsPanel tabs={tabs}/>
+        <div className="px-4 sm:px-6 lg:px-8">
+            <div className="pt-6">
+                <TabsPanel tabs={tabs}/>
+            </div>
+        </div>
     )
 }
 

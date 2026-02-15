@@ -152,34 +152,36 @@ const PropertiesListView = (): React.ReactElement => {
     }) : []
 
     return (
-        <>
-            <SearchableTable<Property>
-                model={defineModel('inmueble')}
-                title="Inmuebles"
-                toolbarActions={
-                    <PropertiesActionsDropdown
-                        loading={loadingDownload}
-                        progress={progress}
-                        permissions={permissions}
-                        onDownloadTemplate={handleDownloadTemplate}
-                        onImport={handleImport}
-                    />
-                }
-                canCreate={permissions.canCreate("property")}
-                canEdit={permissions.canEdit("property")}
-                headers={headers}
-                data={parsedColumns}
-                loading={loading}
-                error={error}
-                paginatorInfo={paginatorInfo}
-                refetch={handleRefetching}
-            />
+        <div className="px-4 sm:px-6 lg:px-8">
+            <div className="pt-6">
+                <SearchableTable<Property>
+                    model={defineModel('inmueble')}
+                    title="Inmuebles"
+                    toolbarActions={
+                        <PropertiesActionsDropdown
+                            loading={loadingDownload}
+                            progress={progress}
+                            permissions={permissions}
+                            onDownloadTemplate={handleDownloadTemplate}
+                            onImport={handleImport}
+                        />
+                    }
+                    canCreate={permissions.canCreate("property")}
+                    canEdit={permissions.canEdit("property")}
+                    headers={headers}
+                    data={parsedColumns}
+                    loading={loading}
+                    error={error}
+                    paginatorInfo={paginatorInfo}
+                    refetch={handleRefetching}
+                />
 
-            <ImportModal
-                open={modal}
-                setModalOpen={setModal}
-            />
-        </>
+                <ImportModal
+                    open={modal}
+                    setModalOpen={setModal}
+                />
+            </div>
+        </div>
     )
 }
 

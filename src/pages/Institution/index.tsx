@@ -48,18 +48,22 @@ const InstitutionsListView = (): React.ReactElement => {
 	}) : []
 
 	return (
-		<SearchableTable<Institution>
-			model={defineModel('institucion')}
-			title={'Instituciones'}
-			canCreate={permissions.canCreate("institution")}
-			canEdit={permissions.canEdit("institution")}
-			headers={headers}
-			data={parsedColumns}
-			loading={loading}
-			error={error}
-			paginatorInfo={paginatorInfo}
-			refetch={handleRefetching}
-		/>
+		<div className="px-4 sm:px-6 lg:px-8">
+            <div className="pt-6">
+				<SearchableTable<Institution>
+					model={defineModel('institucion')}
+					title={'Instituciones'}
+					canCreate={permissions.canCreate("institution")}
+					canEdit={permissions.canEdit("institution")}
+					headers={headers}
+					data={parsedColumns}
+					loading={loading}
+					error={error}
+					paginatorInfo={paginatorInfo}
+					refetch={handleRefetching}
+				/>
+			</div>
+		</div>
 	)
 }
 

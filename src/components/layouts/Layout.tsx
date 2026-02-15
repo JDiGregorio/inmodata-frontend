@@ -106,20 +106,16 @@ const MainLayout = (): React.ReactElement => {
             <Navbar permissions={permissions} setSidebarOpen={setSidebarOpen} />
 
             <main className="pt-16 lg:pl-72 h-full overflow-y-auto">
-                <div className="px-4 sm:px-6 lg:px-8">
-                    <div className="pt-6">
-                        <Suspense fallback={<Spinner />}>
-                            <Routes>
-                                {routes(permissions).map((route, index) => (
-                                    <Route key={index} path={route.path} element={route.view ? <route.component /> : <Navigate to="/inicio" />} />
-                                ))}
+                <Suspense fallback={<Spinner />}>
+                    <Routes>
+                        {routes(permissions).map((route, index) => (
+                            <Route key={index} path={route.path} element={route.view ? <route.component /> : <Navigate to="/inicio" />} />
+                        ))}
 
-                                <Route path="/403" element={<Page403 />} />
-                                <Route path="*" element={<Page404 />} />
-                            </Routes>
-                        </Suspense>
-                    </div>
-                </div>
+                        <Route path="/403" element={<Page403 />} />
+                        <Route path="*" element={<Page404 />} />
+                    </Routes>
+                </Suspense>
             </main>
         </div>
     )

@@ -48,18 +48,22 @@ const RolesListView = (): React.ReactElement => {
 	}) : []
 
 	return (
-		<SearchableTable<Role>
-			model={defineModel('rol')}
-			title={'Roles'}
-			canCreate={permissions.canCreate("role")}
-			canEdit={permissions.canEdit("role")}
-			headers={headers}
-			data={parsedColumns}
-			loading={loading}
-			error={error}
-			paginatorInfo={paginatorInfo}
-			refetch={handleRefetching}
-		/>
+		<div className="px-4 sm:px-6 lg:px-8">
+            <div className="pt-6">
+				<SearchableTable<Role>
+					model={defineModel('rol')}
+					title={'Roles'}
+					canCreate={permissions.canCreate("role")}
+					canEdit={permissions.canEdit("role")}
+					headers={headers}
+					data={parsedColumns}
+					loading={loading}
+					error={error}
+					paginatorInfo={paginatorInfo}
+					refetch={handleRefetching}
+				/>
+			</div>
+		</div>
 	)
 }
 

@@ -52,18 +52,22 @@ const UsersListView = (): React.ReactElement => {
     }) : []
 
     return (
-        <SearchableTable<User>
-            model={defineModel('usuario')}
-            title="Usuarios"
-            canCreate={permissions.canCreate("user")}
-            canEdit={permissions.canEdit("user")}
-            headers={headers}
-            data={parsedColumns}
-            loading={loading}
-            error={error}
-            paginatorInfo={paginatorInfo}
-            refetch={handleRefetching}
-        />
+        <div className="px-4 sm:px-6 lg:px-8">
+            <div className="pt-6">
+                <SearchableTable<User>
+                    model={defineModel('usuario')}
+                    title="Usuarios"
+                    canCreate={permissions.canCreate("user")}
+                    canEdit={permissions.canEdit("user")}
+                    headers={headers}
+                    data={parsedColumns}
+                    loading={loading}
+                    error={error}
+                    paginatorInfo={paginatorInfo}
+                    refetch={handleRefetching}
+                />
+            </div>
+        </div>
     )
 }
 
