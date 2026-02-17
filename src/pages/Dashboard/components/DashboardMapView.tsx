@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { Map, AdvancedMarker, InfoWindow, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
-import { ExpandIcon, Minimize2Icon, XIcon } from 'lucide-react'
+import { ExpandIcon, Minimize2Icon } from 'lucide-react'
 
 type Point = {
     id: string;
@@ -102,7 +102,7 @@ function PlacesSearch({ onPlaceSelected }: { onPlaceSelected: (place: SelectedPl
     }, [placesLib, map, onPlaceSelected])
 
     return (
-        <div className="absolute left-48 top-2 z-10 w-[min(520px,calc(100%-2rem))]">
+        <div className="absolute left-4 top-4 z-10 w-[min(520px,calc(100%-2rem))]">
             <div className="rounded bg-white/95 shadow-lg ring-1 ring-black/5">
 
                 <div className="relative">
@@ -188,7 +188,7 @@ function MapCanvas({ expanded, onToggleExpand }: { expanded: boolean; onToggleEx
     const selectedPoint = React.useMemo(() => points.find((p) => p.id === selectedId) ?? null, [points, selectedId])
 
     return (
-        <div className="relative h-full w-full">
+        <div className="relative h-full w-full border-0">
             <PlacesSearch
                 onPlaceSelected={(place) => {
                     setSearchPlace(place)
@@ -200,7 +200,7 @@ function MapCanvas({ expanded, onToggleExpand }: { expanded: boolean; onToggleEx
             <button
                 type="button"
                 onClick={onToggleExpand}
-                className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white"
+                className="absolute top-4 right-4 z-10 inline-flex items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white"
             >
                 {expanded ? <Minimize2Icon className="size-4" /> : <ExpandIcon className="size-4" />}
                 {expanded ? 'Salir de vista ampliada' : 'Expandir mapa'}
@@ -210,9 +210,12 @@ function MapCanvas({ expanded, onToggleExpand }: { expanded: boolean; onToggleEx
                 defaultCenter={DEFAULT_CENTER}
                 defaultZoom={DEFAULT_ZOOM}
                 gestureHandling="greedy"
-                disableDefaultUI={false}
+                mapTypeId={'hybrid'}
                 mapId={MAP_ID}
                 style={{ width: "100%", height: "100%" }}
+                disableDefaultUI={true}
+                zoomControl={true}
+                fullscreenControl={false}
             >
                 {points.map((p) => (
                     <AdvancedMarker
@@ -254,18 +257,10 @@ export default function DashboardMapView() {
             <MapCanvas expanded={false} onToggleExpand={() => setExpanded(true)} />
 
             <Dialog open={expanded} onClose={setExpanded} className="relative z-50">
-                <DialogBackdrop className="fixed inset-0 bg-black/50" />
+                <DialogBackdrop className="fixed inset-0 bg-black/90" />
 
                 <div className="fixed inset-0 p-3 sm:p-6">
                     <DialogPanel className="relative h-full w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        <button
-                            type="button"
-                            onClick={() => setExpanded(false)}
-                            className="absolute right-3 top-3 z-20 rounded-lg bg-white/95 p-2 text-gray-600 shadow ring-1 ring-black/5 transition hover:bg-white"
-                        >
-                            <XIcon className="size-4" />
-                        </button>
-
                         <MapCanvas expanded onToggleExpand={() => setExpanded(false)} />
                     </DialogPanel>
                 </div>
