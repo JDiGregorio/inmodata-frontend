@@ -73,38 +73,30 @@ query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMe
     }
 }
 
-query PropertiesWithinBounds(
-    $northLatitude: Float!
-    $eastLongitude: Float!
-    $southLatitude: Float!
-    $westLongitude: Float!
-    $limit: Int
-) {
-    propertiesWithinBounds(
-        northLatitude: $northLatitude
-        eastLongitude: $eastLongitude
-        southLatitude: $southLatitude
-        westLongitude: $westLongitude
-        limit: $limit
-    ) {
-        id
-        name
-        exactAddress
-        cadastralKey
-        latitude
-        longitude
-        quantity
-        latestValuation {
-            sector
-            averageValue
-            landArea
-            improvementArea
-            landValue
-            utilizationRatio
-            averageSquareYard
-            averageSquareMeter
-            riskProfile
-            measuredAt
-        }
+fragment PropertyPointFields on Property {
+    id
+    name
+    exactAddress
+    cadastralKey
+    latitude
+    longitude
+    quantity
+    latestValuation {
+        sector
+        averageValue
+        landArea
+        improvementArea
+        landValue
+        utilizationRatio
+        averageSquareYard
+        averageSquareMeter
+        riskProfile
+        measuredAt
+    }
+}
+
+query PropertiesWithinBounds($northLatitude: Float!, $eastLongitude: Float!, $southLatitude: Float!, $westLongitude: Float!, $limit: Int) {
+    propertiesWithinBounds(northLatitude: $northLatitude, eastLongitude: $eastLongitude, southLatitude: $southLatitude, westLongitude: $westLongitude, limit: $limit) {
+        ...PropertyPointFields
     }
 }

@@ -1,7 +1,16 @@
-import type { Point } from './types'
+import {
+	PropertyPointFieldsFragment
+} from '@/generated-types'
+
+type Property = PropertyPointFieldsFragment & {
+	position: { 
+		lat: number;
+		lng: number;
+	}
+}
 
 type RightPanelProps = {
-	point: Point | null;
+	point: Property | null;
 	onClose: () => void;
 }
 
@@ -48,7 +57,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 				<div className="flex items-start justify-between gap-3 border-b border-gray-100 p-4">
 					<div>
 						<h3 className="text-sm font-semibold text-gray-900">{point?.name ?? 'Detalle'}</h3>
-						<p className="text-xs text-gray-500">{point?.address ?? 'Sin dirección'}</p>
+						<p className="text-xs text-gray-500">{point?.exactAddress ?? 'Sin dirección'}</p>
 					</div>
 
 					<button onClick={onClose} className="cursor-pointer rounded-lg px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100">
@@ -56,7 +65,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 					</button>
 				</div>
 
-				<div className="max-h-[70vh] space-y-3 overflow-y-auto p-4">
+				<div className="max-h-[67vh] space-y-3 overflow-y-auto p-4">
 					<div className="rounded-xl bg-gray-50 p-3">
 						<p className="text-xs text-gray-600">Clave catastral</p>
 						<p className="text-sm font-medium text-gray-900">{point?.cadastralKey ?? '-'}</p>
@@ -97,21 +106,6 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Perfil de riesgo</p><p className="text-sm font-medium text-gray-900">{valuation?.riskProfile ?? '-'}</p></div>
 						</>
 					)}
-
-					<button
-						className="w-full cursor-pointer rounded-xl bg-gray-900 py-2 text-sm font-semibold text-white hover:bg-gray-800"
-						onClick={() => {
-							if (!point) {
-								return
-							}
-
-							const url = `https://www.google.com/maps?q=${point.position.lat},${point.position.lng}`
-
-							window.open(url, '_blank', 'noopener,noreferrer')
-						}}
-					>
-						Abrir en Google Maps
-					</button>
 				</div>
 			</div>
 		</div>

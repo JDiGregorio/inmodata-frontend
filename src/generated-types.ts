@@ -268,6 +268,7 @@ export type Query = {
   institutionById?: Maybe<Institution>;
   institutions: InstitutionPaginator;
   properties: PropertyPaginator;
+  propertiesWithinBounds: Array<Property>;
   propertiesWithinRadius: Array<Property>;
   propertyById?: Maybe<Property>;
   roleById?: Maybe<Role>;
@@ -294,6 +295,15 @@ export type QueryPropertiesArgs = {
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPropertiesWithinBoundsArgs = {
+  eastLongitude: Scalars['Float']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  northLatitude: Scalars['Float']['input'];
+  southLatitude: Scalars['Float']['input'];
+  westLongitude: Scalars['Float']['input'];
 };
 
 
@@ -559,6 +569,19 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 
 export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
+export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null };
+
+export type PropertiesWithinBoundsQueryVariables = Exact<{
+  northLatitude: Scalars['Float']['input'];
+  eastLongitude: Scalars['Float']['input'];
+  southLatitude: Scalars['Float']['input'];
+  westLongitude: Scalars['Float']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null }> };
+
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
 }>;
@@ -633,7 +656,29 @@ export type GetUserByIdQueryVariables = Exact<{
 
 export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
 
-
+export const PropertyPointFieldsFragmentDoc = gql`
+    fragment PropertyPointFields on Property {
+  id
+  name
+  exactAddress
+  cadastralKey
+  latitude
+  longitude
+  quantity
+  latestValuation {
+    sector
+    averageValue
+    landArea
+    improvementArea
+    landValue
+    utilizationRatio
+    averageSquareYard
+    averageSquareMeter
+    riskProfile
+    measuredAt
+  }
+}
+    `;
 export const CreateInstitutionDocument = gql`
     mutation CreateInstitution($input: CreateInstitutionInput!) {
   createInstitution(input: $input) {
@@ -1212,6 +1257,56 @@ export type GetPropertiesWithinRadiusQueryHookResult = ReturnType<typeof useGetP
 export type GetPropertiesWithinRadiusLazyQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusLazyQuery>;
 export type GetPropertiesWithinRadiusSuspenseQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusSuspenseQuery>;
 export type GetPropertiesWithinRadiusQueryResult = Apollo.QueryResult<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>;
+export const PropertiesWithinBoundsDocument = gql`
+    query PropertiesWithinBounds($northLatitude: Float!, $eastLongitude: Float!, $southLatitude: Float!, $westLongitude: Float!, $limit: Int) {
+  propertiesWithinBounds(
+    northLatitude: $northLatitude
+    eastLongitude: $eastLongitude
+    southLatitude: $southLatitude
+    westLongitude: $westLongitude
+    limit: $limit
+  ) {
+    ...PropertyPointFields
+  }
+}
+    ${PropertyPointFieldsFragmentDoc}`;
+
+/**
+ * __usePropertiesWithinBoundsQuery__
+ *
+ * To run a query within a React component, call `usePropertiesWithinBoundsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePropertiesWithinBoundsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePropertiesWithinBoundsQuery({
+ *   variables: {
+ *      northLatitude: // value for 'northLatitude'
+ *      eastLongitude: // value for 'eastLongitude'
+ *      southLatitude: // value for 'southLatitude'
+ *      westLongitude: // value for 'westLongitude'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function usePropertiesWithinBoundsQuery(baseOptions: Apollo.QueryHookOptions<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables> & ({ variables: PropertiesWithinBoundsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>(PropertiesWithinBoundsDocument, options);
+      }
+export function usePropertiesWithinBoundsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>(PropertiesWithinBoundsDocument, options);
+        }
+export function usePropertiesWithinBoundsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>(PropertiesWithinBoundsDocument, options);
+        }
+export type PropertiesWithinBoundsQueryHookResult = ReturnType<typeof usePropertiesWithinBoundsQuery>;
+export type PropertiesWithinBoundsLazyQueryHookResult = ReturnType<typeof usePropertiesWithinBoundsLazyQuery>;
+export type PropertiesWithinBoundsSuspenseQueryHookResult = ReturnType<typeof usePropertiesWithinBoundsSuspenseQuery>;
+export type PropertiesWithinBoundsQueryResult = Apollo.QueryResult<PropertiesWithinBoundsQuery, PropertiesWithinBoundsQueryVariables>;
 export const CreateRoleDocument = gql`
     mutation CreateRole($input: CreateRoleInput!) {
   createRole(input: $input) {

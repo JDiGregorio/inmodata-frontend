@@ -1,12 +1,18 @@
 import * as React from 'react'
-import { gql, useLazyQuery } from '@apollo/client'
 import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
 import { ExpandIcon, Minimize2Icon } from 'lucide-react'
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
 import { PlacesSearch } from './PlacesSearch'
 import { RightPanel } from './RightPanel'
-import type { Point, PointValuation, SelectedPlace } from './types'
+import type { SelectedPlace } from './types'
+
+import {
+	usePropertiesWithinBoundsLazyQuery,
+	PropertyPointFieldsFragment
+} from '@/generated-types'
+
+type Property = PropertyPointFieldsFragment
 
 type MapCanvasProps = {
 	expanded: boolean;
@@ -15,65 +21,6 @@ type MapCanvasProps = {
 
 const VIEWPORT_LIMIT = 500
 const VIEWPORT_FETCH_DEBOUNCE_MS = 250
-
-const PROPERTIES_WITHIN_BOUNDS_DOCUMENT = gql`
-	query PropertiesWithinBounds(
-		$northLatitude: Float!
-		$eastLongitude: Float!
-		$southLatitude: Float!
-		$westLongitude: Float!
-		$limit: Int
-	) {
-		propertiesWithinBounds(
-			northLatitude: $northLatitude
-			eastLongitude: $eastLongitude
-			southLatitude: $southLatitude
-			westLongitude: $westLongitude
-			limit: $limit
-		) {
-			id
-			name
-			exactAddress
-			cadastralKey
-			latitude
-			longitude
-			quantity
-			latestValuation {
-				sector
-				averageValue
-				landArea
-				improvementArea
-				landValue
-				utilizationRatio
-				averageSquareYard
-				averageSquareMeter
-				riskProfile
-				measuredAt
-			}
-		}
-	}
-`
-
-type PropertiesWithinBoundsQueryResponse = {
-	propertiesWithinBounds: Array<{
-		id: string;
-		name?: string | null;
-		exactAddress?: string | null;
-		cadastralKey?: string | null;
-		latitude: number;
-		longitude: number;
-		quantity?: number | null;
-		latestValuation?: PointValuation | null;
-	}>;
-}
-
-type PropertiesWithinBoundsQueryVariables = {
-	northLatitude: number;
-	eastLongitude: number;
-	southLatitude: number;
-	westLongitude: number;
-	limit?: number;
-}
 
 function ViewportListener({
 	onBoundsChange,
@@ -110,15 +57,12 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 	const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
 	const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	const [fetchWithinBounds, { data }] = useLazyQuery<
-		PropertiesWithinBoundsQueryResponse,
-		PropertiesWithinBoundsQueryVariables
-	>(PROPERTIES_WITHIN_BOUNDS_DOCUMENT, {
+	const [fetchWithinBounds, { data }] = usePropertiesWithinBoundsLazyQuery({
 		fetchPolicy: 'network-only',
-		notifyOnNetworkStatusChange: true,
+		notifyOnNetworkStatusChange: true
 	})
 
-	const points = React.useMemo<Point[]>(() => {
+	const points = React.useMemo<Property[]>(() => {
 		const properties = data?.propertiesWithinBounds ?? []
 
 		return properties.map((property) => ({
@@ -128,14 +72,22 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 			cadastralKey: property.cadastralKey,
 			quantity: property.quantity,
 			latestValuation: property.latestValuation,
-			position: {
-				lat: property.latitude,
-				lng: property.longitude,
-			},
+			latitude: property.latitude,
+			longitude: property.longitude,
 		}))
 	}, [data])
 
-	const selectedPoint = React.useMemo(() => points.find((p) => p.id === selectedId) ?? null, [points, selectedId])
+	const selectedPoint = React.useMemo(() => {
+		const point = points.find((p) => p.id === selectedId) ?? null
+
+		return point ? {
+			...point,
+			position: { 
+				lat: point.latitude,
+				lng: point.longitude
+			}
+		} : null
+	}, [points, selectedId])
 
 	const requestForBounds = React.useCallback(
 		(bounds: google.maps.LatLngBounds) => {
@@ -207,7 +159,7 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 					const isSelected = selectedId === p.id
 
 					return (
-						<AdvancedMarker key={p.id} position={p.position} onClick={() => setSelectedId(p.id)}>
+						<AdvancedMarker key={p.id} position={{ lat: p.latitude, lng: p.longitude }} onClick={() => setSelectedId(p.id)}>
 							<Pin
 								scale={isSelected ? 1.2 : 1}
 								background={isSelected ? '#2563eb' : '#4b5563'}
