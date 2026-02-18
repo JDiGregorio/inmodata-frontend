@@ -9,14 +9,14 @@ export default function DashboardMapView() {
 
     return (
         <>
-            <MapCanvas expanded={false} onToggleExpand={() => setExpanded(true)} />
+            {!expanded && <MapCanvas expanded={false} onToggleExpand={() => setExpanded(true)} />}
 
             <Dialog open={expanded} onClose={setExpanded} className="relative z-50">
                 <DialogBackdrop className="fixed inset-0 bg-black/90" />
 
                 <div className="fixed inset-0 p-3 sm:p-6">
                     <DialogPanel className="relative h-full w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        <MapCanvas expanded onToggleExpand={() => setExpanded(false)} />
+                        {expanded && <MapCanvas expanded onToggleExpand={() => setExpanded(false)} />}
                     </DialogPanel>
                 </div>
             </Dialog>

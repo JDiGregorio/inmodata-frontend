@@ -20,7 +20,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 						</p>
 					</div>
 
-					<button onClick={onClose} className="rounded-lg px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100">
+					<button onClick={onClose} className="cursor-pointer rounded-lg px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100">
 						Cerrar
 					</button>
 				</div>
@@ -47,7 +47,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 					</div>
 
 					<button
-						className="w-full rounded-xl bg-gray-900 text-white text-sm font-semibold py-2 hover:bg-gray-800"
+						className="w-full cursor-pointer rounded-xl bg-gray-900 py-2 text-sm font-semibold text-white hover:bg-gray-800"
 						onClick={() => {
 							if (!point) {
 								return
