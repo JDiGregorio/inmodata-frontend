@@ -2,6 +2,8 @@ import {
 	PropertyPointFieldsFragment
 } from '@/generated-types'
 
+import { getRiskProfileLabel } from './riskProfile'
+
 type Property = PropertyPointFieldsFragment & {
 	position: { 
 		lat: number;
@@ -95,7 +97,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Relación de utilización</p><p className="text-sm font-medium text-gray-900">{formatNumber(valuation?.utilizationRatio)}</p></div>
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Promedio yarda²</p><p className="text-sm font-medium text-gray-900">{formatNumber(valuation?.averageSquareYard)}</p></div>
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Promedio metro²</p><p className="text-sm font-medium text-gray-900">{formatNumber(valuation?.averageSquareMeter)}</p></div>
-							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Perfil de riesgo</p><p className="text-sm font-medium text-gray-900">{valuation?.riskProfile ?? '-'}</p></div>
+							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Perfil de riesgo</p><p className="text-sm font-medium text-gray-900">{getRiskProfileLabel(valuation?.riskProfile)}</p></div>
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Medido en</p><p className="text-sm font-medium text-gray-900">{formatDate(valuation?.measuredAt)}</p></div>
 						</>
 					)}
@@ -103,7 +105,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 					{isControlSector && (
 						<>
 							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Promedio yarda²</p><p className="text-sm font-medium text-gray-900">{formatNumber(valuation?.averageSquareYard)}</p></div>
-							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Perfil de riesgo</p><p className="text-sm font-medium text-gray-900">{valuation?.riskProfile ?? '-'}</p></div>
+							<div className="rounded-xl bg-gray-50 p-3"><p className="text-xs text-gray-600">Perfil de riesgo</p><p className="text-sm font-medium text-gray-900">{getRiskProfileLabel(valuation?.riskProfile)}</p></div>
 						</>
 					)}
 				</div>

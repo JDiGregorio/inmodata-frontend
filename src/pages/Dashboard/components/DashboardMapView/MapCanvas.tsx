@@ -5,6 +5,7 @@ import { ExpandIcon, Minimize2Icon } from 'lucide-react'
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
 import { PlacesSearch } from './PlacesSearch'
 import { RightPanel } from './RightPanel'
+import { getRiskProfileColor } from './riskProfile'
 import type { SelectedPlace } from './types'
 
 import {
@@ -55,20 +56,22 @@ function ViewportListener({
 export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 	const [selectedId, setSelectedId] = React.useState<string | null>(null)
 	const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
+	const [points, setPoints] = React.useState<Property[]>([])
+	const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
 	const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	const [fetchWithinBounds, { data }] = usePropertiesWithinBoundsLazyQuery({
+	const [fetchWithinBounds, { data, loading }] = usePropertiesWithinBoundsLazyQuery({
 		fetchPolicy: 'network-only',
 		notifyOnNetworkStatusChange: true
 	})
 
-	const points = React.useMemo<Property[]>(() => {
+	const mappedPoints = React.useMemo<Property[]>(() => {
 		const properties = data?.propertiesWithinBounds ?? []
 
 		return properties.map((property) => ({
 			id: property.id,
 			name: property.name?.trim() || 'Sin nombre',
-			address: property.exactAddress?.trim() || 'Sin dirección',
+			exactAddress: property.exactAddress?.trim() || 'Sin dirección',
 			cadastralKey: property.cadastralKey,
 			quantity: property.quantity,
 			latestValuation: property.latestValuation,
@@ -76,6 +79,15 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 			longitude: property.longitude,
 		}))
 	}, [data])
+
+	React.useEffect(() => {
+		if (!data) {
+			return
+		}
+
+		setPoints(mappedPoints)
+		setHasLoadedOnce(true)
+	}, [data, mappedPoints])
 
 	const selectedPoint = React.useMemo(() => {
 		const point = points.find((p) => p.id === selectedId) ?? null
@@ -128,6 +140,15 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 		}
 	}, [])
 
+	const handleClosePanel = React.useCallback(() => {
+		setSelectedId(null)
+	}, [])
+
+	const handleToggleExpand = React.useCallback(() => {
+		setSelectedId(null)
+		onToggleExpand()
+	}, [onToggleExpand])
+
 	return (
 		<div className="relative h-full w-full border-0">
 			<PlacesSearch
@@ -136,9 +157,7 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 				}}
 			/>
 
-			<RightPanel point={selectedPoint} onClose={() => setSelectedId(null)} />
-
-			<button type="button" onClick={onToggleExpand} className="absolute top-4 right-4 z-10 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white">
+			<button type="button" onClick={handleToggleExpand} className="absolute top-4 right-4 z-20 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white">
 				{expanded ? <Minimize2Icon className="size-6" /> : <ExpandIcon className="size-6" />}
 			</button>
 
@@ -157,13 +176,14 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 
 				{points.map((p) => {
 					const isSelected = selectedId === p.id
+					const markerColor = getRiskProfileColor(p.latestValuation?.riskProfile)
 
 					return (
 						<AdvancedMarker key={p.id} position={{ lat: p.latitude, lng: p.longitude }} onClick={() => setSelectedId(p.id)}>
 							<Pin
-								scale={isSelected ? 1.2 : 1}
-								background={isSelected ? '#2563eb' : '#4b5563'}
-								borderColor={isSelected ? '#1e3a8a' : '#1f2937'}
+								scale={isSelected ? 1.25 : 0.85}
+								background={isSelected ? '#D4AF37' : markerColor}
+								borderColor={isSelected ? '#8B6B1F' : '#374151'}
 								glyphColor="#ffffff"
 							/>
 						</AdvancedMarker>
@@ -172,6 +192,22 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 
 				{searchPlace?.position && <AdvancedMarker position={searchPlace.position} />}
 			</Map>
+
+			<RightPanel point={selectedPoint} onClose={handleClosePanel} />
+
+			{!hasLoadedOnce && loading && (
+				<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/45">
+					<div className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5">
+						Cargando propiedades...
+					</div>
+				</div>
+			)}
+
+			{hasLoadedOnce && loading && (
+				<div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-gray-700 shadow ring-1 ring-black/5">
+					Actualizando resultados...
+				</div>
+			)}
 		</div>
 	)
 }
