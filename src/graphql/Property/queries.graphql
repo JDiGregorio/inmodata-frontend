@@ -72,3 +72,39 @@ query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMe
         longitude
     }
 }
+
+query PropertiesWithinBounds(
+    $northLatitude: Float!
+    $eastLongitude: Float!
+    $southLatitude: Float!
+    $westLongitude: Float!
+    $limit: Int
+) {
+    propertiesWithinBounds(
+        northLatitude: $northLatitude
+        eastLongitude: $eastLongitude
+        southLatitude: $southLatitude
+        westLongitude: $westLongitude
+        limit: $limit
+    ) {
+        id
+        name
+        exactAddress
+        cadastralKey
+        latitude
+        longitude
+        quantity
+        latestValuation {
+            sector
+            averageValue
+            landArea
+            improvementArea
+            landValue
+            utilizationRatio
+            averageSquareYard
+            averageSquareMeter
+            riskProfile
+            measuredAt
+        }
+    }
+}
