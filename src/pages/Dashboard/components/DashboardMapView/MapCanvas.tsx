@@ -1,24 +1,132 @@
 import * as React from 'react'
-import { AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps'
+import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
 import { ExpandIcon, Minimize2Icon } from 'lucide-react'
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
-import { TEST_POINTS } from './data'
 import { PlacesSearch } from './PlacesSearch'
 import { RightPanel } from './RightPanel'
-import type { Point, SelectedPlace } from './types'
+import type { SelectedPlace } from './types'
+
+import {
+	usePropertiesWithinBoundsLazyQuery,
+	PropertyPointFieldsFragment
+} from '@/generated-types'
+
+type Property = PropertyPointFieldsFragment
 
 type MapCanvasProps = {
 	expanded: boolean;
 	onToggleExpand: () => void;
 }
 
+const VIEWPORT_LIMIT = 500
+const VIEWPORT_FETCH_DEBOUNCE_MS = 250
+
+function ViewportListener({
+	onBoundsChange,
+}: {
+	onBoundsChange: (bounds: google.maps.LatLngBounds) => void;
+}) {
+	const map = useMap()
+
+	React.useEffect(() => {
+		if (!map) {
+			return
+		}
+
+		const listener = map.addListener('idle', () => {
+			const bounds = map.getBounds()
+
+			if (!bounds) {
+				return
+			}
+
+			onBoundsChange(bounds)
+		})
+
+		return () => {
+			listener.remove()
+		}
+	}, [map, onBoundsChange])
+
+	return null
+}
+
 export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
-	const [points] = React.useState<Point[]>(TEST_POINTS)
 	const [selectedId, setSelectedId] = React.useState<string | null>(null)
 	const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
+	const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	const selectedPoint = React.useMemo(() => points.find((p) => p.id === selectedId) ?? null, [points, selectedId])
+	const [fetchWithinBounds, { data }] = usePropertiesWithinBoundsLazyQuery({
+		fetchPolicy: 'network-only',
+		notifyOnNetworkStatusChange: true
+	})
+
+	const points = React.useMemo<Property[]>(() => {
+		const properties = data?.propertiesWithinBounds ?? []
+
+		return properties.map((property) => ({
+			id: property.id,
+			name: property.name?.trim() || 'Sin nombre',
+			address: property.exactAddress?.trim() || 'Sin dirección',
+			cadastralKey: property.cadastralKey,
+			quantity: property.quantity,
+			latestValuation: property.latestValuation,
+			latitude: property.latitude,
+			longitude: property.longitude,
+		}))
+	}, [data])
+
+	const selectedPoint = React.useMemo(() => {
+		const point = points.find((p) => p.id === selectedId) ?? null
+
+		return point ? {
+			...point,
+			position: { 
+				lat: point.latitude,
+				lng: point.longitude
+			}
+		} : null
+	}, [points, selectedId])
+
+	const requestForBounds = React.useCallback(
+		(bounds: google.maps.LatLngBounds) => {
+			const northEast = bounds.getNorthEast()
+			const southWest = bounds.getSouthWest()
+
+			fetchWithinBounds({
+				variables: {
+					northLatitude: northEast.lat(),
+					eastLongitude: northEast.lng(),
+					southLatitude: southWest.lat(),
+					westLongitude: southWest.lng(),
+					limit: VIEWPORT_LIMIT,
+				},
+			})
+		},
+		[fetchWithinBounds],
+	)
+
+	const handleBoundsChange = React.useCallback(
+		(bounds: google.maps.LatLngBounds) => {
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current)
+			}
+
+			debounceTimerRef.current = setTimeout(() => {
+				requestForBounds(bounds)
+			}, VIEWPORT_FETCH_DEBOUNCE_MS)
+		},
+		[requestForBounds],
+	)
+
+	React.useEffect(() => {
+		return () => {
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current)
+			}
+		}
+	}, [])
 
 	return (
 		<div className="relative h-full w-full border-0">
@@ -45,11 +153,13 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 				zoomControl={true}
 				fullscreenControl={false}
 			>
+				<ViewportListener onBoundsChange={handleBoundsChange} />
+
 				{points.map((p) => {
 					const isSelected = selectedId === p.id
 
 					return (
-						<AdvancedMarker key={p.id} position={p.position} onClick={() => setSelectedId(p.id)}>
+						<AdvancedMarker key={p.id} position={{ lat: p.latitude, lng: p.longitude }} onClick={() => setSelectedId(p.id)}>
 							<Pin
 								scale={isSelected ? 1.2 : 1}
 								background={isSelected ? '#2563eb' : '#4b5563'}
