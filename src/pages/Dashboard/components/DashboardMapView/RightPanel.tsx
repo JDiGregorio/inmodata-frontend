@@ -67,8 +67,8 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 
     return (
         <div className={['absolute bottom-4 right-4 top-4 z-20 w-[370px] max-w-[calc(100%-2rem)]', 'transition-all duration-200', point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0'].join(' ')}>
-            <div className="p-4 flex h-auto max-h-min flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm space-y-3 overflow-y-auto">
-                <div className="flex justify-between items-center">
+            <div className="flex h-full max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95 p-4 shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
                     <h3 className="text-md font-semibold text-gray-900">
                         {point?.name ?? 'Detalle'}
                     </h3>
@@ -78,7 +78,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
                     </button>
                 </div>
 
-                <div className="px-2 py-2 w-full flex items-center rounded-lg shadow-sm space-x-4" style={{ backgroundColor: getRiskProfileColor(valuation?.riskProfile) }}>
+                <div className="mt-3 flex w-full items-center space-x-4 rounded-lg px-2 py-2 shadow-sm" style={{ backgroundColor: getRiskProfileColor(valuation?.riskProfile) }}>
                     <dt className="py-2 px-3 bg-white rounded-md border-transparent">
                         <p className="text-xl font-bold">
                             {getRiskProfileShort(valuation?.riskProfile)}
@@ -95,17 +95,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
                     </dd>
                 </div>
 
-                <div className="space-y-1 border-b border-gray-200 pb-4">
-                    <h3 className="text-md font-semibold text-gray-900">
-                        {point?.name ?? 'Detalle'}
-                    </h3>
-
-                    <p className="text-xs text-gray-600">
-                        {point?.exactAddress ?? 'Sin dirección'}
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 border-b border-gray-200 pb-4">
+                <div className="mt-3 grid grid-cols-2 gap-2 border-b border-gray-200 pb-4">
                     <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
                         <p className="text-sm text-gray-600">
                             Perfil de Riesgo:
@@ -127,49 +117,61 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">
-                        Más Detalles
-                    </p>
+                <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                    <div className="space-y-1 border-b border-gray-200 pb-4">
+                        <h3 className="text-md font-semibold text-gray-900">
+                            {point?.name ?? 'Detalle'}
+                        </h3>
 
-                    <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1 flex items-center cursor-pointer rounded-md border border-gray-200 bg-gray-100">
-                        {showDetails ? (
-                            <EyeOffIcon className="size-4 text-gray-400" />
-                        ) : (
-                            <EyeIcon className="size-4 text-gray-400" />
-                        )}
-                    </button>
-                </div>
-
-                {showDetails && (
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-3  pr-2 text-sm">
-                        <Item label="Clave catastral" value={point?.cadastralKey ?? '-'} />
-
-                        <Item label="Coordenadas" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
-
-                        <Item label="Sector avalúo" value={valuation?.sector ?? '-'} />
-
-                        <Item label="Valor promedio" value={formatNumber(valuation?.averageValue)} />
-
-                        <Item label="Área de terreno" value={formatNumber(valuation?.landArea)} />
-
-                        <Item label="Valor del terreno" value={formatNumber(valuation?.landValue)} />
-
-                        {isFinancialSector && (
-                            <Item label="Área de mejoras" value={formatNumber(valuation?.improvementArea)} />
-                        )}
-
-                        {isFinancialSector && (
-                            <Item label="L/v²" value={formatNumber(valuation?.averageSquareYard)} />
-                        )}
-
-                        {(isFinancialSector || isControlSector) && (
-                            <Item label="Radio de utilización" value={formatNumber(valuation?.utilizationRatio)} />
-                        )}
-
-                        <Item label="Última actualización" value={formatDate(valuation?.measuredAt)} />
+                        <p className="text-xs text-gray-600">
+                            {point?.exactAddress ?? 'Sin dirección'}
+                        </p>
                     </div>
-                )}
+
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500">
+                            Más Detalles
+                        </p>
+
+                        <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1 flex items-center cursor-pointer rounded-md border border-gray-200 bg-gray-100">
+                            {showDetails ? (
+                                <EyeOffIcon className="size-4 text-gray-400" />
+                            ) : (
+                                <EyeIcon className="size-4 text-gray-400" />
+                            )}
+                        </button>
+                    </div>
+
+                    {showDetails && (
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pr-2 text-sm">
+                            <Item label="Clave catastral" value={point?.cadastralKey ?? '-'} />
+
+                            <Item label="Coordenadas" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
+
+                            <Item label="Sector avalúo" value={valuation?.sector ?? '-'} />
+
+                            <Item label="Valor promedio" value={formatNumber(valuation?.averageValue)} />
+
+                            <Item label="Área de terreno" value={formatNumber(valuation?.landArea)} />
+
+                            <Item label="Valor del terreno" value={formatNumber(valuation?.landValue)} />
+
+                            {isFinancialSector && (
+                                <Item label="Área de mejoras" value={formatNumber(valuation?.improvementArea)} />
+                            )}
+
+                            {isFinancialSector && (
+                                <Item label="L/v²" value={formatNumber(valuation?.averageSquareYard)} />
+                            )}
+
+                            {(isFinancialSector || isControlSector) && (
+                                <Item label="Radio de utilización" value={formatNumber(valuation?.utilizationRatio)} />
+                            )}
+
+                            <Item label="Última actualización" value={formatDate(valuation?.measuredAt)} />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )
