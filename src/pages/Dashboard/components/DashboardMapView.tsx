@@ -26,8 +26,8 @@ export default function DashboardMapView() {
     }
 
     return (
-        <div className="py-6 px-8 space-y-6">
-            <div className="pointer-events-none  space-y-3">
+        <div className="flex h-full min-h-0 flex-col gap-6 px-8 py-6">
+            <div className="pointer-events-none shrink-0 space-y-3">
                 <div className="pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
                     <div className="flex justify-between flex-wrap items-center gap-2">
                         <div>
@@ -86,7 +86,7 @@ export default function DashboardMapView() {
                 </div>
             </div>
             
-            <div className="flex flex-grow flex-1 rounded">
+            <div className="flex min-h-0 flex-1 rounded">
                 {!expanded && (
                     <MapCanvas
                         limit={limit}
