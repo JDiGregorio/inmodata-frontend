@@ -15,9 +15,9 @@ export default function DashboardMapView() {
     const [expanded, setExpanded] = React.useState<boolean>(false)
     const [selectedId, setSelectedId] = React.useState<string | null>(null)
 
-    const handleToggleExpand = () => {
+    const handleToggleExpand = (value: boolean) => {
         setSelectedId(null)
-        setExpanded(true)
+        setExpanded(value)
     }
 
     const handleClearFilters = () => {
@@ -65,7 +65,17 @@ export default function DashboardMapView() {
                                         rawValueTrimPrefix: false
                                     }}
                                     value={limit}
-                                    onChange={({ target }) => setLimit(parseInt(target.value))}
+                                    onChange={({ target }) => {
+                                        setLimit(parseInt(target.value))
+                                        
+                                        if (expanded) {
+                                            setExpanded(false)
+                                        }
+
+                                        if (selectedId) {
+                                            setSelectedId(null)
+                                        }
+                                    }}
                                     className="h-7.5 px-1 w-[65px] border text-center bg-white border border-gray-400"
                                 />
 
@@ -78,7 +88,7 @@ export default function DashboardMapView() {
                                 <FunnelXIcon className="size-4" />
                             </button>
 
-                            <button type="button" onClick={handleToggleExpand} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                            <button type="button" onClick={() => handleToggleExpand(true)} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
                                 {expanded ? <Minimize2Icon className="size-4" /> : <ExpandIcon className="size-4" />}
                             </button>
                         </div>
@@ -90,9 +100,11 @@ export default function DashboardMapView() {
                 {!expanded && (
                     <MapCanvas
                         limit={limit}
+                        expanded={expanded}
                         searchPlace={searchPlace}
                         selectedId={selectedId}
                         setSelected={setSelectedId}
+                        handleToggleExpand={handleToggleExpand}
                     />
                 )}
             </div>
@@ -105,9 +117,11 @@ export default function DashboardMapView() {
                         {expanded && (
                             <MapCanvas
                                 limit={limit}
+                                expanded={expanded}
                                 searchPlace={searchPlace}
                                 selectedId={selectedId}
                                 setSelected={setSelectedId}
+                                handleToggleExpand={handleToggleExpand}
                             />
                         )}
                     </DialogPanel>

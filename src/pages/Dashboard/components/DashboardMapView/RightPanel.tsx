@@ -8,6 +8,7 @@ import { getRiskProfileColor, getRiskProfileShort, getRiskProfileLabel } from '.
 import {
     PropertyPointFieldsFragment
 } from '@/generated-types'
+import { classNames } from '@/lib/utils'
 
 type Property = PropertyPointFieldsFragment & {
     position: {
@@ -67,68 +68,70 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
 
     return (
         <div className={['absolute bottom-4 right-4 top-4 z-20 w-[370px] max-w-[calc(100%-2rem)]', 'transition-all duration-200', point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0'].join(' ')}>
-            <div className="flex h-full max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95 p-4 shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-md font-semibold text-gray-900">
-                        {point?.name ?? 'Detalle'}
-                    </h3>
-
-                    <button onClick={onClose} className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
-                        <XIcon aria-hidden="true" className="size-5 text-gray-500" />
-                    </button>
-                </div>
-
-                <div className="mt-3 flex w-full items-center space-x-4 rounded-lg px-2 py-2 shadow-sm" style={{ backgroundColor: getRiskProfileColor(valuation?.riskProfile) }}>
-                    <dt className="py-2 px-3 bg-white rounded-md border-transparent">
-                        <p className="text-xl font-bold">
-                            {getRiskProfileShort(valuation?.riskProfile)}
-                        </p>
-                    </dt>
-
-                    <dd className="flex flex-col items-baseline leading-none">
-                        <p className="text-xs text-gray-500">
-                            Riesgo:
-                        </p>
-                        <p className="text-xl font-semibold text-gray-900">
-                            {getRiskProfileLabel(valuation?.riskProfile)}
-                        </p>
-                    </dd>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2 border-b border-gray-200 pb-4">
-                    <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
-                        <p className="text-sm text-gray-600">
-                            Perfil de Riesgo:
-                        </p>
-
-                        <p className="text-md font-semibold text-gray-900">
-                            {getRiskProfileLabel(valuation?.riskProfile)}
-                        </p>
-                    </div>
-
-                    <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
-                        <p className="text-sm text-gray-600">
-                            L/m² Promedio:
-                        </p>
-
-                        <p className="text-md font-semibold text-gray-900">
-                            {formatNumber(valuation?.averageSquareMeter)}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-                    <div className="space-y-1 border-b border-gray-200 pb-4">
+            <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
+                <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
                         <h3 className="text-md font-semibold text-gray-900">
                             {point?.name ?? 'Detalle'}
+                        </h3>
+
+                        <button onClick={onClose} className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
+                            <XIcon aria-hidden="true" className="size-5 text-gray-500" />
+                        </button>
+                    </div>
+
+                    <div className="flex w-full items-center space-x-4 rounded-lg px-2 py-2 shadow-sm" style={{ backgroundColor: getRiskProfileColor(valuation?.riskProfile) }}>
+                        <dt className="py-2 px-3 bg-white rounded-md border-transparent">
+                            <p className="text-xl font-bold">
+                                {getRiskProfileShort(valuation?.riskProfile)}
+                            </p>
+                        </dt>
+
+                        <dd className="flex flex-col items-baseline leading-none">
+                            <p className="text-xs text-gray-500">
+                                Riesgo:
+                            </p>
+                            <p className="text-xl font-semibold text-gray-900">
+                                {getRiskProfileLabel(valuation?.riskProfile)}
+                            </p>
+                        </dd>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 border-b border-gray-200 pb-4">
+                        <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
+                            <p className="text-sm text-gray-600">
+                                Perfil de Riesgo:
+                            </p>
+
+                            <p className="text-md font-semibold text-gray-900">
+                                {getRiskProfileLabel(valuation?.riskProfile)}
+                            </p>
+                        </div>
+
+                        <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
+                            <p className="text-sm text-gray-600">
+                                L/m² Promedio:
+                            </p>
+
+                            <p className="text-md font-semibold text-gray-900">
+                                {formatNumber(valuation?.averageSquareMeter)}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1 border-b border-gray-200 pb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                            Dirección:
                         </h3>
 
                         <p className="text-xs text-gray-600">
                             {point?.exactAddress ?? 'Sin dirección'}
                         </p>
                     </div>
+                </div>
 
-                    <div className="flex items-center justify-between">
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-4">
+                    <div className={classNames(showDetails ? "pr-2" : "pr-4", "pl-4  flex items-center justify-between")}>
                         <p className="text-sm text-gray-500">
                             Más Detalles
                         </p>
@@ -143,7 +146,7 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
                     </div>
 
                     {showDetails && (
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pr-2 text-sm">
+                        <div className="px-4 grid grid-cols-2 gap-x-6 gap-y-3 pr-2 text-sm">
                             <Item label="Clave catastral" value={point?.cadastralKey ?? '-'} />
 
                             <Item label="Coordenadas" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
