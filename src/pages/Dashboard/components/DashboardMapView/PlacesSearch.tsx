@@ -1,15 +1,14 @@
 import * as React from 'react'
-import { SearchIcon } from 'lucide-react'
 import { useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
 
 import type { SelectedPlace } from './types'
 
 type PlacesSearchProps = {
-    onPlaceSelected: (place: SelectedPlace) => void
-    containerClassName?: string
+    containerClassName?: string;
+    onPlaceSelected: (place: SelectedPlace) => void;
 }
 
-export function PlacesSearch({ onPlaceSelected, containerClassName }: PlacesSearchProps) {
+export function PlacesSearch({ containerClassName,onPlaceSelected }: PlacesSearchProps) {
     const map = useMap()
     const placesLib = useMapsLibrary('places')
     const inputContainerRef = React.useRef<HTMLDivElement | null>(null)
@@ -23,8 +22,7 @@ export function PlacesSearch({ onPlaceSelected, containerClassName }: PlacesSear
             requestedLanguage: 'es',
         })
 
-        placeAutocomplete.className =
-            'bg-white text-gray-700 block w-full rounded-lg [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:pl-10 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-gray-300'
+        placeAutocomplete.className = 'h-10 bg-white text-gray-700 block w-full rounded-lg [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:pl-10 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-none [&>input]:focus:ring-gray-300'
         placeAutocomplete.setAttribute('aria-label', 'Buscar lugar')
         inputContainerRef.current.replaceChildren(placeAutocomplete)
 
@@ -67,9 +65,8 @@ export function PlacesSearch({ onPlaceSelected, containerClassName }: PlacesSear
 
     return (
         <div className={containerClassName ?? 'w-full'}>
-            <div className="relative rounded-xl bg-white ring-1 ring-gray-200">
-                <SearchIcon className="pointer-events-none absolute left-3 top-1/2 z-10 size-5 -translate-y-1/2 text-gray-400" />
-                <div ref={inputContainerRef} className="rounded-lg [&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full bg-white text-gray-700" />
+            <div className="relative bg-transparent">
+                <div ref={inputContainerRef} className="rounded-lg [&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full bg-white text-gray-700 border border-gray-400" />
             </div>
         </div>
     )

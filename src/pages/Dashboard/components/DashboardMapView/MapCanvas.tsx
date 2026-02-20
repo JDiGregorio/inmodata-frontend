@@ -1,11 +1,10 @@
 import * as React from 'react'
 import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
-import { ExpandIcon, ListFilterIcon, Minimize2Icon, SquareSplitHorizontalIcon } from 'lucide-react'
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
-import { PlacesSearch } from './PlacesSearch'
 import { RightPanel } from './RightPanel'
 import { getRiskProfileColor } from './riskProfile'
+
 import type { SelectedPlace } from './types'
 
 import { usePropertiesWithinBoundsLazyQuery, PropertyPointFieldsFragment } from '@/generated-types'
@@ -13,11 +12,12 @@ import { usePropertiesWithinBoundsLazyQuery, PropertyPointFieldsFragment } from 
 type Property = PropertyPointFieldsFragment
 
 type MapCanvasProps = {
-    expanded: boolean
-    onToggleExpand: () => void
+    limit: number;
+    searchPlace: SelectedPlace | null;
+    selectedId: string | null;
+    setSelected: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const VIEWPORT_LIMIT = 500
 const VIEWPORT_FETCH_DEBOUNCE_MS = 250
 
 function ViewportListener({ onBoundsChange }: { onBoundsChange: (bounds: google.maps.LatLngBounds) => void }) {
@@ -46,9 +46,7 @@ function ViewportListener({ onBoundsChange }: { onBoundsChange: (bounds: google.
     return null
 }
 
-export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
-    const [selectedId, setSelectedId] = React.useState<string | null>(null)
-    const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
+export function MapCanvas({ limit, searchPlace, selectedId, setSelected }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -107,7 +105,7 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
                     eastLongitude: northEast.lng(),
                     southLatitude: southWest.lat(),
                     westLongitude: southWest.lng(),
-                    limit: VIEWPORT_LIMIT,
+                    limit: limit
                 },
             })
         },
@@ -136,81 +134,18 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
     }, [])
 
     const handleClosePanel = React.useCallback(() => {
-        setSelectedId(null)
+        setSelected(null)
     }, [])
-
-    const handleToggleExpand = React.useCallback(() => {
-        setSelectedId(null)
-        onToggleExpand()
-    }, [onToggleExpand])
 
     return (
         <div className="relative h-full w-full border-0">
-            <div className="pointer-events-none absolute left-4 right-4 top-4 z-20 space-y-3">
-                <div className="pointer-events-auto flex items-start justify-between gap-3">
-                    <div>
-                        <h2 className="text-3xl font-semibold tracking-tight text-gray-900">Mapa de inmuebles</h2>
-                        <p className="mt-1 text-sm text-gray-600">Explora los puntos en el mapa y revisa el detalle del inmueble seleccionado.</p>
-                    </div>
-
-                    <button
-                        type="button"
-                        className="inline-flex cursor-pointer items-center rounded-xl border border-gray-200 bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-white"
-                    >
-                        Exportar
-                    </button>
-                </div>
-
-                <div className="pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <div className="min-w-[260px] flex-1">
-                            <PlacesSearch
-                                onPlaceSelected={(place) => {
-                                    setSearchPlace(place)
-                                }}
-                            />
-                        </div>
-
-                        <button
-                            type="button"
-                            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            <ListFilterIcon className="size-4" />
-                            Filtros
-                        </button>
-
-                        <button
-                            type="button"
-                            className="inline-flex h-11 cursor-pointer items-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            Mostrar {VIEWPORT_LIMIT} puntos
-                        </button>
-
-                        <button
-                            type="button"
-                            className="inline-flex h-11 cursor-pointer items-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            Limpiar filtros
-                        </button>
-
-                        <button
-                            type="button"
-                            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                            onClick={handleToggleExpand}
-                        >
-                            {expanded ? <Minimize2Icon className="size-4" /> : <SquareSplitHorizontalIcon className="size-4" />}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <button
+            {/*<button
                 type="button"
                 onClick={handleToggleExpand}
                 className="absolute bottom-4 right-4 z-20 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white"
             >
                 {expanded ? <Minimize2Icon className="size-6" /> : <ExpandIcon className="size-6" />}
-            </button>
+            </button>*/}
 
             <Map
                 defaultCenter={DEFAULT_CENTER}
@@ -225,12 +160,12 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
             >
                 <ViewportListener onBoundsChange={handleBoundsChange} />
 
-                {points.map((p) => {
-                    const isSelected = selectedId === p.id
-                    const markerColor = getRiskProfileColor(p.latestValuation?.riskProfile)
+                {points.map((point) => {
+                    const isSelected = selectedId === point.id
+                    const markerColor = getRiskProfileColor(point.latestValuation?.riskProfile)
 
                     return (
-                        <AdvancedMarker key={p.id} position={{ lat: p.latitude, lng: p.longitude }} onClick={() => setSelectedId(p.id)}>
+                        <AdvancedMarker key={point.id} position={{ lat: point.latitude, lng: point.longitude }} onClick={() => setSelected(point.id)}>
                             <Pin
                                 scale={isSelected ? 1.25 : 0.85}
                                 background={isSelected ? '#D4AF37' : markerColor}
@@ -248,7 +183,9 @@ export function MapCanvas({ expanded, onToggleExpand }: MapCanvasProps) {
 
             {!hasLoadedOnce && loading && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/45">
-                    <div className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5">Cargando propiedades...</div>
+                    <div className="rounded-xl bg-white/95 px-4 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5">
+                        Cargando propiedades...
+                    </div>
                 </div>
             )}
 
