@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
+import { ShrinkIcon } from 'lucide-react'
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
 import { RightPanel } from './RightPanel'
@@ -13,9 +14,11 @@ type Property = PropertyPointFieldsFragment
 
 type MapCanvasProps = {
     limit: number;
+    expanded: boolean;
     searchPlace: SelectedPlace | null;
     selectedId: string | null;
     setSelected: React.Dispatch<React.SetStateAction<string | null>>;
+    handleToggleExpand: (value: boolean) => void;
 }
 
 const VIEWPORT_FETCH_DEBOUNCE_MS = 250
@@ -46,7 +49,46 @@ function ViewportListener({ onBoundsChange }: { onBoundsChange: (bounds: google.
     return null
 }
 
-export function MapCanvas({ limit, searchPlace, selectedId, setSelected }: MapCanvasProps) {
+function LimitChangeListener({ limit, requestForBounds }: { limit: number; requestForBounds: (bounds: google.maps.LatLngBounds) => void }) {
+    const map = useMap()
+
+    React.useEffect(() => {
+        if (!map) {
+            return
+        }
+
+        const bounds = map.getBounds()
+
+        if (!bounds) {
+            return
+        }
+
+        requestForBounds(bounds)
+    }, [limit, map, requestForBounds])
+
+    return null
+}
+
+function SelectedPointViewportAdjuster({ selectedPoint }: { selectedPoint: Property | null }) {
+    const map = useMap()
+
+    React.useEffect(() => {
+        if (!map || !selectedPoint) {
+            return
+        }
+
+        map.panTo({ lat: selectedPoint.latitude, lng: selectedPoint.longitude })
+
+        const mapWidth = map.getDiv().clientWidth
+        const horizontalOffset = Math.max(Math.round(mapWidth * 0.2), 180)
+
+        map.panBy(horizontalOffset, 0)
+    }, [map, selectedPoint])
+
+    return null
+}
+
+export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelected, handleToggleExpand }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -109,7 +151,7 @@ export function MapCanvas({ limit, searchPlace, selectedId, setSelected }: MapCa
                 },
             })
         },
-        [fetchWithinBounds],
+        [fetchWithinBounds, limit],
     )
 
     const handleBoundsChange = React.useCallback(
@@ -135,17 +177,15 @@ export function MapCanvas({ limit, searchPlace, selectedId, setSelected }: MapCa
 
     const handleClosePanel = React.useCallback(() => {
         setSelected(null)
-    }, [])
+    }, [setSelected])
 
     return (
         <div className="relative h-full w-full border-0">
-            {/*<button
-                type="button"
-                onClick={handleToggleExpand}
-                className="absolute bottom-4 right-4 z-20 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white"
-            >
-                {expanded ? <Minimize2Icon className="size-6" /> : <ExpandIcon className="size-6" />}
-            </button>*/}
+            {expanded && (
+                <button type="button" onClick={() => handleToggleExpand(false)} className="absolute bottom-36 left-2.5 z-20 inline-flex cursor-pointer items-center gap-2 bg-white/95 px-2.5 py-2.5 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white">
+                    <ShrinkIcon className="size-5" /> 
+                </button>
+            )}
 
             <Map
                 defaultCenter={DEFAULT_CENTER}
@@ -156,9 +196,12 @@ export function MapCanvas({ limit, searchPlace, selectedId, setSelected }: MapCa
                 style={{ width: '100%', height: '100%' }}
                 disableDefaultUI={true}
                 zoomControl={true}
+                zoomControlOptions={{ position: google.maps.ControlPosition.LEFT_BOTTOM }}
                 fullscreenControl={false}
             >
                 <ViewportListener onBoundsChange={handleBoundsChange} />
+                <LimitChangeListener limit={limit} requestForBounds={requestForBounds} />
+                <SelectedPointViewportAdjuster selectedPoint={selectedPoint} />
 
                 {points.map((point) => {
                     const isSelected = selectedId === point.id
