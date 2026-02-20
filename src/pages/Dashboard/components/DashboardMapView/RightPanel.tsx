@@ -1,239 +1,127 @@
-import {
-	PropertyPointFieldsFragment
-} from '@/generated-types'
+import * as React from 'react'
+
+import { PropertyPointFieldsFragment } from '@/generated-types'
 
 import { getRiskProfileLabel } from './riskProfile'
 
 type Property = PropertyPointFieldsFragment & {
-	position: { 
-		lat: number;
-		lng: number;
-	}
+    position: {
+        lat: number
+        lng: number
+    }
 }
 
 type RightPanelProps = {
-	point: Property | null;
-	onClose: () => void;
+    point: Property | null
+    onClose: () => void
 }
 
 const numberFormatter = new Intl.NumberFormat('es-HN', {
-	maximumFractionDigits: 2,
+    maximumFractionDigits: 2,
 })
 
 const dateFormatter = new Intl.DateTimeFormat('es-HN', {
-	dateStyle: 'medium',
-	timeStyle: 'short',
+    dateStyle: 'medium',
+    timeStyle: 'short',
 })
 
 function formatNumber(value?: number | null) {
-	if (value == null) {
-		return '-'
-	}
+    if (value == null) {
+        return '-'
+    }
 
-	return numberFormatter.format(value)
+    return numberFormatter.format(value)
 }
 
 function formatDate(value?: string | null) {
-	if (!value) {
-		return '-'
-	}
+    if (!value) {
+        return '-'
+    }
 
-	const parsedDate = new Date(value)
+    const parsedDate = new Date(value)
 
-	if (Number.isNaN(parsedDate.getTime())) {
-		return value
-	}
+    if (Number.isNaN(parsedDate.getTime())) {
+        return value
+    }
 
-	return dateFormatter.format(parsedDate)
+    return dateFormatter.format(parsedDate)
+}
+
+function Item({ label, value }: { label: string; value: string }) {
+    return (
+        <div>
+            <p className="text-xs text-gray-500">{label}</p>
+            <p className="text-sm font-semibold text-gray-900">{value}</p>
+        </div>
+    )
 }
 
 export function RightPanel({ point, onClose }: RightPanelProps) {
-	const valuation = point?.latestValuation
-	const sector = valuation?.sector?.toLowerCase() ?? null
-	const isFinancialSector = sector === 'financiero'
-	const isControlSector = sector === 'control'
+    const valuation = point?.latestValuation
+    const sector = valuation?.sector?.toLowerCase() ?? null
+    const isFinancialSector = sector === 'financiero'
+    const isControlSector = sector === 'control'
+    const [showDetails, setShowDetails] = React.useState<boolean>(false)
 
-	return (
-		<div className={['absolute right-4 top-20 z-10 w-[390px] max-w-[calc(100%-2rem)]', 'transition-all duration-200', point ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'].join(' ')}>
-			<div className="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5">
-				<div className="flex items-start justify-between gap-3 border-b border-gray-100 p-4">
-					<div className="space-y-2">
-						<div className="flex justify-between items-center">
-							<h3 className="text-md font-semibold text-gray-900">
-								{point?.name ?? 'Detalle'}
-							</h3>
+    React.useEffect(() => {
+        setShowDetails(false)
+    }, [point?.id])
 
-							<button onClick={onClose} className="cursor-pointer rounded-lg px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100">
-								Cerrar
-							</button>
-						</div>
+    return (
+        <div
+            className={[
+                'absolute bottom-4 right-4 top-[9.7rem] z-20 w-[420px] max-w-[calc(100%-2rem)]',
+                'transition-all duration-200',
+                point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0',
+            ].join(' ')}
+        >
+            <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95 p-4 shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
+                <div className="mb-4 flex items-center justify-between">
+                    <div className="inline-flex rounded-full bg-orange-500 px-3 py-1 text-sm font-semibold text-white">{getRiskProfileLabel(valuation?.riskProfile)}</div>
 
-						<p className="text-xs text-gray-500">
-							{point?.exactAddress ?? 'Sin dirección'}
-						</p>
-					</div>
-				</div>
+                    <button onClick={onClose} className="cursor-pointer rounded-lg px-2 py-1 text-sm text-gray-500 hover:bg-gray-100">
+                        Cerrar
+                    </button>
+                </div>
 
-				<div className="max-h-[52.5vh] space-y-2 overflow-y-auto p-4">
-					<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-						<p className="text-xs text-gray-600">
-							Clave Catastral:
-						</p>
+                <div className="space-y-1 border-b border-gray-200 pb-4">
+                    <h3 className="text-3xl font-semibold text-gray-900">{point?.name ?? 'Detalle'}</h3>
+                    <p className="text-lg text-gray-600">{point?.exactAddress ?? 'Sin dirección'}</p>
+                </div>
 
-						<p className="text-sm font-medium text-gray-900">
-							{point?.cadastralKey ?? '-'}
-						</p>
-					</div>
+                <div className="mt-4 grid grid-cols-2 gap-3 border-b border-gray-200 pb-4">
+                    <div className="rounded-xl border border-gray-200 p-3">
+                        <p className="text-sm text-gray-500">Perfil de riesgo</p>
+                        <p className="text-2xl font-semibold text-gray-900">{getRiskProfileLabel(valuation?.riskProfile)}</p>
+                    </div>
+                    <div className="rounded-xl border border-gray-200 p-3">
+                        <p className="text-sm text-gray-500">L/m² promedio</p>
+                        <p className="text-2xl font-semibold text-gray-900">{formatNumber(valuation?.averageSquareMeter)}</p>
+                    </div>
+                </div>
 
-					<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-						<p className="text-xs text-gray-600">
-							Cantidad:
-						</p>
+                <div className="mt-4 flex items-center justify-between border-b border-gray-200 pb-4">
+                    <p className="text-sm text-gray-500">Detalles del inmueble</p>
+                    <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-500">
+                        {showDetails ? 'Ocultar detalles' : 'Ver más detalles'}
+                    </button>
+                </div>
 
-						<p className="text-sm font-medium text-gray-900">
-							{formatNumber(point?.quantity)}
-						</p>
-					</div>
-
-					<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-						<p className="text-xs text-gray-600">
-							Coordenadas:
-						</p>
-
-						<p className="text-sm font-medium text-gray-900">
-							{point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'}
-						</p>
-					</div>
-
-					<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-						<p className="text-xs text-gray-600">
-							Sector Avalúo:
-						</p>
-
-						<p className="text-sm font-medium text-gray-900 capitalize">
-							{valuation?.sector ?? '-'}
-						</p>
-					</div>
-
-					{isFinancialSector && (
-						<>
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Valor Promedio:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.averageValue)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Área de Terreno:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.landArea)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Área de Mejoras:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.improvementArea)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Valor del Terreno:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.landValue)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Radio de Utilización:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.utilizationRatio)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									L/v&#178;:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.averageSquareYard)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									L/m&#178; Promedio
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.averageSquareMeter)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Perfil de Riesgo:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{getRiskProfileLabel(valuation?.riskProfile)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Valuado en:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatDate(valuation?.measuredAt)}
-								</p>
-							</div>
-						</>
-					)}
-
-					{isControlSector && (
-						<>
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									L/v&#178;:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{formatNumber(valuation?.averageSquareYard)}
-								</p>
-							</div>
-
-							<div className="px-4 py-2 flex justify-between items-center rounded bg-gray-50">
-								<p className="text-xs text-gray-600">
-									Perfil de riesgo:
-								</p>
-
-								<p className="text-sm font-medium text-gray-900">
-									{getRiskProfileLabel(valuation?.riskProfile)}
-								</p>
-							</div>
-						</>
-					)}
-				</div>
-			</div>
-		</div>
-	)
+                {showDetails && (
+                    <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 overflow-y-auto pr-2 text-sm">
+                        <Item label="Clave catastral" value={point?.cadastralKey ?? '-'} />
+                        <Item label="Coordenadas" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
+                        <Item label="Sector avalúo" value={valuation?.sector ?? '-'} />
+                        <Item label="Valor promedio" value={formatNumber(valuation?.averageValue)} />
+                        <Item label="Área de terreno" value={formatNumber(valuation?.landArea)} />
+                        <Item label="Valor del terreno" value={formatNumber(valuation?.landValue)} />
+                        {isFinancialSector && <Item label="Área de mejoras" value={formatNumber(valuation?.improvementArea)} />}
+                        {isFinancialSector && <Item label="L/v²" value={formatNumber(valuation?.averageSquareYard)} />}
+                        {(isFinancialSector || isControlSector) && <Item label="Radio de utilización" value={formatNumber(valuation?.utilizationRatio)} />}
+                        <Item label="Última actualización" value={formatDate(valuation?.measuredAt)} />
+                    </div>
+                )}
+            </div>
+        </div>
+    )
 }
