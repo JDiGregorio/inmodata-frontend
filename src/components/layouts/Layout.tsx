@@ -74,7 +74,7 @@ const MainLayout = (): React.ReactElement => {
             </Dialog>
 
             {/* Static sidebar for desktop */}
-            <aside className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col bg-gray-900">
+            <aside className="hidden lg:fixed lg:inset-y-0 lg:z-60 lg:flex lg:w-72 lg:flex-col bg-gray-900">
                 <div className="py-8 flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 px-6 border-white/10 bg-black/10">
                     <nav className="flex flex-1 flex-col">
                         <ul role="list" className="flex flex-1 flex-col gap-y-7">
