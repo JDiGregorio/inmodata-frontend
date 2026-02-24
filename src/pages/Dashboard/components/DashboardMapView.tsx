@@ -26,7 +26,7 @@ export default function DashboardMapView() {
 
     return (
         <div className="relative z-0 flex h-full min-h-0 flex-col gap-6 px-8 py-6">
-            <div className="pointer-events-none absolute left-8 right-8 top-6 z-0 shrink-0 space-y-3">
+            <div className="pointer-events-none absolute left-8 right-8 top-6 z-30 shrink-0 space-y-3">
                 <div className="pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
                     <div className="flex justify-between flex-wrap items-center gap-2">
                         <div>
