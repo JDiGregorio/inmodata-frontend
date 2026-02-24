@@ -108,7 +108,7 @@ export default function DashboardMapView() {
                 )}
             </div>
 
-            <Dialog open={expanded} onClose={setExpanded} className="relative z-50">
+            <Dialog open={expanded} onClose={setExpanded} className="relative z-60">
                 <DialogBackdrop className="fixed inset-0 bg-black/90" />
 
                 <div className="fixed inset-0 p-3 sm:p-6">
