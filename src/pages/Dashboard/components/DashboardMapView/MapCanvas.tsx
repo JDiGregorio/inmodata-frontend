@@ -1,15 +1,22 @@
 import * as React from 'react'
-import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
+import { AdvancedMarker, Map, useMap } from '@vis.gl/react-google-maps'
 import { ShrinkIcon } from 'lucide-react'
-import markerPrimary from '@/assets/marker9.png'
+
+import { PinContent } from './PinContent'
+import { RightPanel } from './RightPanel'
+
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
-import { RightPanel } from './RightPanel'
+
 import { getRiskProfileColor } from './riskProfile'
 
-import type { SelectedPlace } from './types'
+import markerPrimary from '@/assets/marker9.png'
 
-import { usePropertiesWithinBoundsLazyQuery, PropertyPointFieldsFragment } from '@/generated-types'
+import type { SelectedPlace } from './types'
+import {
+    usePropertiesWithinBoundsLazyQuery,
+    PropertyPointFieldsFragment
+} from '@/generated-types'
 
 type Property = PropertyPointFieldsFragment
 
@@ -236,10 +243,10 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                             {isSelected ? (
                                 <img src={markerPrimary} width={40} height={56} alt="Marcador seleccionado" />
                             ) : (
-                                <Pin
+                                <PinContent
                                     scale={0.85}
                                     background={markerColor}
-                                    borderColor="#374151"
+                                    borderColor={"#374151"}
                                     glyphColor="#ffffff"
                                 />
                             )}
