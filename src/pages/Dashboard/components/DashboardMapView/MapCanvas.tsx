@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps'
 import { ShrinkIcon } from 'lucide-react'
+import markerPrimary from '@/assets/marker9.png'
 
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MAP_ID } from './constants'
 import { RightPanel } from './RightPanel'
@@ -180,7 +181,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
     }, [setSelected])
 
     return (
-        <div className="relative h-full w-full border-0">
+        <div className="relative h-full w-full overflow-hidden rounded-2xl border-0">
             {expanded && (
                 <button type="button" onClick={() => handleToggleExpand(false)} className="absolute bottom-36 left-2.5 z-20 inline-flex cursor-pointer items-center gap-2 bg-white/95 px-2.5 py-2.5 text-sm font-medium text-gray-700 shadow-lg ring-1 ring-black/5 transition hover:bg-white">
                     <ShrinkIcon className="size-5" /> 
@@ -209,12 +210,16 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
 
                     return (
                         <AdvancedMarker key={point.id} position={{ lat: point.latitude, lng: point.longitude }} onClick={() => setSelected(point.id)}>
-                            <Pin
-                                scale={isSelected ? 1.25 : 0.85}
-                                background={isSelected ? '#D4AF37' : markerColor}
-                                borderColor={isSelected ? '#8B6B1F' : '#374151'}
-                                glyphColor="#ffffff"
-                            />
+                            {isSelected ? (
+                                <img src={markerPrimary} width={34} height={48} alt="Marcador seleccionado" />
+                            ) : (
+                                <Pin
+                                    scale={0.85}
+                                    background={markerColor}
+                                    borderColor="#374151"
+                                    glyphColor="#ffffff"
+                                />
+                            )}
                         </AdvancedMarker>
                     )
                 })}
