@@ -209,9 +209,14 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                     const markerColor = getRiskProfileColor(point.latestValuation?.riskProfile)
 
                     return (
-                        <AdvancedMarker key={point.id} position={{ lat: point.latitude, lng: point.longitude }} onClick={() => setSelected(point.id)}>
+                        <AdvancedMarker
+                            key={point.id}
+                            position={{ lat: point.latitude, lng: point.longitude }}
+                            zIndex={isSelected ? 200 : 100}
+                            onClick={() => setSelected(point.id)}
+                        >
                             {isSelected ? (
-                                <img src={markerPrimary} width={34} height={48} alt="Marcador seleccionado" />
+                                <img src={markerPrimary} width={40} height={56} alt="Marcador seleccionado" />
                             ) : (
                                 <Pin
                                     scale={0.85}
@@ -227,7 +232,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                 {searchPlace?.position && <AdvancedMarker position={searchPlace.position} />}
             </Map>
 
-            <RightPanel point={selectedPoint} onClose={handleClosePanel} />
+            <RightPanel point={selectedPoint} expanded={expanded} onClose={handleClosePanel} />
 
             {!hasLoadedOnce && loading && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/45">

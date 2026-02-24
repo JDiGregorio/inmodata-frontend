@@ -39,7 +39,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
     }
 
     return (
-        <Disclosure as="nav" className="fixed inset-x-0 top-0 lg:pl-72  bg-white shadow border-b border-gray-200">
+        <Disclosure as="nav" className="fixed inset-x-0 top-0 z-50 lg:pl-72 bg-white shadow border-b border-gray-200">
             {() => (
                 <>
                     <div className="mx-auto max-w-full px-2 sm:px-2 lg:px-8">
@@ -81,7 +81,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
                                         </span>
                                     </MenuButton>
 
-                                    <MenuItems transition className="absolute right-0 z-10 mt-4 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
+                                    <MenuItems transition className="absolute right-0 z-[60] mt-4 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
                                         <MenuItem>
                                             {({ close }) => (
                                                 <button

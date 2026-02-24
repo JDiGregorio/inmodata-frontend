@@ -19,6 +19,7 @@ type Property = PropertyPointFieldsFragment & {
 
 type RightPanelProps = {
     point: Property | null;
+    expanded?: boolean;
     onClose: () => void;
 }
 
@@ -55,7 +56,7 @@ function formatDate(value?: string | null) {
 
 
 
-export function RightPanel({ point, onClose }: RightPanelProps) {
+export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
     const valuation = point?.latestValuation
     const sector = valuation?.sector?.toLowerCase() ?? null
     const isFinancialSector = sector === 'financiero'
@@ -67,7 +68,12 @@ export function RightPanel({ point, onClose }: RightPanelProps) {
     }, [point?.id])
 
     return (
-        <div className={['absolute bottom-4 right-4 top-4 z-20 w-[370px] max-w-[calc(100%-2rem)]', 'transition-all duration-200', point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0'].join(' ')}>
+        <div className={[
+            'absolute right-4 z-20 w-[370px] max-w-[calc(100%-2rem)]',
+            expanded ? 'bottom-4 top-[94px]' : 'bottom-4 top-4',
+            'transition-all duration-200',
+            point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0'
+        ].join(' ')}>
             <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
                 <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
