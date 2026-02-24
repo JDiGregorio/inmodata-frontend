@@ -116,10 +116,44 @@ label[for]::after {
   font-weight: bold;
 }
 
+/* --- Places Autocomplete (New) clear button --- */
+gmp-place-autocomplete button.clear-button {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 6px !important;
+  background: transparent !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+gmp-place-autocomplete button.clear-button:hover {
+  background: #e5e7eb !important; /* bg-gray-200 */
+}
+
+/* reduce el svg para que no se vea gigante */
+gmp-place-autocomplete button.clear-button svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* opcional: cambia el color del ícono a gris */
+gmp-place-autocomplete button.clear-button svg path {
+  fill: #6b7280 !important; /* text-gray-500 */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

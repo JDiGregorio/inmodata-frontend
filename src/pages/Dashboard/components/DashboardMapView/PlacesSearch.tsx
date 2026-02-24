@@ -8,10 +8,38 @@ type PlacesSearchProps = {
     onPlaceSelected: (place: SelectedPlace) => void;
 }
 
-export function PlacesSearch({ containerClassName,onPlaceSelected }: PlacesSearchProps) {
+function parseLatLng(input: string): google.maps.LatLngLiteral | null {
+    const cleaned = input.trim().replace(/\s+/g, " ")
+    const match = cleaned.match(/^(-?\d+(?:\.\d+)?)\s*,?\s*(-?\d+(?:\.\d+)?)$/)
+
+    if (!match) {
+        return null
+    }
+
+    const lat = Number(match[1])
+    const lng = Number(match[2])
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null
+    }
+
+    if (lat < -90 || lat > 90) {
+        return null
+    }
+
+    if (lng < -180 || lng > 180) {
+        return null
+    }
+
+    return { lat, lng }
+}
+
+export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSearchProps) {
     const map = useMap()
-    const placesLib = useMapsLibrary('places')
+    const placesLib = useMapsLibrary("places")
     const inputContainerRef = React.useRef<HTMLDivElement | null>(null)
+
+    const autocompleteRef = React.useRef<google.maps.places.PlaceAutocompleteElement | null>(null)
 
     React.useEffect(() => {
         if (!placesLib || !map || !inputContainerRef.current || !google.maps.places.PlaceAutocompleteElement) {
@@ -19,17 +47,22 @@ export function PlacesSearch({ containerClassName,onPlaceSelected }: PlacesSearc
         }
 
         const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
-            requestedLanguage: 'es',
+            requestedLanguage: "es"
         })
 
-        placeAutocomplete.className = 'h-10 bg-white text-gray-700 block w-full rounded-lg [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 [&>input]:px-3 [&>input]:py-2 [&>input]:pl-10 [&>input]:text-sm [&>input]:outline-none [&>input]:focus:ring-none [&>input]:focus:ring-gray-300'
-        placeAutocomplete.setAttribute('aria-label', 'Buscar lugar')
+        autocompleteRef.current = placeAutocomplete
+
+        placeAutocomplete.className =
+            "h-10 bg-white text-gray-700 block w-full rounded-lg " +
+            "[&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 " +
+            "[&>input]:px-3 [&>input]:py-2 [&>input]:pl-10 [&>input]:text-sm " +
+            "[&>input]:outline-none [&>input]:focus:ring-none [&>input]:focus:ring-gray-300";
+
+        placeAutocomplete.setAttribute("aria-label", "Buscar lugar")
         inputContainerRef.current.replaceChildren(placeAutocomplete)
 
         const handlePlaceSelect = async (event: Event) => {
-            const selectedEvent = event as Event & {
-                placePrediction?: google.maps.places.PlacePrediction
-            }
+            const selectedEvent = event as Event & { placePrediction?: google.maps.places.PlacePrediction }
             const prediction = selectedEvent.placePrediction
 
             if (!prediction) {
@@ -37,7 +70,7 @@ export function PlacesSearch({ containerClassName,onPlaceSelected }: PlacesSearc
             }
 
             const place = prediction.toPlace()
-            await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] })
+            await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] })
 
             if (!place.location) {
                 return
@@ -48,25 +81,98 @@ export function PlacesSearch({ containerClassName,onPlaceSelected }: PlacesSearc
             onPlaceSelected({
                 position,
                 name: place.displayName ?? undefined,
-                address: place.formattedAddress ?? undefined,
+                address: place.formattedAddress ?? undefined
             })
 
             map.panTo(position)
             map.setZoom(16)
         }
 
-        placeAutocomplete.addEventListener('gmp-placeselect', handlePlaceSelect)
+        placeAutocomplete.addEventListener("gmp-placeselect", handlePlaceSelect)
+
+        const tryCoordsSearch = async (rawValue: string) => {
+            const coords = parseLatLng(rawValue)
+
+            if (!coords) {
+                return
+            }
+
+            const geocoder = new google.maps.Geocoder()
+            const result = await geocoder.geocode({ location: coords })
+
+            const best = result.results?.[0]
+
+            onPlaceSelected({
+                position: coords,
+                name: best?.address_components?.[0]?.long_name ?? "Coordenadas",
+                address: best?.formatted_address ?? `${coords.lat}, ${coords.lng}`
+            })
+
+            map.panTo(coords)
+            map.setZoom(16)
+        }
+
+        const attachKeyListener = () => {
+            const innerInput = placeAutocomplete.querySelector("input") as HTMLInputElement | null
+
+            if (!innerInput) {
+                return
+            }
+
+            const onKeyDown = (e: KeyboardEvent) => {
+                if (e.key !== "Enter") {
+                    return
+                }
+
+                void tryCoordsSearch(innerInput.value)
+            }
+
+            innerInput.addEventListener("keydown", onKeyDown)
+
+            return () => innerInput.removeEventListener("keydown", onKeyDown)
+        }
+
+        const detach = attachKeyListener()
 
         return () => {
-            placeAutocomplete.removeEventListener('gmp-placeselect', handlePlaceSelect)
+            placeAutocomplete.removeEventListener("gmp-placeselect", handlePlaceSelect)
+
+            if (detach) {
+                detach()
+            }
+
             placeAutocomplete.remove()
+            autocompleteRef.current = null
         }
     }, [placesLib, map, onPlaceSelected])
 
     return (
-        <div className={containerClassName ?? 'w-full'}>
+        <div className={containerClassName ?? "w-full"}>
             <div className="relative bg-transparent">
-                <div ref={inputContainerRef} className="rounded-lg [&>gmp-place-autocomplete]:block [&>gmp-place-autocomplete]:w-full bg-white text-gray-700 border border-gray-400" />
+                <div ref={inputContainerRef} 
+                    className="
+                        rounded-lg bg-white text-gray-700 border border-gray-400
+                        [&>gmp-place-autocomplete]:block
+                        [&>gmp-place-autocomplete]:w-full
+
+                        [&_gmp-place-autocomplete_button.clear-button]:!w-6
+                        [&_gmp-place-autocomplete_button.clear-button]:!h-6
+                        [&_gmp-place-autocomplete_button.clear-button]:![min-width:24px]
+                        [&_gmp-place-autocomplete_button.clear-button]:![min-height:24px]
+                        [&_gmp-place-autocomplete_button.clear-button]:!p-0
+                        [&_gmp-place-autocomplete_button.clear-button]:!m-0
+                        [&_gmp-place-autocomplete_button.clear-button]:!bg-transparent
+                        [&_gmp-place-autocomplete_button.clear-button]:rounded-md
+                        [&_gmp-place-autocomplete_button.clear-button]:[display:inline-flex]
+                        [&_gmp-place-autocomplete_button.clear-button]:[align-items:center]
+                        [&_gmp-place-autocomplete_button.clear-button]:[justify-content:center]
+                        [&_gmp-place-autocomplete_button.clear-button:hover]:!bg-gray-200
+
+                        [&_gmp-place-autocomplete_button.clear-button_svg]:!w-4
+                        [&_gmp-place-autocomplete_button.clear-button_svg]:!h-4
+                        [&_gmp-place-autocomplete_button.clear-button_svg_path]:![fill:#6b7280]
+                    "
+                />
             </div>
         </div>
     )
