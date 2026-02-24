@@ -61,6 +61,54 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
         placeAutocomplete.setAttribute("aria-label", "Buscar lugar")
         inputContainerRef.current.replaceChildren(placeAutocomplete)
 
+        const styleClearButton = () => {
+            const clearBtn = placeAutocomplete
+                .shadowRoot
+                ?.querySelector('button.clear-button') as HTMLButtonElement | null
+
+            if (!clearBtn) {
+                return
+            }
+
+            clearBtn.style.width = '24px'
+            clearBtn.style.height = '24px'
+            clearBtn.style.minWidth = '24px'
+            clearBtn.style.minHeight = '24px'
+            clearBtn.style.padding = '0px'
+            clearBtn.style.margin = '0px'
+            clearBtn.style.borderRadius = '6px'
+            clearBtn.style.background = 'transparent'
+            clearBtn.style.border = 'none'
+            clearBtn.style.display = 'inline-flex'
+            clearBtn.style.alignItems = 'center'
+            clearBtn.style.justifyContent = 'center'
+
+            const icon = clearBtn.querySelector('svg') as SVGElement | null
+
+            if (icon) {
+                icon.setAttribute('width', '16')
+                icon.setAttribute('height', '16')
+            }
+
+            const hoverIn = () => {
+                clearBtn.style.background = '#e5e7eb'
+            }
+
+            const hoverOut = () => {
+                clearBtn.style.background = 'transparent'
+            }
+
+            clearBtn.onmouseenter = hoverIn
+            clearBtn.onmouseleave = hoverOut
+        }
+
+        const observer = new MutationObserver(() => {
+            styleClearButton()
+        })
+
+        observer.observe(placeAutocomplete, { childList: true, subtree: true })
+        styleClearButton()
+
         const handlePlaceSelect = async (event: Event) => {
             const selectedEvent = event as Event & { placePrediction?: google.maps.places.PlacePrediction }
             const prediction = selectedEvent.placePrediction
@@ -70,7 +118,7 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
             }
 
             const place = prediction.toPlace()
-            await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] })
+            await place.fetchFields({ fields: ["displayName", "formattedAddress", "location", "viewport"] })
 
             if (!place.location) {
                 return
@@ -80,6 +128,7 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
 
             onPlaceSelected({
                 position,
+                viewport: place.viewport?.toJSON(),
                 name: place.displayName ?? undefined,
                 address: place.formattedAddress ?? undefined
             })
@@ -141,6 +190,8 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
                 detach()
             }
 
+            observer.disconnect()
+
             placeAutocomplete.remove()
             autocompleteRef.current = null
         }
@@ -151,9 +202,15 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
             <div className="relative bg-transparent">
                 <div ref={inputContainerRef} 
                     className="
-                        rounded-lg bg-white text-gray-700 border border-gray-400
+                        rounded-lg bg-white text-gray-700 border border-gray-400 overflow-visible
                         [&>gmp-place-autocomplete]:block
                         [&>gmp-place-autocomplete]:w-full
+                        [&>gmp-place-autocomplete]:overflow-visible
+                        [&_gmp-place-autocomplete]:overflow-visible
+
+                        [&_gmp-place-autocomplete_.suggestions-container]:z-[9999]
+                        [&_gmp-place-autocomplete_.suggestions-container]:shadow-xl
+                        [&_gmp-place-autocomplete_.suggestions-container]:rounded-b-lg
 
                         [&_gmp-place-autocomplete_button.clear-button]:!w-6
                         [&_gmp-place-autocomplete_button.clear-button]:!h-6
@@ -161,16 +218,20 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
                         [&_gmp-place-autocomplete_button.clear-button]:![min-height:24px]
                         [&_gmp-place-autocomplete_button.clear-button]:!p-0
                         [&_gmp-place-autocomplete_button.clear-button]:!m-0
-                        [&_gmp-place-autocomplete_button.clear-button]:!bg-transparent
+                        [&_gmp-place-autocomplete_button.clear-button]:!bg-gray-800
+                        [&_gmp-place-autocomplete_button.clear-button]:!text-white
+                        [&_gmp-place-autocomplete_button.clear-button]:!border
+                        [&_gmp-place-autocomplete_button.clear-button]:!border-white/25
                         [&_gmp-place-autocomplete_button.clear-button]:rounded-md
                         [&_gmp-place-autocomplete_button.clear-button]:[display:inline-flex]
                         [&_gmp-place-autocomplete_button.clear-button]:[align-items:center]
                         [&_gmp-place-autocomplete_button.clear-button]:[justify-content:center]
-                        [&_gmp-place-autocomplete_button.clear-button:hover]:!bg-gray-200
+                        [&_gmp-place-autocomplete_button.clear-button:hover]:!bg-gray-700
+                        [&_gmp-place-autocomplete_button.clear-button:hover]:!border-white/40
 
                         [&_gmp-place-autocomplete_button.clear-button_svg]:!w-4
                         [&_gmp-place-autocomplete_button.clear-button_svg]:!h-4
-                        [&_gmp-place-autocomplete_button.clear-button_svg_path]:![fill:#6b7280]
+                        [&_gmp-place-autocomplete_button.clear-button_svg_path]:![fill:#ffffff]
                     "
                 />
             </div>
