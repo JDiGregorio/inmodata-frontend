@@ -91,6 +91,7 @@ function SelectedPointViewportAdjuster({ selectedPoint }: { selectedPoint: Prope
 
 export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelected, handleToggleExpand }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
+    const [selectedSnapshot, setSelectedSnapshot] = React.useState<Property | null>(null)
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -123,8 +124,21 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
         setHasLoadedOnce(true)
     }, [data, mappedPoints])
 
-    const selectedPoint = React.useMemo(() => {
+    React.useEffect(() => {
+        if (!selectedId) {
+            setSelectedSnapshot(null)
+            return
+        }
+
         const point = points.find((p) => p.id === selectedId) ?? null
+
+        if (point) {
+            setSelectedSnapshot(point)
+        }
+    }, [points, selectedId])
+
+    const selectedPoint = React.useMemo(() => {
+        const point = points.find((p) => p.id === selectedId) ?? selectedSnapshot
 
         return point
             ? {
@@ -135,7 +149,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                   },
               }
             : null
-    }, [points, selectedId])
+    }, [points, selectedId, selectedSnapshot])
 
     const requestForBounds = React.useCallback(
         (bounds: google.maps.LatLngBounds) => {
@@ -213,7 +227,11 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                             key={point.id}
                             position={{ lat: point.latitude, lng: point.longitude }}
                             zIndex={isSelected ? 200 : 100}
-                            onClick={() => setSelected(point.id)}
+                            clickable
+                            onClick={() => {
+                                setSelected(point.id)
+                                setSelectedSnapshot(point)
+                            }}
                         >
                             {isSelected ? (
                                 <img src={markerPrimary} width={40} height={56} alt="Marcador seleccionado" />
