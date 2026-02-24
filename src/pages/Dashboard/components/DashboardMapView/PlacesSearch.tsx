@@ -77,8 +77,8 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
             clearBtn.style.padding = '0px'
             clearBtn.style.margin = '0px'
             clearBtn.style.borderRadius = '6px'
-            clearBtn.style.background = 'transparent'
-            clearBtn.style.border = 'none'
+            clearBtn.style.background = '#1f2937'
+            clearBtn.style.border = '1px solid rgba(255, 255, 255, 0.25)'
             clearBtn.style.display = 'inline-flex'
             clearBtn.style.alignItems = 'center'
             clearBtn.style.justifyContent = 'center'
@@ -88,14 +88,21 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
             if (icon) {
                 icon.setAttribute('width', '16')
                 icon.setAttribute('height', '16')
+
+                const paths = icon.querySelectorAll('path')
+                paths.forEach((path) => {
+                    path.setAttribute('fill', '#ffffff')
+                })
             }
 
             const hoverIn = () => {
-                clearBtn.style.background = '#e5e7eb'
+                clearBtn.style.background = '#111827'
+                clearBtn.style.borderColor = 'rgba(255, 255, 255, 0.4)'
             }
 
             const hoverOut = () => {
-                clearBtn.style.background = 'transparent'
+                clearBtn.style.background = '#1f2937'
+                clearBtn.style.borderColor = 'rgba(255, 255, 255, 0.25)'
             }
 
             clearBtn.onmouseenter = hoverIn
@@ -110,8 +117,12 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
         styleClearButton()
 
         const handlePlaceSelect = async (event: Event) => {
-            const selectedEvent = event as Event & { placePrediction?: google.maps.places.PlacePrediction }
-            const prediction = selectedEvent.placePrediction
+            const selectedEvent = event as Event & {
+                placePrediction?: google.maps.places.PlacePrediction;
+                detail?: { placePrediction?: google.maps.places.PlacePrediction };
+            }
+
+            const prediction = selectedEvent.placePrediction ?? selectedEvent.detail?.placePrediction
 
             if (!prediction) {
                 return
@@ -138,6 +149,7 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
         }
 
         placeAutocomplete.addEventListener("gmp-placeselect", handlePlaceSelect)
+        placeAutocomplete.addEventListener("gmp-select", handlePlaceSelect)
 
         const tryCoordsSearch = async (rawValue: string) => {
             const coords = parseLatLng(rawValue)
@@ -185,6 +197,7 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
 
         return () => {
             placeAutocomplete.removeEventListener("gmp-placeselect", handlePlaceSelect)
+            placeAutocomplete.removeEventListener("gmp-select", handlePlaceSelect)
 
             if (detach) {
                 detach()

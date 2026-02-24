@@ -116,70 +116,6 @@ function SearchPlaceViewportAdjuster({ searchPlace }: { searchPlace: SelectedPla
     return null
 }
 
-function SearchPlaceHighlight({ searchPlace }: { searchPlace: SelectedPlace | null }) {
-    const map = useMap()
-    const polygonRef = React.useRef<google.maps.Polygon | null>(null)
-    const circleRef = React.useRef<google.maps.Circle | null>(null)
-
-    React.useEffect(() => {
-        if (!map) {
-            return
-        }
-
-        polygonRef.current?.setMap(null)
-        polygonRef.current = null
-        circleRef.current?.setMap(null)
-        circleRef.current = null
-
-        if (!searchPlace?.position) {
-            return
-        }
-
-        if (searchPlace.viewport) {
-            const { north, south, east, west } = searchPlace.viewport
-
-            polygonRef.current = new google.maps.Polygon({
-                map,
-                paths: [
-                    { lat: north, lng: west },
-                    { lat: north, lng: east },
-                    { lat: south, lng: east },
-                    { lat: south, lng: west },
-                ],
-                strokeColor: '#ef4444',
-                strokeOpacity: 0.95,
-                strokeWeight: 2,
-                fillColor: '#ef4444',
-                fillOpacity: 0.12,
-                zIndex: 90,
-            })
-
-            return
-        }
-
-        circleRef.current = new google.maps.Circle({
-            map,
-            center: searchPlace.position,
-            radius: 180,
-            strokeColor: '#ef4444',
-            strokeOpacity: 0.95,
-            strokeWeight: 2,
-            fillColor: '#ef4444',
-            fillOpacity: 0.15,
-            zIndex: 90,
-        })
-    }, [map, searchPlace])
-
-    React.useEffect(() => {
-        return () => {
-            polygonRef.current?.setMap(null)
-            circleRef.current?.setMap(null)
-        }
-    }, [])
-
-    return null
-}
-
 export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelected, handleToggleExpand }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
     const [selectedSnapshot, setSelectedSnapshot] = React.useState<Property | null>(null)
@@ -309,7 +245,6 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                 <LimitChangeListener limit={limit} requestForBounds={requestForBounds} />
                 <SelectedPointViewportAdjuster selectedPoint={selectedPoint} />
                 <SearchPlaceViewportAdjuster searchPlace={searchPlace} />
-                <SearchPlaceHighlight searchPlace={searchPlace} />
 
                 {points.map((point) => {
                     const isSelected = selectedId === point.id
@@ -327,7 +262,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                             }}
                         >
                             {isSelected ? (
-                                <img src={markerPrimary} width={40} height={56} alt="Marcador seleccionado" />
+                                <img src={markerPrimary} width={30} height={46} alt="Marcador seleccionado" />
                             ) : (
                                 <PinContent
                                     scale={0.85}
@@ -339,8 +274,6 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                         </AdvancedMarker>
                     )
                 })}
-
-                {searchPlace?.position && <AdvancedMarker position={searchPlace.position} />}
             </Map>
 
             <RightPanel point={selectedPoint} expanded={expanded} onClose={handleClosePanel} />
