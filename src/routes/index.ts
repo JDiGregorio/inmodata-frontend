@@ -1,6 +1,6 @@
 import { lazy } from 'react'
 import {
-    HomeIcon,
+    MapIcon,
     MapPinHouseIcon,
     LandmarkIcon,
     UsersIcon,
@@ -30,7 +30,7 @@ const routes = (permissions: PermissionHelpers) => [
         component: Dashboard,
         label: 'Inicio',
         sidebar: {
-            icon: HomeIcon,
+            icon: MapIcon,
             name: 'Inicio'
         }
     },

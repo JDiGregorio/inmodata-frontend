@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { XIcon, EyeOffIcon, EyeIcon } from 'lucide-react'
+import { ExternalLinkIcon, XIcon, EyeOffIcon, EyeIcon } from 'lucide-react'
 
 import { Item } from './Item'
 
@@ -54,13 +54,8 @@ function formatDate(value?: string | null) {
     return dateFormatter.format(parsedDate)
 }
 
-
-
 export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
     const valuation = point?.latestValuation
-    const sector = valuation?.sector?.toLowerCase() ?? null
-    const isFinancialSector = sector === 'financiero'
-    const isControlSector = sector === 'control'
     const [showDetails, setShowDetails] = React.useState<boolean>(false)
 
     React.useEffect(() => {
@@ -77,9 +72,15 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
             <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
                 <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-md font-semibold text-gray-900">
-                            {point?.name ?? 'Detalle'}
-                        </h3>
+                        <a href={`/inmuebles/${point?.id}/editar#informacion-general`} target="_blank" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
+                            <span>
+                                {point?.name ?? 'Detalle'}
+                            </span>
+
+                            {point?.name && (
+                                <ExternalLinkIcon size={15} />
+                            )}
+                        </a>
 
                         <button onClick={onClose} className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
                             <XIcon aria-hidden="true" className="size-5 text-gray-500" />
@@ -109,18 +110,18 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                                 Perfil de Riesgo:
                             </p>
 
-                            <p className="text-md font-semibold text-gray-900">
+                            <p className="text-sm font-semibold text-gray-900">
                                 {getRiskProfileLabel(valuation?.riskProfile)}
                             </p>
                         </div>
 
                         <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
                             <p className="text-sm text-gray-600">
-                                L/m² Promedio:
+                                Precio de L/v&sup2;:
                             </p>
 
-                            <p className="text-md font-semibold text-gray-900">
-                                {formatNumber(valuation?.averageSquareMeter)}
+                            <p className="text-sm font-semibold text-gray-900">
+                                {formatNumber(valuation?.averageSquareYard)}
                             </p>
                         </div>
                     </div>
@@ -134,50 +135,44 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             {point?.exactAddress ?? 'Sin dirección'}
                         </p>
                     </div>
-                </div>
 
-                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-4">
-                    <div className={classNames(showDetails ? "pr-2" : "pr-4", "pl-4  flex items-center justify-between")}>
+                    <div className={classNames("flex items-center justify-between")}>
                         <p className="text-sm text-gray-500">
                             Más Detalles
                         </p>
 
-                        <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1 flex items-center cursor-pointer rounded-md border border-gray-200 bg-gray-100">
+                        <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1.5 flex items-center cursor-pointer rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
                             {showDetails ? (
-                                <EyeOffIcon className="size-4 text-gray-400" />
+                                <EyeOffIcon className="size-4 text-gray-600" />
                             ) : (
-                                <EyeIcon className="size-4 text-gray-400" />
+                                <EyeIcon className="size-4 text-gray-600" />
                             )}
                         </button>
                     </div>
+                </div>
 
+                <div className={classNames(showDetails ? "pb-4" : "", "min-h-0 flex-1 space-y-3 overflow-y-auto")}>
                     {showDetails && (
                         <div className="px-4 grid grid-cols-2 gap-x-6 gap-y-3 pr-2 text-sm">
-                            <Item label="Clave catastral" value={point?.cadastralKey ?? '-'} />
+                            <Item label="Clave catastral:" value={point?.cadastralKey ?? '-'} />
 
-                            <Item label="Coordenadas" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
+                            <Item label="Coordenadas:" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
 
-                            <Item label="Sector avalúo" value={valuation?.sector ?? '-'} />
+                            <Item label="Sector Avalúo" value={valuation?.sector ?? '-'} />
 
-                            <Item label="Valor promedio" value={formatNumber(valuation?.averageValue)} />
+                            <Item label="Valor Total del Inmueble L:" value={formatNumber(valuation?.averageValue)} />
 
-                            <Item label="Área de terreno" value={formatNumber(valuation?.landArea)} />
+                            <Item label="Área de Terreno v&sup2;:" value={formatNumber(valuation?.landArea)} />
 
-                            <Item label="Valor del terreno" value={formatNumber(valuation?.landValue)} />
+                            <Item label="Valor del Terreno L:" value={formatNumber(valuation?.landValue)} />
 
-                            {isFinancialSector && (
-                                <Item label="Área de mejoras" value={formatNumber(valuation?.improvementArea)} />
-                            )}
+                            <Item label="Área de Mejoras m&sup2;:" value={formatNumber(valuation?.improvementArea)} />
 
-                            {isFinancialSector && (
-                                <Item label="L/v²" value={formatNumber(valuation?.averageSquareYard)} />
-                            )}
+                            <Item label="Valor Promedio de Mejoras L/m&sup2;:" value={formatNumber(valuation?.averageSquareMeter)} />
 
-                            {(isFinancialSector || isControlSector) && (
-                                <Item label="Radio de utilización" value={formatNumber(valuation?.utilizationRatio)} />
-                            )}
+                            <Item label="Ratio de Utilización:" value={formatNumber(valuation?.utilizationRatio)} />
 
-                            <Item label="Última actualización" value={formatDate(valuation?.measuredAt)} />
+                            <Item label="Última Actualización:" value={formatDate(valuation?.measuredAt)} />
                         </div>
                     )}
                 </div>

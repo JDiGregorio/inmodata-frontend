@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
-
 import type { SelectedPlace } from './types'
+import { SearchIcon } from 'lucide-react'
 
 type PlacesSearchProps = {
     containerClassName?: string;
@@ -37,93 +37,105 @@ function parseLatLng(input: string): google.maps.LatLngLiteral | null {
 export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSearchProps) {
     const map = useMap()
     const placesLib = useMapsLibrary("places")
-    const inputContainerRef = React.useRef<HTMLDivElement | null>(null)
 
-    const autocompleteRef = React.useRef<google.maps.places.PlaceAutocompleteElement | null>(null)
+    const [value, setValue] = React.useState("")
+    const [open, setOpen] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
+    const [items, setItems] = React.useState<google.maps.places.AutocompleteSuggestion[]>([])
+
+    const inputRef = React.useRef<HTMLInputElement | null>(null)
+    const rootRef = React.useRef<HTMLDivElement | null>(null)
+
+    const skipFetchRef = React.useRef(false)
+
+    const mapRef = React.useRef<google.maps.Map | null>(null)
 
     React.useEffect(() => {
-        if (!placesLib || !map || !inputContainerRef.current || !google.maps.places.PlaceAutocompleteElement) {
+        mapRef.current = map ?? null
+    }, [map])
+
+    const fetchSuggestions = React.useCallback(async (q: string) => {
+        if (!map || !placesLib) {
             return
         }
 
-        const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
-            requestedLanguage: "es"
-        })
+        if (skipFetchRef.current) {
+            return
+        }
 
-        autocompleteRef.current = placeAutocomplete
+        if (!q.trim()) {
+            setItems([])
+            setOpen(false)
 
-        placeAutocomplete.className =
-            "h-10 bg-white text-gray-700 block w-full rounded-lg " +
-            "[&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-200 " +
-            "[&>input]:px-3 [&>input]:py-2 [&>input]:pl-10 [&>input]:text-sm " +
-            "[&>input]:outline-none [&>input]:focus:ring-none [&>input]:focus:ring-gray-300";
+            return
+        }
 
-        placeAutocomplete.setAttribute("aria-label", "Buscar lugar")
-        inputContainerRef.current.replaceChildren(placeAutocomplete)
+        if (parseLatLng(q)) {
+            setItems([])
+            setOpen(false)
 
-        const styleClearButton = () => {
-            const clearBtn = placeAutocomplete
-                .shadowRoot
-                ?.querySelector('button.clear-button') as HTMLButtonElement | null
+            return
+        }
 
-            if (!clearBtn) {
+        setLoading(true)
+
+        try {
+            const bounds = map.getBounds()
+
+            const { AutocompleteSuggestion } = google.maps.places as any
+
+            const res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+                input: q,
+                includedRegionCodes: ["HN"],
+                locationBias: bounds ?? undefined,
+                language: "es"
+            })
+
+            const suggestions = res?.suggestions ?? []
+
+            setItems(suggestions)
+            setOpen(suggestions.length > 0)
+        } catch (e) {
+            console.error(e)
+            setItems([])
+            setOpen(false)
+        } finally {
+            setLoading(false)
+        }
+    }, [map, placesLib])
+
+    React.useEffect(() => {
+        const t = window.setTimeout(() => void fetchSuggestions(value), 250)
+
+        return () => window.clearTimeout(t)
+    }, [value, fetchSuggestions])
+
+    React.useEffect(() => {
+        const onDocMouseDown = (e: MouseEvent) => {
+            const root = rootRef.current
+
+            if (!root) {
                 return
             }
 
-            clearBtn.style.width = '24px'
-            clearBtn.style.height = '24px'
-            clearBtn.style.minWidth = '24px'
-            clearBtn.style.minHeight = '24px'
-            clearBtn.style.padding = '0px'
-            clearBtn.style.margin = '0px'
-            clearBtn.style.borderRadius = '6px'
-            clearBtn.style.background = '#1f2937'
-            clearBtn.style.border = '1px solid rgba(255, 255, 255, 0.25)'
-            clearBtn.style.display = 'inline-flex'
-            clearBtn.style.alignItems = 'center'
-            clearBtn.style.justifyContent = 'center'
-
-            const icon = clearBtn.querySelector('svg') as SVGElement | null
-
-            if (icon) {
-                icon.setAttribute('width', '16')
-                icon.setAttribute('height', '16')
-
-                const paths = icon.querySelectorAll('path')
-                paths.forEach((path) => {
-                    path.setAttribute('fill', '#ffffff')
-                })
+            if (!root.contains(e.target as Node)) {
+                setOpen(false)
             }
-
-            const hoverIn = () => {
-                clearBtn.style.background = '#111827'
-                clearBtn.style.borderColor = 'rgba(255, 255, 255, 0.4)'
-            }
-
-            const hoverOut = () => {
-                clearBtn.style.background = '#1f2937'
-                clearBtn.style.borderColor = 'rgba(255, 255, 255, 0.25)'
-            }
-
-            clearBtn.onmouseenter = hoverIn
-            clearBtn.onmouseleave = hoverOut
         }
 
-        const observer = new MutationObserver(() => {
-            styleClearButton()
-        })
+        document.addEventListener("mousedown", onDocMouseDown)
 
-        observer.observe(placeAutocomplete, { childList: true, subtree: true })
-        styleClearButton()
+        return () => document.removeEventListener("mousedown", onDocMouseDown)
+    }, [])
 
-        const handlePlaceSelect = async (event: Event) => {
-            const selectedEvent = event as Event & {
-                placePrediction?: google.maps.places.PlacePrediction;
-                detail?: { placePrediction?: google.maps.places.PlacePrediction };
-            }
+    const handleSelectSuggestion = async (s: google.maps.places.AutocompleteSuggestion) => {
+        setOpen(false)
 
-            const prediction = selectedEvent.placePrediction ?? selectedEvent.detail?.placePrediction
+        skipFetchRef.current = true
 
+        try {
+            const prediction = (s as any).placePrediction as google.maps.places.PlacePrediction | undefined
+            
             if (!prediction) {
                 return
             }
@@ -144,23 +156,41 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
                 address: place.formattedAddress ?? undefined
             })
 
-            map.panTo(position)
-            map.setZoom(16)
+            setValue(place.displayName ?? place.formattedAddress ?? "")
+
+            const m = mapRef.current
+
+            if (m) {
+                if (place.viewport) {
+                    m.fitBounds(place.viewport)
+                } else {
+                    m.panTo(position)
+                    m.setZoom(16)
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            window.setTimeout(() => {
+                skipFetchRef.current = false
+            }, 0)
+        }
+    }
+
+    const tryCoordsSearch = async (rawValue: string) => {
+        const coords = parseLatLng(rawValue)
+        const m = mapRef.current
+
+        if (!coords || !m) {
+            return
         }
 
-        placeAutocomplete.addEventListener("gmp-placeselect", handlePlaceSelect)
-        placeAutocomplete.addEventListener("gmp-select", handlePlaceSelect)
+        setOpen(false)
+        skipFetchRef.current = true
 
-        const tryCoordsSearch = async (rawValue: string) => {
-            const coords = parseLatLng(rawValue)
-
-            if (!coords) {
-                return
-            }
-
+        try {
             const geocoder = new google.maps.Geocoder()
             const result = await geocoder.geocode({ location: coords })
-
             const best = result.results?.[0]
 
             onPlaceSelected({
@@ -169,84 +199,107 @@ export function PlacesSearch({ containerClassName, onPlaceSelected }: PlacesSear
                 address: best?.formatted_address ?? `${coords.lat}, ${coords.lng}`
             })
 
-            map.panTo(coords)
-            map.setZoom(16)
+            m.panTo(coords)
+            m.setZoom(16)
+        } finally {
+            window.setTimeout(() => {
+                skipFetchRef.current = false
+            }, 0)
         }
-
-        const attachKeyListener = () => {
-            const innerInput = placeAutocomplete.querySelector("input") as HTMLInputElement | null
-
-            if (!innerInput) {
-                return
-            }
-
-            const onKeyDown = (e: KeyboardEvent) => {
-                if (e.key !== "Enter") {
-                    return
-                }
-
-                void tryCoordsSearch(innerInput.value)
-            }
-
-            innerInput.addEventListener("keydown", onKeyDown)
-
-            return () => innerInput.removeEventListener("keydown", onKeyDown)
-        }
-
-        const detach = attachKeyListener()
-
-        return () => {
-            placeAutocomplete.removeEventListener("gmp-placeselect", handlePlaceSelect)
-            placeAutocomplete.removeEventListener("gmp-select", handlePlaceSelect)
-
-            if (detach) {
-                detach()
-            }
-
-            observer.disconnect()
-
-            placeAutocomplete.remove()
-            autocompleteRef.current = null
-        }
-    }, [placesLib, map, onPlaceSelected])
+    }
 
     return (
-        <div className={containerClassName ?? "w-full"}>
-            <div className="relative bg-transparent">
-                <div ref={inputContainerRef} 
-                    className="
-                        rounded-lg bg-white text-gray-700 border border-gray-400 overflow-visible
-                        [&>gmp-place-autocomplete]:block
-                        [&>gmp-place-autocomplete]:w-full
-                        [&>gmp-place-autocomplete]:overflow-visible
-                        [&_gmp-place-autocomplete]:overflow-visible
+        <div ref={rootRef} className={containerClassName ?? "w-full"}>
+            <div className="relative">
+                <input
+                    ref={inputRef}
+                    value={value}
+                    onChange={(e) => {
+                        setValue(e.target.value)
+                        skipFetchRef.current = false
+                    }}
+                    onFocus={() => {
+                        if (items.length > 0) {
+                            setOpen(true)
+                        }
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            void tryCoordsSearch(value)
+                        }
 
-                        [&_gmp-place-autocomplete_.suggestions-container]:z-[9999]
-                        [&_gmp-place-autocomplete_.suggestions-container]:shadow-xl
-                        [&_gmp-place-autocomplete_.suggestions-container]:rounded-b-lg
-
-                        [&_gmp-place-autocomplete_button.clear-button]:!w-6
-                        [&_gmp-place-autocomplete_button.clear-button]:!h-6
-                        [&_gmp-place-autocomplete_button.clear-button]:![min-width:24px]
-                        [&_gmp-place-autocomplete_button.clear-button]:![min-height:24px]
-                        [&_gmp-place-autocomplete_button.clear-button]:!p-0
-                        [&_gmp-place-autocomplete_button.clear-button]:!m-0
-                        [&_gmp-place-autocomplete_button.clear-button]:!bg-gray-800
-                        [&_gmp-place-autocomplete_button.clear-button]:!text-white
-                        [&_gmp-place-autocomplete_button.clear-button]:!border
-                        [&_gmp-place-autocomplete_button.clear-button]:!border-white/25
-                        [&_gmp-place-autocomplete_button.clear-button]:rounded-md
-                        [&_gmp-place-autocomplete_button.clear-button]:[display:inline-flex]
-                        [&_gmp-place-autocomplete_button.clear-button]:[align-items:center]
-                        [&_gmp-place-autocomplete_button.clear-button]:[justify-content:center]
-                        [&_gmp-place-autocomplete_button.clear-button:hover]:!bg-gray-700
-                        [&_gmp-place-autocomplete_button.clear-button:hover]:!border-white/40
-
-                        [&_gmp-place-autocomplete_button.clear-button_svg]:!w-4
-                        [&_gmp-place-autocomplete_button.clear-button_svg]:!h-4
-                        [&_gmp-place-autocomplete_button.clear-button_svg_path]:![fill:#ffffff]
-                    "
+                        if (e.key === "Escape") {
+                            setOpen(false)
+                        }
+                    }}
+                    placeholder="Buscar dirección (o coordenadas: 15.77, -86.79)"
+                    className="h-10 w-full rounded-lg border border-gray-200 bg-white text-gray-700 px-3 py-2 pl-10 pr-10 text-sm outline-none focus:ring-2 focus:ring-gray-300"
                 />
+
+                <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <SearchIcon size={16} />
+                </div>
+
+                <button
+                    type="button"
+                    aria-label="Borrar"
+                    onClick={() => {
+                        setValue("")
+                        setItems([])
+                        setOpen(false)
+                        skipFetchRef.current = false
+                        inputRef.current?.focus()
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-6 w-6 items-center justify-center rounded-md bg-transparent transition-colors hover:bg-gray-200 cursor-pointer"
+                    style={{ visibility: value ? "visible" : "hidden" }}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M6 6l8 8M14 6l-8 8" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                </button>
+
+                {open && (
+                    <div className="absolute left-0 right-0 mt-1 z-[9999] rounded-lg border border-gray-200 bg-white shadow-xl overflow-hidden">
+                        {loading && (
+                            <div className="px-3 py-2 text-xs text-gray-500">
+                                Buscando…
+                            </div>
+                        )}
+
+                        {!loading && items.length === 0 && (
+                            <div className="px-3 py-2 text-xs text-gray-500">
+                                Sin resultados
+                            </div>
+                        )}
+
+                        {!loading && items.slice(0, 8).map((s, idx) => {
+                            const mainText = (s as any).placePrediction?.mainText?.text ?? (s as any).placePrediction?.text?.text ?? "Resultado"
+                            const secondary = (s as any).placePrediction?.secondaryText?.text ?? ""
+
+                            return (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        void handleSelectSuggestion(s);
+                                    }}
+                                    className="w-full text-left px-3 py-2 hover:bg-gray-100"
+                                >
+                                    <div className="text-sm text-gray-900">
+                                        {mainText}
+                                    </div>
+
+                                    {secondary ? (
+                                        <div className="text-xs text-gray-500">
+                                            {secondary}
+                                        </div>
+                                    ) : (null)}
+                                </button>
+                            )
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     )
