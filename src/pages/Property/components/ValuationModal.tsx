@@ -236,7 +236,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
     const result = valuation.id === null ? resultCreate : resultUpdate
 
     return (
-        <Dialog open={open} onClose={(value) => handleClose(value)} className="relative z-60">
+        <Dialog open={open} onClose={(value) => handleClose(value)} className="relative z-50">
             <DialogBackdrop className="fixed inset-0 bg-black/50" />
 
             <div className="fixed inset-0 flex items-center justify-center p-4">
