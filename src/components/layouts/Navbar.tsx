@@ -39,7 +39,7 @@ export const Navbar = ({ permissions, setSidebarOpen }: NavbarProps): React.Reac
     }
 
     return (
-        <Disclosure as="nav" className="fixed inset-x-0 top-0 z-50 lg:pl-72 bg-white shadow border-b border-gray-200">
+        <Disclosure as="nav" className="fixed inset-x-0 top-0 z-40 lg:pl-72 bg-white shadow border-b border-gray-200">
             {() => (
                 <>
                     <div className="mx-auto max-w-full px-2 sm:px-2 lg:px-8">
