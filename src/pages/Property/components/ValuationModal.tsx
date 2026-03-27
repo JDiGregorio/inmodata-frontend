@@ -303,7 +303,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                     type="text"
                                                     id="owner"
                                                     name="owner"
-                                                    value={valuation.owner || ''}
+                                                    value={valuation.owner ?? ''}
                                                     placeholder="Propietario"
                                                     onChange={({ target }) => handleUpdate({ owner: target.value })}
                                                     autoComplete="off"
@@ -320,7 +320,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                     type="text"
                                                     id="applicant"
                                                     name="applicant"
-                                                    value={valuation.applicant || ''}
+                                                    value={valuation.applicant ?? ''}
                                                     placeholder="Solicitante"
                                                     onChange={({ target }) => handleUpdate({ applicant: target.value })}
                                                     autoComplete="off"
@@ -346,7 +346,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         delimiter: '-',
                                                         blocks: [4, 4],
                                                     }}
-                                                    value={valuation.phone || ''}
+                                                    value={valuation.phone ?? ''}
                                                     onChange={({ target }) => handleUpdate({ phone: target.value })}
                                                     autoComplete="off"
                                                 />
@@ -391,7 +391,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         numeralDecimalMark: ".",
                                                         delimiter: ","
                                                     }}
-                                                    value={valuation.averageValue || ''}
+                                                    value={valuation.averageValue ?? ''}
                                                     onChange={(e) => {
                                                         const value = parseFloat(e.target.rawValue || "0")
                                                         handleUpdate({ averageValue: value })
@@ -420,9 +420,9 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         noImmediatePrefix: false,
                                                         rawValueTrimPrefix: false
                                                     }}
-                                                    value={valuation.landArea || ''}
+                                                    value={valuation.landArea ?? ''}
                                                     onChange={(e) => {
-                                                        const value = parseInt(e.target.rawValue || "0")
+                                                        const value = parseFloat(e.target.rawValue || "0")
                                                         handleUpdate({ landArea: value })
                                                     }}
                                                 />
@@ -447,9 +447,9 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         numeralThousandsGroupStyle: 'thousand',
                                                         numeralDecimalScale: 2
                                                     }}
-                                                    value={valuation.improvementArea || ''}
+                                                    value={valuation.improvementArea ?? ''}
                                                     onChange={(e) => {
-                                                        const value = parseInt(e.target.rawValue || "0", 10)
+                                                        const value = parseFloat(e.target.rawValue || "0")
                                                         handleUpdate({ improvementArea: value })
                                                     }}
                                                 />
@@ -476,7 +476,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         numeralDecimalMark: ".",
                                                         delimiter: ","
                                                     }}
-                                                    value={valuation.landValue || ''}
+                                                    value={valuation.landValue ?? ''}
                                                     onChange={(e) => {
                                                         const value = parseFloat(e.target.rawValue || "0")
                                                         handleUpdate({ landValue: value })
@@ -506,7 +506,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                         numeralDecimalMark: ".",
                                                         delimiter: ","
                                                     }}
-                                                    value={valuation.utilizationRatio || ''}
+                                                    value={valuation.utilizationRatio ?? ''}
                                                 />
                                             </div>
                                         </>
@@ -534,7 +534,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                 numeralDecimalMark: ".",
                                                 delimiter: ","
                                             }}
-                                            value={valuation.averageSquareYard || ''}
+                                            value={valuation.averageSquareYard ?? ''}
                                             onChange={(e) => {
                                                 const value = parseFloat(e.target.rawValue || "0")
                                                 handleUpdate({ averageSquareYard: value })
@@ -565,7 +565,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                                     numeralDecimalMark: ".",
                                                     delimiter: ","
                                                 }}
-                                                value={valuation.averageSquareMeter || ''}
+                                                value={valuation.averageSquareMeter ?? ''}
                                             />
                                         </div>
                                     )}
