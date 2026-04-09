@@ -349,11 +349,11 @@ export type QueryUsersArgs = {
 };
 
 export enum RiskAggregates {
-  High = 'High',
-  Low = 'Low',
-  Medium = 'Medium',
-  VeryHigh = 'VeryHigh',
-  VeryLow = 'VeryLow'
+  Excellent = 'Excellent',
+  Fair = 'Fair',
+  Good = 'Good',
+  HighRisk = 'HighRisk',
+  VeryGood = 'VeryGood'
 }
 
 export type Role = {

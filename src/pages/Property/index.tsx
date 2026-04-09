@@ -32,28 +32,28 @@ export type AggregateOption = {
 export const risks: AggregateOption[] = [
     {
         id: 1,
-        label: 'Muy Alto',
-        value: RiskAggregates.VeryHigh
+        label: 'R1 - Excelente',
+        value: RiskAggregates.Excellent
     },
     {
         id: 2,
-        label: 'Alto',
-        value: RiskAggregates.High
+        label: 'R2 - Muy Bueno',
+        value: RiskAggregates.VeryGood
     },
     {
         id: 3,
-        label: 'Medio',
-        value: RiskAggregates.Medium
+        label: 'R3 - Bueno',
+        value: RiskAggregates.Good
     },
     {
         id: 4,
-        label: 'Bajo',
-        value: RiskAggregates.Low
+        label: 'R4 - Regular',
+        value: RiskAggregates.Fair
     },
     {
         id: 5,
-        label: 'Muy Bajo',
-        value: RiskAggregates.VeryLow
+        label: 'R5 - Riesgo Alto',
+        value: RiskAggregates.HighRisk
     }
 ]
 

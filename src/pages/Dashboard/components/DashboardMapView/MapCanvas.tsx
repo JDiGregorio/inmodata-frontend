@@ -30,6 +30,9 @@ type MapCanvasProps = {
 }
 
 const VIEWPORT_FETCH_DEBOUNCE_MS = 250
+const DEFAULT_PIN_SCALE = 0.85
+const SELECTED_MARKER_WIDTH = 30
+const SELECTED_MARKER_HEIGHT = 46
 
 function ViewportListener({ onBoundsChange }: { onBoundsChange: (bounds: google.maps.LatLngBounds) => void }) {
     const map = useMap()
@@ -262,10 +265,15 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                             }}
                         >
                             {isSelected ? (
-                                <img src={markerPrimary} width={30} height={46} alt="Marcador seleccionado" />
+                                <img
+                                    src={markerPrimary}
+                                    width={SELECTED_MARKER_WIDTH}
+                                    height={SELECTED_MARKER_HEIGHT}
+                                    alt="Marcador seleccionado"
+                                />
                             ) : (
                                 <PinContent
-                                    scale={0.85}
+                                    scale={DEFAULT_PIN_SCALE}
                                     background={markerColor}
                                     borderColor={"#374151"}
                                     glyphColor="#ffffff"

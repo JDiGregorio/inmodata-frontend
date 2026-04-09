@@ -28,8 +28,9 @@ const numberFormatter = new Intl.NumberFormat('es-HN', {
 })
 
 const dateFormatter = new Intl.DateTimeFormat('es-HN', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
 })
 
 function formatNumber(value?: number | null) {
@@ -45,13 +46,22 @@ function formatDate(value?: string | null) {
         return '-'
     }
 
-    const parsedDate = new Date(value)
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00`) : new Date(value)
 
     if (Number.isNaN(parsedDate.getTime())) {
         return value
     }
 
-    return dateFormatter.format(parsedDate)
+    const parts = dateFormatter.formatToParts(parsedDate)
+    const day = parts.find((part) => part.type === 'day')?.value
+    const month = parts.find((part) => part.type === 'month')?.value
+    const year = parts.find((part) => part.type === 'year')?.value
+
+    if (!day || !month || !year) {
+        return dateFormatter.format(parsedDate)
+    }
+
+    return `${day} de ${month.charAt(0).toUpperCase()}${month.slice(1)} de ${year}`
 }
 
 export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
@@ -158,7 +168,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
 
                             <Item label="Coordenadas:" value={point ? `${point.position.lat.toFixed(6)}, ${point.position.lng.toFixed(6)}` : '-'} />
 
-                            <Item label="Sector Avalúo" value={valuation?.sector ?? '-'} />
+                            <Item label="Sector Avalúo" value={valuation?.sector ?? '-'} capitalize={true} />
 
                             <Item label="Valor Total del Inmueble L:" value={formatNumber(valuation?.averageValue)} />
 
