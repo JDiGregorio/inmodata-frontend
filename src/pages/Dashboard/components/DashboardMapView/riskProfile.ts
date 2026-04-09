@@ -1,11 +1,11 @@
 import { RiskAggregates } from '@/generated-types'
 
 export const RISK_PROFILE_META: Record<RiskAggregates, { short: string; label: string; color: string }> = {
-	[RiskAggregates.Excellent]: { short: 'R1', label: 'Muy Bajo', color: '#00B050' },
-	[RiskAggregates.VeryGood]: { short: 'R2', label: 'Bajo', color: '#95D050' },
-	[RiskAggregates.Good]: { short: 'R3', label: 'Medio', color: '#FFFF00' },
-	[RiskAggregates.Fair]: { short: 'R4', label: 'Alto', color: '#FFC000' },
-	[RiskAggregates.HighRisk]: { short: 'R5', label: 'Muy Alto', color: '#FF0000' },
+	[RiskAggregates.Excellent]: { short: 'R1', label: 'Excelente', color: '#00B050' },
+	[RiskAggregates.VeryGood]: { short: 'R2', label: 'Muy Bueno', color: '#95D050' },
+	[RiskAggregates.Good]: { short: 'R3', label: 'Bueno', color: '#FFFF00' },
+	[RiskAggregates.Fair]: { short: 'R4', label: 'Regular', color: '#FFC000' },
+	[RiskAggregates.HighRisk]: { short: 'R5', label: 'Riesgo Alto', color: '#FF0000' },
 }
 
 export function getRiskProfileShort(riskProfile?: RiskAggregates | null) {
