@@ -47,12 +47,10 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
     const permissions = usePermissions()
 
     const handleUpdateValuation = (mutation: Partial<Valuation>, view?: string): void => {
-        const newData = {
-            ...valuation,
+        setValuation((prevValuation) => ({
+            ...prevValuation,
             ...mutation
-        }
-
-        setValuation(newData)
+        }))
 
         if (view === "edit") {
             setModalOpen(true)
