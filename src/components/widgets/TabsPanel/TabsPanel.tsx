@@ -13,9 +13,10 @@ export interface TabPanel {
 
 interface TabsPanelProps {
     tabs: TabPanel[];
+    actions?: React.ReactNode;
 }
 
-const TabsPanel = ({ tabs }: TabsPanelProps): React.ReactElement => {
+const TabsPanel = ({ tabs, actions }: TabsPanelProps): React.ReactElement => {
     const navigate = useNavigate()
     const location = useLocation()
     const [activeTab, setActiveTab] = useState(location.hash || tabs[0].hash)
@@ -38,21 +39,29 @@ const TabsPanel = ({ tabs }: TabsPanelProps): React.ReactElement => {
     return (
         <>
             <div className="sm:block">
-                <nav className="flex space-x-4" aria-label="Tabs">
-                    {tabs.map((tab) => tab.view && (
-                        <a
-                            key={tab.name}
-                            onClick={() => handleTabClick(tab.hash)}
-                            className={classNames(
-                            tab.hash === activeTab ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800',
-                            'rounded-md px-3 py-2 text-sm font-medium cursor-pointer',
-                            )}
-                            aria-current={tab.active ? 'page' : undefined}
-                        >
-                            {tab.name}
-                        </a>
-                    ))}
-                </nav>
+                <div className="flex items-center justify-between gap-3">
+                    <nav className="flex space-x-4" aria-label="Tabs">
+                        {tabs.map((tab) => tab.view && (
+                            <a
+                                key={tab.name}
+                                onClick={() => handleTabClick(tab.hash)}
+                                className={classNames(
+                                tab.hash === activeTab ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800',
+                                'rounded-md px-3 py-2 text-sm font-medium cursor-pointer',
+                                )}
+                                aria-current={tab.active ? 'page' : undefined}
+                            >
+                                {tab.name}
+                            </a>
+                        ))}
+                    </nav>
+
+                    {actions && (
+                        <div className="flex items-center">
+                            {actions}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {getActiveTabContents(activeTab)}

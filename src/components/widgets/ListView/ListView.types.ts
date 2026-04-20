@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 export interface ModelDefinition {
     singular: string;
     plural: string;
@@ -24,4 +26,10 @@ export type Header = {
 export type DataRow<T> = {
     row?: T;
     values: Record<string, string | number | undefined>;
+}
+
+export type RowAction<T> = {
+    key: string;
+    label: string;
+    content: (row: DataRow<T>) => ReactNode;
 }

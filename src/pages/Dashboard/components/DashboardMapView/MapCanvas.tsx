@@ -25,6 +25,7 @@ type MapCanvasProps = {
     expanded: boolean;
     searchPlace: SelectedPlace | null;
     selectedId: string | null;
+    focusTarget: { lat: number; lng: number; zoom: number } | null;
     setSelected: React.Dispatch<React.SetStateAction<string | null>>;
     handleToggleExpand: (value: boolean) => void;
 }
@@ -119,7 +120,24 @@ function SearchPlaceViewportAdjuster({ searchPlace }: { searchPlace: SelectedPla
     return null
 }
 
-export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelected, handleToggleExpand }: MapCanvasProps) {
+function FocusTargetViewportAdjuster({ focusTarget }: { focusTarget: { lat: number; lng: number; zoom: number } | null }) {
+    const map = useMap()
+    const hasAppliedFocusRef = React.useRef<boolean>(false)
+
+    React.useEffect(() => {
+        if (!map || !focusTarget || hasAppliedFocusRef.current) {
+            return
+        }
+
+        map.panTo({ lat: focusTarget.lat, lng: focusTarget.lng })
+        map.setZoom(focusTarget.zoom)
+        hasAppliedFocusRef.current = true
+    }, [focusTarget, map])
+
+    return null
+}
+
+export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarget, setSelected, handleToggleExpand }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
     const [selectedSnapshot, setSelectedSnapshot] = React.useState<Property | null>(null)
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
@@ -248,6 +266,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, setSelecte
                 <LimitChangeListener limit={limit} requestForBounds={requestForBounds} />
                 <SelectedPointViewportAdjuster selectedPoint={selectedPoint} />
                 <SearchPlaceViewportAdjuster searchPlace={searchPlace} />
+                <FocusTargetViewportAdjuster focusTarget={focusTarget} />
 
                 {points.map((point) => {
                     const isSelected = selectedId === point.id
