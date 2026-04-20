@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { classNames } from '@/lib/utils'
 import { alignClass, caseClass, ellipsis, colStyle } from './ListView.helpers'
 
-import { ModelDefinition, Header, DataRow } from './ListView.types'
+import { ModelDefinition, Header, DataRow, RowAction } from './ListView.types'
 import { PaginatorInfo } from '@/generated-types'
 
 const LIST_ITEMS_LENGTH = 10
@@ -31,6 +31,7 @@ export interface ListViewProps<T> {
     canCreate: boolean;
     canEdit: boolean;
     headers: Header[];
+    rowActions?: RowAction<T>[];
     data: DataRow<T>[];
     searchQuery: string;
     paginatorInfo: Pick<PaginatorInfo, 'currentPage' | 'lastPage' | 'total'>;
@@ -38,7 +39,7 @@ export interface ListViewProps<T> {
     handlePageChanged: (page: number) => void;
 }
 
-const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit, headers, data, paginatorInfo,  searchQuery, setSearchQuery, handlePageChanged }: ListViewProps<T>): React.ReactElement => {
+const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit, headers, rowActions, data, paginatorInfo,  searchQuery, setSearchQuery, handlePageChanged }: ListViewProps<T>): React.ReactElement => {
     const navigate = useNavigate()
 
     const tableHeaders = headers.map((header, index) => {
@@ -75,13 +76,21 @@ const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit
                     )
                 })}
 
-                {canEdit && (
-                    <TableCell className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <NavLink to={`/${model.plural}/${row.values.id}/editar`} className="flex justify-center text-orange-600 hover:text-orange-900 items-center">
-                            <SquarePenIcon size={18} color="#646464" />
-                        </NavLink>
-                    </TableCell>
-                )}
+                <TableCell className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <div className="flex items-center justify-center gap-2">
+                        {rowActions?.map((action) => (
+                            <React.Fragment key={action.key}>
+                                {action.content(row)}
+                            </React.Fragment>
+                        ))}
+
+                        {canEdit && (
+                            <NavLink to={`/${model.plural}/${row.values.id}/editar`} className="flex justify-center text-orange-600 hover:text-orange-900 items-center" title="Editar">
+                                <SquarePenIcon size={18} color="#646464" />
+                            </NavLink>
+                        )}
+                    </div>
+                </TableCell>
             </TableRow>
         )
     })
@@ -166,7 +175,7 @@ const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit
                                         <col key={header.key} style={colStyle(header)} />
                                     ))}
 
-                                    <col key="col-__options" style={{ width: "70px" }} />
+                                    <col key="col-__options" style={{ width: "120px" }} />
                                 </colgroup>
 
                                 <TableHeader className="bg-gray-50">

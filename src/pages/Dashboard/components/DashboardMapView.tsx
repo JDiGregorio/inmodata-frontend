@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { Minimize2Icon, FunnelXIcon, ExpandIcon } from 'lucide-react' // SlidersHorizontalIcon
 import Cleave from 'cleave.js/react'
+import { useSearchParams } from 'react-router'
 
 import { MapCanvas } from './DashboardMapView/MapCanvas'
 import { PlacesSearch } from './DashboardMapView/PlacesSearch'
@@ -10,10 +11,34 @@ import { PlacesSearch } from './DashboardMapView/PlacesSearch'
 import type { SelectedPlace } from './DashboardMapView/types'
 
 export default function DashboardMapView() {
+    const [searchParams] = useSearchParams()
     const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
     const [limit, setLimit] = React.useState<number>(500)
     const [expanded, setExpanded] = React.useState<boolean>(false)
     const [selectedId, setSelectedId] = React.useState<string | null>(null)
+    const [focusTarget, setFocusTarget] = React.useState<{ lat: number; lng: number; zoom: number } | null>(null)
+
+    React.useEffect(() => {
+        const propertyId = searchParams.get('propertyId')
+        const latParam = searchParams.get('lat')
+        const lngParam = searchParams.get('lng')
+        const zoomParam = searchParams.get('zoom')
+
+        if (!propertyId || !latParam || !lngParam) {
+            return
+        }
+
+        const latitude = Number(latParam)
+        const longitude = Number(lngParam)
+        const zoom = Number(zoomParam ?? '18')
+
+        if (Number.isNaN(latitude) || Number.isNaN(longitude) || Number.isNaN(zoom)) {
+            return
+        }
+
+        setSelectedId(propertyId)
+        setFocusTarget({ lat: latitude, lng: longitude, zoom })
+    }, [searchParams])
 
     const handleToggleExpand = (value: boolean) => {
         setExpanded(value)
@@ -102,6 +127,7 @@ export default function DashboardMapView() {
                         expanded={expanded}
                         searchPlace={searchPlace}
                         selectedId={selectedId}
+                        focusTarget={focusTarget}
                         setSelected={setSelectedId}
                         handleToggleExpand={handleToggleExpand}
                     />
@@ -177,6 +203,7 @@ export default function DashboardMapView() {
                                 expanded={expanded}
                                 searchPlace={searchPlace}
                                 selectedId={selectedId}
+                                focusTarget={focusTarget}
                                 setSelected={setSelectedId}
                                 handleToggleExpand={handleToggleExpand}
                             />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ChevronDownIcon, DownloadIcon, UploadIcon } from 'lucide-react'
+import { ChevronDownIcon, DownloadIcon, UploadIcon, MapPinnedIcon } from 'lucide-react'
+import { Link } from 'react-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
 
@@ -9,13 +10,16 @@ import { ImportModal } from './components/ImportModal'
 import { defineModel } from '@/utils/modelUtils'
 import { PermissionHelpers, usePermissions } from '@/hooks/usePermissions'
 import { useDownloadTemplate } from './components/useDownloadTemplate'
+import { buildMapViewFocusHref } from './utils/mapViewLink'
 
 import type { Header } from '@/components/widgets/ListView/ListView.types'
 import {
     RiskAggregates,
-    Property,
+    ListPropertiesQuery,
     useListPropertiesQuery,
 } from '@/generated-types'
+
+type PropertyRow = ListPropertiesQuery['properties']['data'][number]
 
 const Properties = (): React.ReactElement => {
     return (
@@ -139,6 +143,7 @@ const PropertiesListView = (): React.ReactElement => {
         const measuredAt = property.latestValuation?.measuredAt
 
         return {
+            row: property,
             values: {
                 id: property.id,
                 name: property.name ?? '',
@@ -154,7 +159,7 @@ const PropertiesListView = (): React.ReactElement => {
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="pt-6">
-                <SearchableTable<Property>
+                <SearchableTable<PropertyRow>
                     model={defineModel('inmueble')}
                     title="Inmuebles"
                     toolbarActions={
@@ -168,6 +173,33 @@ const PropertiesListView = (): React.ReactElement => {
                     }
                     canCreate={permissions.canCreate("property")}
                     canEdit={permissions.canEdit("property")}
+                    rowActions={[
+                        {
+                            key: 'open-map-view',
+                            label: 'Ver en mapa',
+                            content: (row) => {
+                                if (!row.row) {
+                                    return null
+                                }
+
+                                return (
+                                    <Link
+                                        to={buildMapViewFocusHref({
+                                            id: row.row.id,
+                                            latitude: row.row.latitude,
+                                            longitude: row.row.longitude
+                                        })}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900"
+                                        title="Abrir en mapa"
+                                    >
+                                        <MapPinnedIcon size={17} />
+                                    </Link>
+                                )
+                            }
+                        }
+                    ]}
                     headers={headers}
                     data={parsedColumns}
                     loading={loading}
