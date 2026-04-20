@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ChevronDownIcon, DownloadIcon, UploadIcon, SquareArrowOutUpRightIcon } from 'lucide-react'
+import { ChevronDownIcon, DownloadIcon, UploadIcon, MapPinnedIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
@@ -194,7 +194,7 @@ const PropertiesListView = (): React.ReactElement => {
                                         className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900"
                                         title="Abrir en mapa"
                                     >
-                                        <SquareArrowOutUpRightIcon size={17} />
+                                        <MapPinnedIcon size={17} />
                                     </Link>
                                 )
                             }

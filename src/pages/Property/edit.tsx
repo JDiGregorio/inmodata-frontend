@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useParams } from 'react-router'
-import { SquareArrowOutUpRightIcon } from 'lucide-react'
+import { MapPinnedIcon } from 'lucide-react'
 
 import TabsPanel, { TabPanel } from '@/components/widgets/TabsPanel/TabsPanel'
 import Spinner from '@/components/layouts/Spinner'
@@ -73,7 +73,7 @@ const PropertyEdit = (): React.ReactElement => {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
-                            <SquareArrowOutUpRightIcon size={16} />
+                            <MapPinnedIcon size={16} />
                             Ver en mapa
                         </Link>
                     )}
