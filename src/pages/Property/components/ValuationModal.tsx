@@ -110,6 +110,11 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
         }
 
         if (valuation.sector === "financiero") {
+            if (!valuation.reference) {
+                toast.error('Es necesario agregar la referencia de valuación.')
+                return
+            }
+
             if (!valuation.institution) {
                 toast.error('Es necesario seleccionar la institución.')
                 return
@@ -159,6 +164,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                 variables: {
                     propertyId: property.id,
                     input: {
+                        reference: valuation.reference,
                         measuredAt: formatted,
                         institution: _institution,
                         owner: valuation.owner,
@@ -181,6 +187,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                 variables: {
                     input: {
                         id: valuation.id,
+                        reference: valuation.reference,
                         institution: _institution,
                         owner: valuation.owner,
                         applicant: valuation.applicant,
@@ -255,8 +262,8 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                     <ScrollArea className="h-[70vh]">
                         <div className="px-8 py-6">
                             <form className="space-y-6">
-                                <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                                    <div className="sm:col-span-3 space-y-2">
+                                <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                                    <div className="sm:col-span-6 space-y-2">
                                         <Label htmlFor="sector" data-required="*">
                                             Sector
                                         </Label>
@@ -279,7 +286,26 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                         </Select>
                                     </div>
 
-                                    <div className="sm:col-span-3 space-y-2">
+                                    {(valuation.sector === null || valuation.sector === "financiero") && (
+                                        <div className="sm:col-span-3 space-y-2">
+                                            <Label htmlFor="reference" data-required="*">
+                                                Referencia
+                                            </Label>
+
+                                            <Input
+                                                type="text"
+                                                id="reference"
+                                                name="reference"
+                                                value={valuation.reference ?? ''}
+                                                placeholder="Referencia de Avalúo"
+                                                onChange={({ target }) => handleUpdate({ reference: target.value })}
+                                                autoComplete="off"
+                                                className="placeholder:text-gray-300"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className={classNames(valuation.sector === "control" ? "sm:col-span-6" : "sm:col-span-3", "space-y-2")}>
                                         <Label htmlFor="measuredAt" data-required="*">
                                             Fecha de Valuación
                                         </Label>

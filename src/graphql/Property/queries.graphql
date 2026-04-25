@@ -37,6 +37,7 @@ query GetPropertyById($id: ID!) {
         }
         valuations {
             id
+            reference
             owner
             applicant
             phone
@@ -82,6 +83,7 @@ fragment PropertyPointFields on Property {
     longitude
     quantity
     latestValuation {
+        reference
         sector
         averageValue
         landArea

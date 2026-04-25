@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 
 import { risks } from '../index'
-import { classNames, formatMoney } from '@/lib/utils'
+import { classNames } from '@/lib/utils'
 
 import { Valuation } from './tabs/Valuations.edit.tab'
 import {
@@ -29,6 +29,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
         if (valuation) {
             const editValuation = {
                 id: valuation.id,
+                reference: valuation.reference,
                 institution: valuation.institution,
                 owner: valuation.owner,
                 applicant: valuation.applicant,
@@ -79,23 +80,25 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                 <TableHeader className="bg-gray-50">
                                     <TableRow>
                                         <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            Referencia
+                                        </TableHead>
+
+                                        <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                             Sector
                                         </TableHead>
+
                                         <TableHead scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                             Institución
                                         </TableHead>
-                                        <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            Fecha de Valuación
-                                        </TableHead>
-                                        <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            Valor v<sup>2</sup>
-                                        </TableHead>
-                                        <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                            Valor Promedio m<sup>2</sup>
-                                        </TableHead>
+
                                         <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                                             Perfil de Riesgo
                                         </TableHead>
+
+                                        <TableHead scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                            Fecha de Valuación
+                                        </TableHead>
+
                                         <TableHead scope="col" className="w-20 relative py-3.5 pl-3 pr-4 sm:pr-6">
                                             <span className="sr-only">Acciones</span>
                                             Acciones
@@ -107,24 +110,26 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                     {valuations && valuations.length > 0 ? (
                                         valuations.map((valuation, index) => (
                                             <TableRow key={index} className={classNames(valuation?.id === property.latestValuation?.id ? "bg-green-50 hover:bg-green-50/100" : "even:bg-gray-50")}>
+                                                <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 uppercase">
+                                                    {valuation?.reference ?? "-"}
+                                                </TableCell>
+
                                                 <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 capitalize">
                                                     {valuation?.sector ?? "-"}
                                                 </TableCell>
+
                                                 <TableCell className="py-2 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6">
                                                     {valuation?.institution?.name ?? "-"}
                                                 </TableCell>
-                                                <TableCell className="px-3 py-2 py-4 text-sm whitespace-nowrap text-center text-gray-500">
-                                                    {moment(valuation?.measuredAt).format("DD/MM/YYYY")}
-                                                </TableCell>
-                                                <TableCell className="px-3 py-2 text-sm whitespace-nowrap  text-gray-500">
-                                                    L. {formatMoney(valuation?.averageSquareYard ?? 0)}
-                                                </TableCell>
-                                                <TableCell className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                                                    L. {formatMoney(valuation?.averageSquareMeter ?? 0)}
-                                                </TableCell>
+
                                                 <TableCell className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
                                                     {risks.find(risk => risk.value === valuation?.riskProfile)?.label}
                                                 </TableCell>
+
+                                                <TableCell className="px-3 py-2 py-4 text-sm whitespace-nowrap text-center text-gray-500">
+                                                    {moment(valuation?.measuredAt).format("DD/MM/YYYY")}
+                                                </TableCell>
+                                                
                                                 <TableCell className="flex justify-center whitespace-nowrap py-2 pl-3 pr-4 sm:pr-6 items-center">
                                                     {canEdit && (
                                                         <Button variant="ghost" onClick={() => handleUpdateLine(valuation)} className="text-orange-600 hover:text-orange-900 cursor-pointer">

@@ -32,6 +32,7 @@ export type AddValuationInput = {
   owner?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
   propertyId?: InputMaybe<Scalars['ID']['input']>;
+  reference?: InputMaybe<Scalars['String']['input']>;
   riskProfile?: InputMaybe<RiskAggregates>;
   sector?: InputMaybe<Scalars['String']['input']>;
   utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
@@ -257,6 +258,7 @@ export type PropertyValuation = {
   owner?: Maybe<Scalars['String']['output']>;
   phone?: Maybe<Scalars['String']['output']>;
   property_id?: Maybe<Scalars['ID']['output']>;
+  reference?: Maybe<Scalars['String']['output']>;
   riskProfile: RiskAggregates;
   sector?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
@@ -440,6 +442,7 @@ export type UpdateValuationInput = {
   measuredAt?: InputMaybe<Scalars['Date']['input']>;
   owner?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
+  reference?: InputMaybe<Scalars['String']['input']>;
   riskProfile?: InputMaybe<RiskAggregates>;
   sector?: InputMaybe<Scalars['String']['input']>;
   utilizationRatio?: InputMaybe<Scalars['Float']['input']>;
@@ -558,7 +561,7 @@ export type GetPropertyByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type GetPropertiesWithinRadiusQueryVariables = Exact<{
   latitude: Scalars['Float']['input'];
@@ -569,7 +572,7 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 
 export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
-export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null };
+export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null };
 
 export type PropertiesWithinBoundsQueryVariables = Exact<{
   northLatitude: Scalars['Float']['input'];
@@ -580,7 +583,7 @@ export type PropertiesWithinBoundsQueryVariables = Exact<{
 }>;
 
 
-export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null }> };
+export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null }> };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -666,6 +669,7 @@ export const PropertyPointFieldsFragmentDoc = gql`
   longitude
   quantity
   latestValuation {
+    reference
     sector
     averageValue
     landArea
@@ -1148,6 +1152,7 @@ export const GetPropertyByIdDocument = gql`
     }
     valuations {
       id
+      reference
       owner
       applicant
       phone
