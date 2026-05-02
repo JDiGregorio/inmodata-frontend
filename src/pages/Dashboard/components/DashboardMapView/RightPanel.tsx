@@ -65,7 +65,7 @@ function formatDate(value?: string | null) {
 }
 
 export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
-    const valuation = point?.latestValuation
+    const valuation = point?.latestFinancialValuation
     const [showDetails, setShowDetails] = React.useState<boolean>(false)
 
     React.useEffect(() => {

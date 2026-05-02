@@ -82,7 +82,7 @@ fragment PropertyPointFields on Property {
     latitude
     longitude
     quantity
-    latestValuation {
+    latestFinancialValuation {
         reference
         sector
         averageValue

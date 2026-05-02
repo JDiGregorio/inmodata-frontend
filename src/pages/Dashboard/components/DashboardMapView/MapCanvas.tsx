@@ -157,7 +157,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
             exactAddress: property.exactAddress?.trim() || 'Sin dirección',
             cadastralKey: property.cadastralKey,
             quantity: property.quantity,
-            latestValuation: property.latestValuation,
+            latestFinancialValuation: property.latestFinancialValuation,
             latitude: property.latitude,
             longitude: property.longitude,
         }))
@@ -270,7 +270,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
 
                 {points.map((point) => {
                     const isSelected = selectedId === point.id
-                    const markerColor = getRiskProfileColor(point.latestValuation?.riskProfile)
+                    const markerColor = getRiskProfileColor(point.latestFinancialValuation?.riskProfile)
 
                     return (
                         <AdvancedMarker
