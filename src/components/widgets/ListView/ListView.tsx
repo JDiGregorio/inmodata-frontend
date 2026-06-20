@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router'
-import { LucideProps, SquarePenIcon } from 'lucide-react'
+import { LucideProps, PlusIcon, SquarePenIcon } from 'lucide-react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
@@ -157,7 +157,8 @@ const ListView = <T,> ({ model, stats, title, toolbarActions, canCreate, canEdit
                         {toolbarActions}
 
                         {canCreate && (
-                            <Button type="button" variant={'default'} size="default" onClick={() => navigate(`/${model.plural}/crear`)} className="bg-green-700 hover:bg-green-900 cursor-pointer">
+                            <Button type="button" variant={'default'} size="default" onClick={() => navigate(`/${model.plural}/crear`)} className="bg-[#155a7c] hover:bg-[#104761] cursor-pointer">
+                                <PlusIcon className="h-4 w-4" />
                                 Añadir
                             </Button>
                         )}

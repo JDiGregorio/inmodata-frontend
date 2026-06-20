@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import {
     MapIcon,
     MapPinHouseIcon,
+    DiscIcon,
     LandmarkIcon,
     UsersIcon,
     ListTodoIcon
@@ -13,6 +14,9 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const PropertiesIndex = lazy(() => import('@/pages/Property'))
 const PropertyCreate = lazy(() => import('@/pages/Property/create'))
 const PropertyEdit = lazy(() => import('@/pages/Property/edit'))
+const PreAppraisalIndex = lazy(() => import('@/pages/PreAppraisal'))
+const PreAppraisalCreate = lazy(() => import('@/pages/PreAppraisal/create'))
+const PreAppraisalEdit = lazy(() => import('@/pages/PreAppraisal/edit'))
 const InstitutionsIndex = lazy(() => import('@/pages/Institution'))
 const InstitutionCreate = lazy(() => import('@/pages/Institution/create'))
 const InstitutionEdit = lazy(() => import('@/pages/Institution/edit'))
@@ -54,6 +58,28 @@ const routes = (permissions: PermissionHelpers) => [
         view: permissions.canEdit("property"),
         path: '/inmuebles/:id/editar',
         component: PropertyEdit,
+        label: 'Editar'
+    },
+    {
+        view: true, // permissions.canView("preappraisal"),
+        path: '/preavaluos',
+        component: PreAppraisalIndex,
+        label: 'Preavaluos',
+        sidebar: {
+            icon: DiscIcon,
+            name: 'Preavaluos'
+        }
+    },
+    {
+        view: true, // permissions.canCreate("preappraisal"),
+        path: '/preavaluos/crear',
+        component: PreAppraisalCreate,
+        label: 'Crear'
+    },
+    {
+        view: true, // permissions.canEdit("preappraisal"),
+        path: '/preavaluos/:id/editar',
+        component: PreAppraisalEdit,
         label: 'Editar'
     },
     {

@@ -1,0 +1,23 @@
+mutation CreatePreAppraisal($input: CreatePreAppraisalInput!) {
+    createPreAppraisal(input: $input) {
+        id
+        uuid
+        reference
+        name
+        targetAddress
+        targetLatitude
+        targetLongitude
+        radiusMeters
+        sectorFilter
+        valuationDate
+        candidateCount
+        sampleCount
+        recommendedAverageSquareYard
+        expectedRiskScore
+        expectedRiskProfile
+        annualAppreciationRate
+        status
+        generatedAt
+        createdAt
+    }
+}
