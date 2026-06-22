@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
   DateTime: { input: any; output: any; }
+  JSON: { input: any; output: any; }
 };
 
 export type AddValuationInput = {
@@ -40,6 +41,19 @@ export type AddValuationInput = {
 
 export type CreateInstitutionInput = {
   name: Scalars['String']['input'];
+};
+
+export type CreatePreAppraisalInput = {
+  action?: InputMaybe<PreAppraisalCreateAction>;
+  includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
+  radiusMeters: Scalars['Int']['input'];
+  reference?: InputMaybe<Scalars['String']['input']>;
+  sectorFilter: PreAppraisalSectorFilter;
+  targetAddress?: InputMaybe<Scalars['String']['input']>;
+  targetLatitude: Scalars['Float']['input'];
+  targetLongitude: Scalars['Float']['input'];
+  targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
+  timeFactor?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type CreatePropertyInput = {
@@ -80,6 +94,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addPropertyValuation?: Maybe<PropertyValuation>;
   createInstitution: Institution;
+  createPreAppraisal: PreAppraisal;
   createProperty: Property;
   createRole: Role;
   createUser: User;
@@ -88,6 +103,7 @@ export type Mutation = {
   deleteRole?: Maybe<Role>;
   deleteUser?: Maybe<User>;
   deleteValuation?: Maybe<PropertyValuation>;
+  generatePreAppraisal: PreAppraisal;
   updateInstitution: Institution;
   updateProperty: Property;
   updateRole: Role;
@@ -104,6 +120,11 @@ export type MutationAddPropertyValuationArgs = {
 
 export type MutationCreateInstitutionArgs = {
   input: CreateInstitutionInput;
+};
+
+
+export type MutationCreatePreAppraisalArgs = {
+  input: CreatePreAppraisalInput;
 };
 
 
@@ -143,6 +164,11 @@ export type MutationDeleteUserArgs = {
 
 
 export type MutationDeleteValuationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationGeneratePreAppraisalArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -220,6 +246,229 @@ export type PaginatorInfo = {
   total: Scalars['Int']['output'];
 };
 
+export type PreAppraisal = {
+  __typename?: 'PreAppraisal';
+  annualAppreciationRate?: Maybe<Scalars['Float']['output']>;
+  candidateCount: Scalars['Int']['output'];
+  controlSamples: Array<PreAppraisalSample>;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  expectedRiskProfile?: Maybe<RiskAggregates>;
+  expectedRiskScore?: Maybe<Scalars['Float']['output']>;
+  filters?: Maybe<Scalars['JSON']['output']>;
+  financialSamples: Array<PreAppraisalSample>;
+  generatedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  maxAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  minAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  priceByYear?: Maybe<Scalars['JSON']['output']>;
+  radiusMeters: Scalars['Int']['output'];
+  recommendedAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  reference?: Maybe<Scalars['String']['output']>;
+  riskByYear?: Maybe<Scalars['JSON']['output']>;
+  sampleCount: Scalars['Int']['output'];
+  samples: Array<PreAppraisalSample>;
+  sectorFilter: PreAppraisalSectorFilter;
+  status: PreAppraisalStatus;
+  targetAddress?: Maybe<Scalars['String']['output']>;
+  targetLatitude: Scalars['Float']['output'];
+  targetLongitude: Scalars['Float']['output'];
+  targetProperty?: Maybe<Property>;
+  targetPropertyId?: Maybe<Scalars['ID']['output']>;
+  timeFactor: Scalars['Float']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['ID']['output'];
+  uuid: Scalars['String']['output'];
+  valuationDate?: Maybe<Scalars['Date']['output']>;
+  valuationSelectionMode: PreAppraisalValuationSelectionMode;
+  withinRadiusSamples: Array<PreAppraisalSample>;
+};
+
+export type PreAppraisalCalculationInput = {
+  includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
+  radiusMeters: Scalars['Int']['input'];
+  sectorFilter: PreAppraisalSectorFilter;
+  targetAddress?: InputMaybe<Scalars['String']['input']>;
+  targetLatitude: Scalars['Float']['input'];
+  targetLongitude: Scalars['Float']['input'];
+  targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
+  timeFactor?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export enum PreAppraisalCreateAction {
+  Generate = 'GENERATE',
+  SaveDraft = 'SAVE_DRAFT'
+}
+
+export type PreAppraisalFilterInput = {
+  createdFrom?: InputMaybe<Scalars['Date']['input']>;
+  createdTo?: InputMaybe<Scalars['Date']['input']>;
+  expectedRiskProfile?: InputMaybe<RiskAggregates>;
+  generatedFrom?: InputMaybe<Scalars['Date']['input']>;
+  generatedTo?: InputMaybe<Scalars['Date']['input']>;
+  radiusMax?: InputMaybe<Scalars['Int']['input']>;
+  radiusMin?: InputMaybe<Scalars['Int']['input']>;
+  recommendedPriceMax?: InputMaybe<Scalars['Float']['input']>;
+  recommendedPriceMin?: InputMaybe<Scalars['Float']['input']>;
+  sampleCountMax?: InputMaybe<Scalars['Int']['input']>;
+  sampleCountMin?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sectorFilter?: InputMaybe<PreAppraisalSectorFilter>;
+  status?: InputMaybe<PreAppraisalStatus>;
+  targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+  valuationDateFrom?: InputMaybe<Scalars['Date']['input']>;
+  valuationDateTo?: InputMaybe<Scalars['Date']['input']>;
+  valuationSelectionMode?: InputMaybe<PreAppraisalValuationSelectionMode>;
+};
+
+export type PreAppraisalOrderByInput = {
+  direction?: InputMaybe<SortDirection>;
+  field: PreAppraisalOrderField;
+};
+
+export enum PreAppraisalOrderField {
+  CreatedAt = 'CREATED_AT',
+  GeneratedAt = 'GENERATED_AT',
+  RadiusMeters = 'RADIUS_METERS',
+  RecommendedAverageSquareYard = 'RECOMMENDED_AVERAGE_SQUARE_YARD',
+  Reference = 'REFERENCE',
+  SampleCount = 'SAMPLE_COUNT',
+  SectorFilter = 'SECTOR_FILTER',
+  Status = 'STATUS'
+}
+
+/** A paginated list of PreAppraisal items. */
+export type PreAppraisalPaginator = {
+  __typename?: 'PreAppraisalPaginator';
+  /** A list of PreAppraisal items. */
+  data: Array<PreAppraisal>;
+  /** Pagination information about the list of items. */
+  paginatorInfo: PaginatorInfo;
+};
+
+export type PreAppraisalPreviewPayload = {
+  __typename?: 'PreAppraisalPreviewPayload';
+  annualAppreciationRate?: Maybe<Scalars['Float']['output']>;
+  candidateCount: Scalars['Int']['output'];
+  excludedWithoutValidValuationCount: Scalars['Int']['output'];
+  expectedRiskProfile?: Maybe<RiskAggregates>;
+  expectedRiskScore?: Maybe<Scalars['Float']['output']>;
+  maxAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  minAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  priceByYear?: Maybe<Scalars['JSON']['output']>;
+  radiusMeters: Scalars['Int']['output'];
+  recommendedAverageSquareYard?: Maybe<Scalars['Float']['output']>;
+  riskByYear?: Maybe<Scalars['JSON']['output']>;
+  sampleCount: Scalars['Int']['output'];
+  samples: Array<PreAppraisalPreviewSample>;
+  sectorFilter: PreAppraisalSectorFilter;
+  targetLatitude: Scalars['Float']['output'];
+  targetLongitude: Scalars['Float']['output'];
+  targetPropertyId?: Maybe<Scalars['ID']['output']>;
+  timeFactor: Scalars['Float']['output'];
+  valuationDate: Scalars['Date']['output'];
+};
+
+export type PreAppraisalPreviewSample = {
+  __typename?: 'PreAppraisalPreviewSample';
+  applicant?: Maybe<Scalars['String']['output']>;
+  averageSquareMeter?: Maybe<Scalars['Float']['output']>;
+  averageSquareYard?: Maybe<Scalars['Float']['output']>;
+  averageValue?: Maybe<Scalars['Float']['output']>;
+  cadastralKey?: Maybe<Scalars['String']['output']>;
+  distanceMeters?: Maybe<Scalars['Float']['output']>;
+  distanceWeight?: Maybe<Scalars['Float']['output']>;
+  exactAddress?: Maybe<Scalars['String']['output']>;
+  factor?: Maybe<Scalars['Float']['output']>;
+  improvementArea?: Maybe<Scalars['Float']['output']>;
+  institutionId?: Maybe<Scalars['ID']['output']>;
+  isWithinRadius: Scalars['Boolean']['output'];
+  landArea?: Maybe<Scalars['Float']['output']>;
+  landValue?: Maybe<Scalars['Float']['output']>;
+  latitude?: Maybe<Scalars['Float']['output']>;
+  longitude?: Maybe<Scalars['Float']['output']>;
+  measuredAt?: Maybe<Scalars['Date']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+  propertyId?: Maybe<Scalars['ID']['output']>;
+  propertyName?: Maybe<Scalars['String']['output']>;
+  propertyValuationId?: Maybe<Scalars['ID']['output']>;
+  riskProfile?: Maybe<RiskAggregates>;
+  riskScore?: Maybe<Scalars['Int']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+  timeWeight?: Maybe<Scalars['Float']['output']>;
+  utilizationRadio?: Maybe<Scalars['Float']['output']>;
+  valuationAgeYears?: Maybe<Scalars['Float']['output']>;
+  valuationReference?: Maybe<Scalars['String']['output']>;
+  valuationSector?: Maybe<ValuationSector>;
+  weightedPrice?: Maybe<Scalars['Float']['output']>;
+  weightedRisk?: Maybe<Scalars['Float']['output']>;
+};
+
+export type PreAppraisalSample = {
+  __typename?: 'PreAppraisalSample';
+  applicant?: Maybe<Scalars['String']['output']>;
+  averageSquareMeter?: Maybe<Scalars['Float']['output']>;
+  averageSquareYard?: Maybe<Scalars['Float']['output']>;
+  averageValue?: Maybe<Scalars['Float']['output']>;
+  cadastralKey?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  distanceMeters?: Maybe<Scalars['Float']['output']>;
+  distanceWeight?: Maybe<Scalars['Float']['output']>;
+  exactAddress?: Maybe<Scalars['String']['output']>;
+  factor?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  improvementArea?: Maybe<Scalars['Float']['output']>;
+  institution?: Maybe<Institution>;
+  institutionId?: Maybe<Scalars['ID']['output']>;
+  isWithinRadius: Scalars['Boolean']['output'];
+  landArea?: Maybe<Scalars['Float']['output']>;
+  landValue?: Maybe<Scalars['Float']['output']>;
+  latitude?: Maybe<Scalars['Float']['output']>;
+  longitude?: Maybe<Scalars['Float']['output']>;
+  measuredAt?: Maybe<Scalars['Date']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+  preAppraisal: PreAppraisal;
+  preAppraisalId: Scalars['ID']['output'];
+  property?: Maybe<Property>;
+  propertyId?: Maybe<Scalars['ID']['output']>;
+  propertyName?: Maybe<Scalars['String']['output']>;
+  propertyValuation?: Maybe<PropertyValuation>;
+  propertyValuationId?: Maybe<Scalars['ID']['output']>;
+  riskProfile?: Maybe<RiskAggregates>;
+  riskScore?: Maybe<Scalars['Int']['output']>;
+  sourceSnapshot?: Maybe<Scalars['JSON']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+  timeWeight?: Maybe<Scalars['Float']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  utilizationRadio?: Maybe<Scalars['Float']['output']>;
+  valuationAgeYears?: Maybe<Scalars['Float']['output']>;
+  valuationReference?: Maybe<Scalars['String']['output']>;
+  valuationSector?: Maybe<ValuationSector>;
+  weightedPrice?: Maybe<Scalars['Float']['output']>;
+  weightedRisk?: Maybe<Scalars['Float']['output']>;
+};
+
+export enum PreAppraisalSectorFilter {
+  Both = 'Both',
+  Control = 'Control',
+  Financiero = 'Financiero'
+}
+
+export enum PreAppraisalStatus {
+  Cancelled = 'CANCELLED',
+  Draft = 'DRAFT',
+  FormalRequested = 'FORMAL_REQUESTED',
+  Generated = 'GENERATED'
+}
+
+export enum PreAppraisalValuationSelectionMode {
+  LatestPerProperty = 'LatestPerProperty',
+  LatestPerSector = 'LatestPerSector'
+}
+
 export type Property = {
   __typename?: 'Property';
   cadastralKey?: Maybe<Scalars['String']['output']>;
@@ -270,6 +519,8 @@ export type Query = {
   __typename?: 'Query';
   institutionById?: Maybe<Institution>;
   institutions: InstitutionPaginator;
+  preAppraisals: PreAppraisalPaginator;
+  previewPreAppraisal: PreAppraisalPreviewPayload;
   properties: PropertyPaginator;
   propertiesWithinBounds: Array<Property>;
   propertiesWithinRadius: Array<Property>;
@@ -291,6 +542,19 @@ export type QueryInstitutionsArgs = {
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPreAppraisalsArgs = {
+  filter?: InputMaybe<PreAppraisalFilterInput>;
+  first?: Scalars['Int']['input'];
+  orderBy?: InputMaybe<Array<PreAppraisalOrderByInput>>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryPreviewPreAppraisalArgs = {
+  input: PreAppraisalCalculationInput;
 };
 
 
@@ -374,6 +638,11 @@ export type RolePaginator = {
   /** Pagination information about the list of items. */
   paginatorInfo: PaginatorInfo;
 };
+
+export enum SortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
 
 /** Directions for ordering a list of records. */
 export enum SortOrder {
@@ -468,6 +737,11 @@ export type UserPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+export enum ValuationSector {
+  Control = 'Control',
+  Financiero = 'Financiero'
+}
+
 export type CreateInstitutionMutationVariables = Exact<{
   input: CreateInstitutionInput;
 }>;
@@ -504,6 +778,30 @@ export type GetInstitutionByIdQueryVariables = Exact<{
 
 
 export type GetInstitutionByIdQuery = { __typename?: 'Query', institutionById?: { __typename?: 'Institution', id: string, name: string } | null };
+
+export type CreatePreAppraisalMutationVariables = Exact<{
+  input: CreatePreAppraisalInput;
+}>;
+
+
+export type CreatePreAppraisalMutation = { __typename?: 'Mutation', createPreAppraisal: { __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, candidateCount: number, sampleCount: number, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any } };
+
+export type ListPreAppraisalsQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  filter?: InputMaybe<PreAppraisalFilterInput>;
+  orderBy?: InputMaybe<Array<PreAppraisalOrderByInput> | PreAppraisalOrderByInput>;
+}>;
+
+
+export type ListPreAppraisalsQuery = { __typename?: 'Query', preAppraisals: { __typename?: 'PreAppraisalPaginator', data: Array<{ __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationSelectionMode: PreAppraisalValuationSelectionMode, valuationDate?: any | null, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, targetProperty?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null } | null, user: { __typename?: 'User', id: string, name: string } }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+
+export type PreviewPreAppraisalQueryVariables = Exact<{
+  input: PreAppraisalCalculationInput;
+}>;
+
+
+export type PreviewPreAppraisalQuery = { __typename?: 'Query', previewPreAppraisal: { __typename?: 'PreAppraisalPreviewPayload', targetPropertyId?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate: any, timeFactor: number, candidateCount: number, sampleCount: number, excludedWithoutValidValuationCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, samples: Array<{ __typename?: 'PreAppraisalPreviewSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } };
 
 export type CreatePropertyMutationVariables = Exact<{
   input: CreatePropertyInput;
@@ -876,6 +1174,221 @@ export type GetInstitutionByIdQueryHookResult = ReturnType<typeof useGetInstitut
 export type GetInstitutionByIdLazyQueryHookResult = ReturnType<typeof useGetInstitutionByIdLazyQuery>;
 export type GetInstitutionByIdSuspenseQueryHookResult = ReturnType<typeof useGetInstitutionByIdSuspenseQuery>;
 export type GetInstitutionByIdQueryResult = Apollo.QueryResult<GetInstitutionByIdQuery, GetInstitutionByIdQueryVariables>;
+export const CreatePreAppraisalDocument = gql`
+    mutation CreatePreAppraisal($input: CreatePreAppraisalInput!) {
+  createPreAppraisal(input: $input) {
+    id
+    uuid
+    reference
+    name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationDate
+    candidateCount
+    sampleCount
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    status
+    generatedAt
+    createdAt
+  }
+}
+    `;
+export type CreatePreAppraisalMutationFn = Apollo.MutationFunction<CreatePreAppraisalMutation, CreatePreAppraisalMutationVariables>;
+
+/**
+ * __useCreatePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useCreatePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPreAppraisalMutation, { data, loading, error }] = useCreatePreAppraisalMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreatePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<CreatePreAppraisalMutation, CreatePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePreAppraisalMutation, CreatePreAppraisalMutationVariables>(CreatePreAppraisalDocument, options);
+      }
+export type CreatePreAppraisalMutationHookResult = ReturnType<typeof useCreatePreAppraisalMutation>;
+export type CreatePreAppraisalMutationResult = Apollo.MutationResult<CreatePreAppraisalMutation>;
+export type CreatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<CreatePreAppraisalMutation, CreatePreAppraisalMutationVariables>;
+export const ListPreAppraisalsDocument = gql`
+    query ListPreAppraisals($first: Int!, $page: Int, $filter: PreAppraisalFilterInput, $orderBy: [PreAppraisalOrderByInput!]) {
+  preAppraisals(first: $first, page: $page, filter: $filter, orderBy: $orderBy) {
+    data {
+      id
+      uuid
+      reference
+      name
+      targetAddress
+      targetLatitude
+      targetLongitude
+      radiusMeters
+      sectorFilter
+      valuationSelectionMode
+      valuationDate
+      candidateCount
+      sampleCount
+      minAverageSquareYard
+      maxAverageSquareYard
+      recommendedAverageSquareYard
+      expectedRiskScore
+      expectedRiskProfile
+      annualAppreciationRate
+      status
+      generatedAt
+      createdAt
+      targetProperty {
+        id
+        name
+        exactAddress
+        cadastralKey
+      }
+      user {
+        id
+        name
+      }
+    }
+    paginatorInfo {
+      currentPage
+      lastPage
+      total
+    }
+  }
+}
+    `;
+
+/**
+ * __useListPreAppraisalsQuery__
+ *
+ * To run a query within a React component, call `useListPreAppraisalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useListPreAppraisalsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListPreAppraisalsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      page: // value for 'page'
+ *      filter: // value for 'filter'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useListPreAppraisalsQuery(baseOptions: Apollo.QueryHookOptions<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables> & ({ variables: ListPreAppraisalsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>(ListPreAppraisalsDocument, options);
+      }
+export function useListPreAppraisalsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>(ListPreAppraisalsDocument, options);
+        }
+export function useListPreAppraisalsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>(ListPreAppraisalsDocument, options);
+        }
+export type ListPreAppraisalsQueryHookResult = ReturnType<typeof useListPreAppraisalsQuery>;
+export type ListPreAppraisalsLazyQueryHookResult = ReturnType<typeof useListPreAppraisalsLazyQuery>;
+export type ListPreAppraisalsSuspenseQueryHookResult = ReturnType<typeof useListPreAppraisalsSuspenseQuery>;
+export type ListPreAppraisalsQueryResult = Apollo.QueryResult<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>;
+export const PreviewPreAppraisalDocument = gql`
+    query PreviewPreAppraisal($input: PreAppraisalCalculationInput!) {
+  previewPreAppraisal(input: $input) {
+    targetPropertyId
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationDate
+    timeFactor
+    candidateCount
+    sampleCount
+    excludedWithoutValidValuationCount
+    minAverageSquareYard
+    maxAverageSquareYard
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    priceByYear
+    riskByYear
+    samples {
+      tag
+      propertyId
+      propertyValuationId
+      institutionId
+      propertyName
+      exactAddress
+      cadastralKey
+      latitude
+      longitude
+      valuationReference
+      valuationSector
+      averageSquareYard
+      averageSquareMeter
+      riskProfile
+      riskScore
+      measuredAt
+      distanceMeters
+      isWithinRadius
+      valuationAgeYears
+      timeWeight
+      distanceWeight
+      factor
+      weightedPrice
+      weightedRisk
+    }
+  }
+}
+    `;
+
+/**
+ * __usePreviewPreAppraisalQuery__
+ *
+ * To run a query within a React component, call `usePreviewPreAppraisalQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePreviewPreAppraisalQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePreviewPreAppraisalQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function usePreviewPreAppraisalQuery(baseOptions: Apollo.QueryHookOptions<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables> & ({ variables: PreviewPreAppraisalQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>(PreviewPreAppraisalDocument, options);
+      }
+export function usePreviewPreAppraisalLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>(PreviewPreAppraisalDocument, options);
+        }
+export function usePreviewPreAppraisalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>(PreviewPreAppraisalDocument, options);
+        }
+export type PreviewPreAppraisalQueryHookResult = ReturnType<typeof usePreviewPreAppraisalQuery>;
+export type PreviewPreAppraisalLazyQueryHookResult = ReturnType<typeof usePreviewPreAppraisalLazyQuery>;
+export type PreviewPreAppraisalSuspenseQueryHookResult = ReturnType<typeof usePreviewPreAppraisalSuspenseQuery>;
+export type PreviewPreAppraisalQueryResult = Apollo.QueryResult<PreviewPreAppraisalQuery, PreviewPreAppraisalQueryVariables>;
 export const CreatePropertyDocument = gql`
     mutation CreateProperty($input: CreatePropertyInput!) {
   createProperty(input: $input) {
