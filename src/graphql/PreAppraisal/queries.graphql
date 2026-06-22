@@ -42,6 +42,63 @@ query ListPreAppraisals($first: Int!, $page: Int, $filter: PreAppraisalFilterInp
     }
 }
 
+query GetPreAppraisalById($id: ID!) {
+    preAppraisalById(id: $id) {
+        id
+        uuid
+        reference
+        name
+        targetAddress
+        targetLatitude
+        targetLongitude
+        radiusMeters
+        sectorFilter
+        valuationSelectionMode
+        valuationDate
+        timeFactor
+        candidateCount
+        sampleCount
+        minAverageSquareYard
+        maxAverageSquareYard
+        recommendedAverageSquareYard
+        expectedRiskScore
+        expectedRiskProfile
+        annualAppreciationRate
+        priceByYear
+        riskByYear
+        filters
+        status
+        generatedAt
+        createdAt
+        samples {
+            tag
+            propertyId
+            propertyValuationId
+            institutionId
+            propertyName
+            exactAddress
+            cadastralKey
+            latitude
+            longitude
+            valuationReference
+            valuationSector
+            averageSquareYard
+            averageSquareMeter
+            riskProfile
+            riskScore
+            measuredAt
+            distanceMeters
+            isWithinRadius
+            valuationAgeYears
+            timeWeight
+            distanceWeight
+            factor
+            weightedPrice
+            weightedRisk
+        }
+    }
+}
+
 query PreviewPreAppraisal($input: PreAppraisalCalculationInput!) {
     previewPreAppraisal(input: $input) {
         targetPropertyId

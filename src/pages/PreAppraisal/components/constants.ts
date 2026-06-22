@@ -45,7 +45,7 @@ export const riskOptions: Array<{ value: RiskFilter; label: string }> = [
 
 export const statusMeta: Record<PreAppraisalStatus, { label: string; className: string }> = {
     [PreAppraisalStatus.Draft]: {
-        label: 'Draft',
+        label: 'Borrador',
         className: 'bg-slate-100 text-slate-700 ring-slate-500/10'
     },
     [PreAppraisalStatus.Generated]: {

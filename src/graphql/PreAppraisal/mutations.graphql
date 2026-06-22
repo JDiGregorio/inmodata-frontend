@@ -21,3 +21,62 @@ mutation CreatePreAppraisal($input: CreatePreAppraisalInput!) {
         createdAt
     }
 }
+
+mutation UpdatePreAppraisal($input: UpdatePreAppraisalInput!) {
+    updatePreAppraisal(input: $input) {
+        id
+        uuid
+        reference
+        name
+        targetAddress
+        targetLatitude
+        targetLongitude
+        radiusMeters
+        sectorFilter
+        valuationDate
+        candidateCount
+        sampleCount
+        recommendedAverageSquareYard
+        expectedRiskScore
+        expectedRiskProfile
+        annualAppreciationRate
+        status
+        generatedAt
+        createdAt
+    }
+}
+
+mutation GeneratePreAppraisal($id: ID!) {
+    generatePreAppraisal(id: $id) {
+        id
+        status
+        generatedAt
+    }
+}
+
+mutation CancelPreAppraisal($id: ID!) {
+    cancelPreAppraisal(id: $id) {
+        id
+        status
+    }
+}
+
+mutation DeletePreAppraisal($id: ID!) {
+    deletePreAppraisal(id: $id) {
+        id
+    }
+}
+
+mutation RequestFormalPreAppraisal($id: ID!) {
+    requestFormalPreAppraisal(id: $id) {
+        id
+        status
+    }
+}
+
+mutation DuplicatePreAppraisal($id: ID!) {
+    duplicatePreAppraisal(id: $id) {
+        id
+        status
+    }
+}

@@ -137,7 +137,21 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
                             No hay propiedades dentro de la muestra.
                         </div>
                     ) : (
-                        <Table className="min-w-[900px]">
+                        <Table className="min-w-[1040px] table-fixed">
+                            <colgroup>
+                                <col className="w-[4rem]" />
+                                <col className="w-[9rem]" />
+                                <col className="w-[14rem]" />
+                                <col className="w-[7rem]" />
+                                <col className="w-[5rem]" />
+                                <col className="w-[8rem]" />
+                                <col className="w-[8rem]" />
+                                <col className="w-[8rem]" />
+                                <col className="w-[7rem]" />
+                                <col className="w-[9rem]" />
+                                <col className="w-[9rem]" />
+                            </colgroup>
+
                             <TableHeader className="bg-[#155a7c]">
                                 <TableRow>
                                     <TableHead className="px-3 py-2 text-xs font-medium text-white">Tag</TableHead>

@@ -16,7 +16,6 @@ import {
     usePreviewPreAppraisalLazyQuery
 } from '@/generated-types'
 
-import { Badge } from './components/Badge'
 import { PreAppraisalConfigurationPanel } from './components/PreAppraisalConfigurationPanel'
 import { PreAppraisalCreateMap } from './components/PreAppraisalCreateMap'
 import { PreAppraisalPreviewTabs } from './components/PreAppraisalPreviewTabs'
@@ -24,14 +23,12 @@ import { PreAppraisalCreateForm } from './components/createTypes'
 import { DEFAULT_RADIUS_METERS, DEFAULT_TIME_FACTOR, isValidPreviewInput } from './components/createUtils'
 
 const initialForm: PreAppraisalCreateForm = {
-    name: '',
     targetAddress: '',
     targetLatitude: null,
     targetLongitude: null,
     targetPropertyId: null,
     radiusMeters: DEFAULT_RADIUS_METERS,
-    sectorFilter: PreAppraisalSectorFilter.Financiero,
-    valuationDate: new Date().toISOString().split('T')[0]
+    sectorFilter: PreAppraisalSectorFilter.Financiero
 }
 
 const PreAppraisalCreateView = (): React.ReactElement => {
@@ -40,13 +37,13 @@ const PreAppraisalCreateView = (): React.ReactElement => {
     const [validationErrors, setValidationErrors] = useState<Partial<Record<keyof PreAppraisalCreateForm, string>>>({})
     const [confirmGenerateOpen, setConfirmGenerateOpen] = useState(false)
     const [savingAction, setSavingAction] = useState<PreAppraisalCreateAction | null>(null)
+    const [addressAutofillLoading, setAddressAutofillLoading] = useState(false)
 
     const previewFingerprint = JSON.stringify({
         targetLatitude: form.targetLatitude,
         targetLongitude: form.targetLongitude,
         radiusMeters: form.radiusMeters,
-        sectorFilter: form.sectorFilter,
-        valuationDate: form.valuationDate
+        sectorFilter: form.sectorFilter
     })
     const debouncedPreviewFingerprint = useDebounce(previewFingerprint, 650)
 
@@ -68,13 +65,11 @@ const PreAppraisalCreateView = (): React.ReactElement => {
 
         return {
             targetPropertyId: form.targetPropertyId,
-            name: form.name || null,
             targetAddress: form.targetAddress || null,
             targetLatitude: form.targetLatitude!,
             targetLongitude: form.targetLongitude!,
             radiusMeters: Number(form.radiusMeters),
             sectorFilter: form.sectorFilter as PreAppraisalSectorFilter,
-            valuationDate: form.valuationDate,
             timeFactor: DEFAULT_TIME_FACTOR,
             includeTargetProperty: false
         }
@@ -108,13 +103,42 @@ const PreAppraisalCreateView = (): React.ReactElement => {
         })
     }
 
-    const handlePointChanged = (latitude: number, longitude: number, address?: string) => {
+    const handlePointChanged = (latitude: number, longitude: number) => {
         handleChange({
             targetLatitude: latitude,
             targetLongitude: longitude,
-            targetAddress: address ?? form.targetAddress,
             targetPropertyId: null
         })
+    }
+
+    const handleAutofillAddress = async () => {
+        if (form.targetLatitude === null || form.targetLongitude === null) {
+            return
+        }
+
+        setAddressAutofillLoading(true)
+
+        try {
+            const geocoder = new google.maps.Geocoder()
+            const result = await geocoder.geocode({
+                location: {
+                    lat: form.targetLatitude,
+                    lng: form.targetLongitude
+                }
+            })
+            const address = result.results?.[0]?.formatted_address
+
+            if (!address) {
+                toast.error('No se encontró una dirección para el punto seleccionado.')
+                return
+            }
+
+            handleChange({ targetAddress: address })
+        } catch {
+            toast.error('No se pudo autocompletar la dirección.')
+        } finally {
+            setAddressAutofillLoading(false)
+        }
     }
 
     const validate = (): boolean => {
@@ -133,10 +157,6 @@ const PreAppraisalCreateView = (): React.ReactElement => {
             errors.radiusMeters = 'El radio debe ser mayor a 0.'
         }
 
-        if (!form.valuationDate) {
-            errors.valuationDate = 'La fecha de análisis es requerida.'
-        }
-
         setValidationErrors(errors)
 
         return Object.keys(errors).length === 0
@@ -146,13 +166,11 @@ const PreAppraisalCreateView = (): React.ReactElement => {
         return {
             action,
             targetPropertyId: form.targetPropertyId,
-            name: form.name || null,
             targetAddress: form.targetAddress || null,
             targetLatitude: form.targetLatitude!,
             targetLongitude: form.targetLongitude!,
             radiusMeters: Number(form.radiusMeters),
             sectorFilter: form.sectorFilter as PreAppraisalSectorFilter,
-            valuationDate: form.valuationDate,
             timeFactor: DEFAULT_TIME_FACTOR,
             includeTargetProperty: false
         }
@@ -216,9 +234,6 @@ const PreAppraisalCreateView = (): React.ReactElement => {
                             <h1 className="text-lg font-semibold leading-6 text-gray-900">
                                 Nuevo Preavalúo
                             </h1>
-                            <Badge className="bg-slate-100 text-slate-700 ring-slate-500/10">
-                                Draft
-                            </Badge>
                         </div>
                         <p className="text-sm text-slate-500">
                             Configura el punto de interés y el radio para generar el reporte de vecindad.
@@ -233,7 +248,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
 
                     <Button type="button" variant="outline" className="bg-white" onClick={() => handleSave(PreAppraisalCreateAction.SaveDraft)} disabled={savingAction !== null}>
                         {saveDraftLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
-                        Guardar Draft
+                        Guardar borrador
                     </Button>
 
                     <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => validate() && setConfirmGenerateOpen(true)} disabled={savingAction !== null}>
@@ -258,7 +273,9 @@ const PreAppraisalCreateView = (): React.ReactElement => {
                             form={form}
                             validationErrors={validationErrors}
                             previewLoading={previewResult.loading}
+                            addressAutofillLoading={addressAutofillLoading}
                             onChange={handleChange}
+                            onAutofillAddress={handleAutofillAddress}
                             onRecalculate={handleRecalculate}
                         />
 

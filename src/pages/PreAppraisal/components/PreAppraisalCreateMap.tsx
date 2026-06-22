@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Circle } from '@/pages/Property/components/Circle'
 import { PlacesSearch } from '@/pages/Dashboard/components/DashboardMapView/PlacesSearch'
 import { PinContent } from '@/pages/Dashboard/components/DashboardMapView/PinContent'
+import { getRiskProfileColor } from '@/pages/Dashboard/components/DashboardMapView/riskProfile'
 import type { SelectedPlace } from '@/pages/Dashboard/components/DashboardMapView/types'
 
 import markerPrimary from '@/assets/marker9.png'
@@ -20,19 +21,14 @@ interface PreAppraisalCreateMapProps {
     longitude: number | null;
     radiusMeters: number;
     samples: PreAppraisalPreviewSample[];
-    onPointChanged: (latitude: number, longitude: number, address?: string) => void;
+    fitRadiusInView?: boolean;
+    onPointChanged: (latitude: number, longitude: number) => void;
 }
 
 const MAP_ID = '7e4a3d97341b511756649b5f'
+const RADIUS_VIEW_PADDING = 16
 
-const reverseGeocode = async (position: google.maps.LatLngLiteral): Promise<string | undefined> => {
-    const geocoder = new google.maps.Geocoder()
-    const result = await geocoder.geocode({ location: position })
-
-    return result.results?.[0]?.formatted_address
-}
-
-const MapViewportSync = ({ point, recenterSignal }: { point: google.maps.LatLngLiteral | null; recenterSignal: number }) => {
+const MapViewportSync = ({ point, radiusMeters, fitRadiusInView, recenterSignal }: { point: google.maps.LatLngLiteral | null; radiusMeters: number; fitRadiusInView: boolean; recenterSignal: number }) => {
     const map = useMap()
 
     useEffect(() => {
@@ -40,18 +36,30 @@ const MapViewportSync = ({ point, recenterSignal }: { point: google.maps.LatLngL
             return
         }
 
+        if (fitRadiusInView && Number.isFinite(radiusMeters) && radiusMeters > 0) {
+            const radiusBounds = new google.maps.Circle({
+                center: point,
+                radius: radiusMeters
+            }).getBounds()
+
+            if (radiusBounds) {
+                map.fitBounds(radiusBounds, RADIUS_VIEW_PADDING)
+                return
+            }
+        }
+
         map.panTo(point)
         map.setZoom(16)
-    }, [map, point?.lat, point?.lng, recenterSignal])
+    }, [map, point?.lat, point?.lng, radiusMeters, fitRadiusInView, recenterSignal])
 
     return null
 }
 
-export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, samples, onPointChanged }: PreAppraisalCreateMapProps): React.ReactElement => {
+export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, samples, fitRadiusInView = false, onPointChanged }: PreAppraisalCreateMapProps): React.ReactElement => {
     const [recenterSignal, setRecenterSignal] = React.useState(0)
     const point = React.useMemo(() => latitude !== null && longitude !== null ? { lat: latitude, lng: longitude } : null, [latitude, longitude])
 
-    const handleMapClick = useCallback(async (event: any) => {
+    const handleMapClick = useCallback((event: any) => {
         const latLng = event?.detail?.latLng
 
         if (!latLng) {
@@ -79,11 +87,10 @@ export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, sampl
             return
         }
 
-        const address = await reverseGeocode({ lat, lng })
-        onPointChanged(lat, lng, address)
+        onPointChanged(lat, lng)
     }, [onPointChanged])
 
-    const handleDragEnd = useCallback(async (event: google.maps.MapMouseEvent) => {
+    const handleDragEnd = useCallback((event: google.maps.MapMouseEvent) => {
         if (!event.latLng) {
             return
         }
@@ -95,12 +102,11 @@ export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, sampl
             return
         }
 
-        const address = await reverseGeocode({ lat, lng })
-        onPointChanged(lat, lng, address)
+        onPointChanged(lat, lng)
     }, [onPointChanged])
 
-    const handlePlaceSelected = (_place: SelectedPlace) => {
-        return
+    const handlePlaceSelected = (place: SelectedPlace) => {
+        onPointChanged(place.position.lat, place.position.lng)
     }
 
     return (
@@ -126,7 +132,7 @@ export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, sampl
                 fullscreenControl={false}
                 style={{ width: '100%', height: '100%' }}
             >
-                <MapViewportSync point={point} recenterSignal={recenterSignal} />
+                <MapViewportSync point={point} radiusMeters={radiusMeters} fitRadiusInView={fitRadiusInView} recenterSignal={recenterSignal} />
 
                 {point && (
                     <>
@@ -151,9 +157,11 @@ export const PreAppraisalCreateMap = ({ latitude, longitude, radiusMeters, sampl
                         return null
                     }
 
+                    const markerColor = getRiskProfileColor(sample.riskProfile)
+
                     return (
                         <AdvancedMarker key={`${sample.propertyId ?? sample.propertyValuationId ?? index}`} position={{ lat: sample.latitude, lng: sample.longitude }} zIndex={100}>
-                            <PinContent scale={0.65} background="#157783" borderColor="#ffffff" glyphColor="#ffffff" />
+                            <PinContent scale={0.65} background={markerColor} borderColor="#374151" glyphColor="#ffffff" />
                         </AdvancedMarker>
                     )
                 })}

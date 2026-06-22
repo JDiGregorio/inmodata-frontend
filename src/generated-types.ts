@@ -46,7 +46,6 @@ export type CreateInstitutionInput = {
 export type CreatePreAppraisalInput = {
   action?: InputMaybe<PreAppraisalCreateAction>;
   includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
   radiusMeters: Scalars['Int']['input'];
   reference?: InputMaybe<Scalars['String']['input']>;
   sectorFilter: PreAppraisalSectorFilter;
@@ -55,7 +54,6 @@ export type CreatePreAppraisalInput = {
   targetLongitude: Scalars['Float']['input'];
   targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
   timeFactor?: InputMaybe<Scalars['Float']['input']>;
-  valuationDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 export type CreatePropertyInput = {
@@ -290,7 +288,6 @@ export type PreAppraisal = {
 
 export type PreAppraisalCalculationInput = {
   includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
   radiusMeters: Scalars['Int']['input'];
   sectorFilter: PreAppraisalSectorFilter;
   targetAddress?: InputMaybe<Scalars['String']['input']>;
@@ -298,7 +295,6 @@ export type PreAppraisalCalculationInput = {
   targetLongitude: Scalars['Float']['input'];
   targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
   timeFactor?: InputMaybe<Scalars['Float']['input']>;
-  valuationDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 export enum PreAppraisalCreateAction {

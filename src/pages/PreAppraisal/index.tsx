@@ -21,6 +21,7 @@ import { AdvancedFiltersDrawer } from './components/AdvancedFiltersDrawer'
 import { Badge } from './components/Badge'
 import { EmptyState } from './components/EmptyState'
 import { RowActions } from './components/RowActions'
+import { formatDate } from './components/createFormatters'
 import {
     CREATE_PATH,
     ITEMS_PER_PAGE,
@@ -186,22 +187,22 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                                     <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                                         <div className="overflow-hidden border border-gray-200 outline-1 outline-black/5 sm:rounded-lg">
-                                            <Table className="min-w-[1050px] table-fixed">
+                                            <Table className="min-w-[1120px] table-fixed">
                                                 <colgroup>
-                                                    <col className="w-[10rem]" />
-                                                    <col className="w-[14rem]" />
-                                                    <col className="w-[7rem]" />
-                                                    <col className="w-[7rem]" />
-                                                    <col className="w-[10rem]" />
+                                                    <col className="w-[8rem]" />
+                                                    <col className="w-[12rem]" />
                                                     <col className="w-[6rem]" />
+                                                    <col className="w-[6rem]" />
+                                                    <col className="w-[5rem]" />
+                                                    <col className="w-[7rem]" />
                                                 </colgroup>
 
                                                 <TableHeader className="bg-gray-50">
                                                     <TableRow>
                                                         <TableHead className="px-4 py-3 text-xs font-medium uppercase text-slate-500">Referencia</TableHead>
                                                         <TableHead className="px-4 py-3 text-xs font-medium uppercase text-slate-500">Dirección</TableHead>
+                                                        <TableHead className="px-4 py-3 text-xs font-medium uppercase text-slate-500">Fecha</TableHead>
                                                         <TableHead className="px-4 py-3 text-xs font-medium uppercase text-slate-500">Radio</TableHead>
-                                                        <TableHead className="px-4 py-3 text-center text-xs font-medium uppercase text-slate-500">Muestras</TableHead>
                                                         <TableHead className="px-4 py-3 text-xs font-medium uppercase text-slate-500">Estado</TableHead>
                                                         <TableHead className="px-4 py-3 text-center text-xs font-medium uppercase text-slate-500">Acciones</TableHead>
                                                     </TableRow>
@@ -219,11 +220,6 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
 
                                                                 <TableCell className="px-4 py-4 align-top">
                                                                     <div className="max-w-[17rem]">
-                                                                        {preAppraisal.name && (
-                                                                            <p className="truncate text-sm font-medium text-gray-900" title={preAppraisal.name}>
-                                                                                {preAppraisal.name}
-                                                                            </p>
-                                                                        )}
                                                                         <p className="whitespace-normal text-sm leading-5 text-gray-700" title={getDisplayAddress(preAppraisal)}>
                                                                             {getDisplayAddress(preAppraisal)}
                                                                         </p>
@@ -231,11 +227,11 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                                                                 </TableCell>
 
                                                                 <TableCell className="px-4 py-4 align-top text-sm text-gray-700">
-                                                                    {preAppraisal.radiusMeters}m
+                                                                    {formatDate(preAppraisal.createdAt)}
                                                                 </TableCell>
 
-                                                                <TableCell className="px-4 py-4 text-center align-top text-sm text-gray-700">
-                                                                    {preAppraisal.sampleCount}
+                                                                <TableCell className="px-4 py-4 align-top text-sm text-gray-700">
+                                                                    {preAppraisal.radiusMeters}m
                                                                 </TableCell>
 
                                                                 <TableCell className="px-4 py-4 align-top">
@@ -251,7 +247,7 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                                                         )
                                                     }) : (
                                                         <TableRow>
-                                                            <TableCell colSpan={6}>
+                                                            <TableCell colSpan={7}>
                                                                 <EmptyState onCreate={handleCreate} />
                                                             </TableCell>
                                                         </TableRow>
