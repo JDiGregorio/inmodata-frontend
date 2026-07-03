@@ -188,6 +188,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                     input: {
                         id: valuation.id,
                         reference: valuation.reference,
+                        measuredAt: formatted,
                         institution: _institution,
                         owner: valuation.owner,
                         applicant: valuation.applicant,

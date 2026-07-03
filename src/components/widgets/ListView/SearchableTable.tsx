@@ -38,7 +38,7 @@ export const SearchableTable = <T,> ({ model, title, toolbarActions, canCreate, 
     useEffect(() => {
         const refetchArgs = {
             first: 10,
-            page: debouncedSearchTerm.length > 0 ? 1 : currentPage,
+            page: currentPage,
             search: debouncedSearchTerm
         }
 
@@ -52,6 +52,7 @@ export const SearchableTable = <T,> ({ model, title, toolbarActions, canCreate, 
 
     const handleSearchQueryChanged = (query: string): void => {
         setSearchQuery(query)
+        setCurrentPage(1)
     }
 
     if (loading) {
