@@ -31,3 +31,19 @@ export function getRiskProfileColor(riskProfile?: RiskAggregates | null) {
 
 	return RISK_PROFILE_META[riskProfile]?.color ?? '#4B5563'
 }
+
+export function getRiskProfileTextColor(riskProfile?: RiskAggregates | null) {
+	const color = getRiskProfileColor(riskProfile)
+	const normalizedColor = color.replace('#', '')
+
+	if (normalizedColor.length !== 6) {
+		return '#111827'
+	}
+
+	const r = parseInt(normalizedColor.slice(0, 2), 16)
+	const g = parseInt(normalizedColor.slice(2, 4), 16)
+	const b = parseInt(normalizedColor.slice(4, 6), 16)
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+	return luminance > 0.65 ? '#111827' : '#FFFFFF'
+}

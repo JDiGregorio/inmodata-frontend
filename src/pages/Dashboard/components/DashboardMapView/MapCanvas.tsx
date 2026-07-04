@@ -140,6 +140,7 @@ function FocusTargetViewportAdjuster({ focusTarget }: { focusTarget: { lat: numb
 export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarget, setSelected, handleToggleExpand }: MapCanvasProps) {
     const [points, setPoints] = React.useState<Property[]>([])
     const [selectedSnapshot, setSelectedSnapshot] = React.useState<Property | null>(null)
+    const [isPanelOpen, setIsPanelOpen] = React.useState<boolean>(Boolean(selectedId))
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -175,10 +176,13 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
     React.useEffect(() => {
         if (!selectedId) {
             setSelectedSnapshot(null)
+            setIsPanelOpen(false)
             return
         }
 
         const point = points.find((p) => p.id === selectedId) ?? null
+
+        setIsPanelOpen(true)
 
         if (point) {
             setSelectedSnapshot(point)
@@ -239,6 +243,8 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
     }, [])
 
     const handleClosePanel = React.useCallback(() => {
+        setSelectedSnapshot(null)
+        setIsPanelOpen(false)
         setSelected(null)
     }, [setSelected])
 
@@ -303,7 +309,9 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
                 })}
             </Map>
 
-            <RightPanel point={selectedPoint} expanded={expanded} onClose={handleClosePanel} />
+            {isPanelOpen && selectedPoint && (
+                <RightPanel point={selectedPoint} expanded={expanded} onClose={handleClosePanel} />
+            )}
 
             {!hasLoadedOnce && loading && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/45">

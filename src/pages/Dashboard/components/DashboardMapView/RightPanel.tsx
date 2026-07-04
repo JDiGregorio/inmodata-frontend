@@ -3,7 +3,7 @@ import { ExternalLinkIcon, XIcon, EyeOffIcon, EyeIcon } from 'lucide-react'
 
 import { Item } from './Item'
 
-import { getRiskProfileColor, getRiskProfileShort, getRiskProfileLabel } from './riskProfile'
+import { getRiskProfileColor, getRiskProfileShort, getRiskProfileLabel, getRiskProfileTextColor } from './riskProfile'
 
 import {
     PropertyPointFieldsFragment
@@ -105,10 +105,11 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                         </dt>
 
                         <dd className="flex flex-col items-baseline leading-none">
-                            <p className="text-xs text-gray-500">
-                                Riesgo:
+                            <p className="text-xs font-medium" style={{ color: getRiskProfileTextColor(valuation?.riskProfile) }}>
+                                Calidad del Inmueble:
                             </p>
-                            <p className="text-xl font-semibold text-gray-900">
+                            
+                            <p className="text-xl font-semibold" style={{ color: getRiskProfileTextColor(valuation?.riskProfile) }}>
                                 {getRiskProfileLabel(valuation?.riskProfile)}
                             </p>
                         </dd>
