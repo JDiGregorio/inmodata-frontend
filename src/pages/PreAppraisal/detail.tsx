@@ -19,7 +19,7 @@ import { PreAppraisalSectorFilter, PreAppraisalStatus, RiskAggregates, Valuation
 import Page404 from '../404'
 import { Badge } from './components/Badge'
 import { BarChart, LineChart } from './components/SimpleCharts'
-import { formatDate, formatNumber, formatPercent, formatRisk, sectorLabels } from './components/createFormatters'
+import { formatDate, formatExpectedRiskLevel, formatNumber, formatPercent, formatRisk, sectorLabels } from './components/createFormatters'
 import { DEFAULT_CENTER } from './components/createUtils'
 import { statusMeta } from './components/constants'
 import { parseChartPoints } from './components/createUtils'
@@ -417,7 +417,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                                     <div className="mt-5 divide-y divide-gray-100">
                                         <ReportSummaryRow label="Rango" unit="L./V2" value={`${formatNumber(preAppraisal.minAverageSquareYard)} - ${formatNumber(preAppraisal.maxAverageSquareYard)}`} />
                                         <ReportSummaryRow label="Precio Recomendado" unit="L./V2" value={formatNumber(preAppraisal.recommendedAverageSquareYard)} strong />
-                                        <ReportSummaryRow label="Calidad Esperada" unit={preAppraisal.expectedRiskScore ? `R${Math.round(preAppraisal.expectedRiskScore)}` : '-'} value={formatRisk(preAppraisal.expectedRiskProfile)} />
+                                        <ReportSummaryRow label="Calidad Esperada" unit={formatExpectedRiskLevel(preAppraisal.expectedRiskScore)} value={formatRisk(preAppraisal.expectedRiskProfile)} />
                                         <ReportSummaryRow label="Plusvalía Anual" unit="%" value={formatPercent(preAppraisal.annualAppreciationRate)} strong />
                                     </div>
                                 </section>

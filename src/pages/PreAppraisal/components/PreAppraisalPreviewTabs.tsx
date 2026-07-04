@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { RiskAggregates } from '@/generated-types'
 
 import { Badge } from './Badge'
-import { formatDate, formatDistance, formatLempiras, formatNumber, formatPercent, formatRisk, sectorLabels, valuationSectorLabels } from './createFormatters'
+import { formatDate, formatDistance, formatExpectedRiskLevel, formatLempiras, formatNumber, formatPercent, formatRisk, sectorLabels, valuationSectorLabels } from './createFormatters'
 import { parseChartPoints } from './createUtils'
 import { BarChart, LineChart } from './SimpleCharts'
 import { PreAppraisalPreview } from './createTypes'
@@ -90,7 +90,7 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
                         <SummaryCard label="Precio Recomendado" value={`${formatLempiras(preview.recommendedAverageSquareYard)} L./V2`} strong />
                         <SummaryCard
                             label="Calidad Esperada"
-                            value={preview.expectedRiskScore ? `R${preview.expectedRiskScore}` : '-'}
+                            value={formatExpectedRiskLevel(preview.expectedRiskScore)}
                             aside={<Badge className={riskBadgeClass(preview.expectedRiskProfile)}>{formatRisk(preview.expectedRiskProfile)}</Badge>}
                         />
                         <SummaryCard label="Plusvalía Anual" value={formatPercent(preview.annualAppreciationRate)} strong />

@@ -74,3 +74,11 @@ export const formatRisk = (value?: RiskAggregates | null): string => {
 
     return riskLabels[value] ?? value
 }
+
+export const formatExpectedRiskLevel = (value?: number | null): string => {
+    if (value === null || value === undefined) {
+        return '-'
+    }
+
+    return `R${Math.round(value)}`
+}
