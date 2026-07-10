@@ -36,8 +36,8 @@ const riskBadgeClass = (risk?: RiskAggregates | null): string => {
 export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError }: PreAppraisalPreviewTabsProps): React.ReactElement => {
     const [activeTab, setActiveTab] = useState<'summary' | 'behavior' | 'samples'>('summary')
 
-    const priceChartData = useMemo(() => parseChartPoints(preview?.priceByYear, ['averagePrice', 'averageSquareYard', 'price', 'value']), [preview?.priceByYear])
-    const riskChartData = useMemo(() => parseChartPoints(preview?.riskByYear, ['averageRiskScore', 'riskScore', 'risk', 'value']), [preview?.riskByYear])
+    const priceChartData = useMemo(() => parseChartPoints(preview?.priceByYear, 'averagePrice'), [preview?.priceByYear])
+    const riskChartData = useMemo(() => parseChartPoints(preview?.riskByYear, 'averageRiskScore'), [preview?.riskByYear])
 
     if (previewError) {
         return (

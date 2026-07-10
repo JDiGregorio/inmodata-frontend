@@ -13,6 +13,8 @@ export type PreAppraisalCreateForm = {
 }
 
 export type ChartPoint = {
-    year: string;
+    year: number;
     value: number;
+    valuationCount?: number;
+    propertyCount?: number;
 }

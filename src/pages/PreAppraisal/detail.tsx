@@ -171,6 +171,7 @@ type DetailPreAppraisal = {
     annualAppreciationRate?: number | null;
     priceByYear?: unknown;
     riskByYear?: unknown;
+    filters?: Record<string, unknown> | string | null;
     status: PreAppraisalStatus;
     generatedAt?: string | null;
     createdAt: string;
@@ -229,8 +230,8 @@ const PreAppraisalDetailView = (): React.ReactElement => {
     const [duplicatePreAppraisal] = useMutation<MutationData, MutationVariables>(DUPLICATE_PRE_APPRAISAL)
 
     const preAppraisal = data?.preAppraisalById
-    const priceChartData = useMemo(() => parseChartPoints(preAppraisal?.priceByYear, ['averagePrice', 'averageSquareYard', 'price', 'value']), [preAppraisal?.priceByYear])
-    const riskChartData = useMemo(() => parseChartPoints(preAppraisal?.riskByYear, ['averageRiskScore', 'riskScore', 'risk', 'value']), [preAppraisal?.riskByYear])
+    const priceChartData = useMemo(() => parseChartPoints(preAppraisal?.priceByYear, 'averagePrice'), [preAppraisal?.priceByYear])
+    const riskChartData = useMemo(() => parseChartPoints(preAppraisal?.riskByYear, 'averageRiskScore'), [preAppraisal?.riskByYear])
 
     if (!id) {
         return <Page404 />
