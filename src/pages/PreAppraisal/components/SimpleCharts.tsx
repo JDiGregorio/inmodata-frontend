@@ -13,6 +13,10 @@ interface BarChartProps {
 const chartWidth = 360
 const chartHeight = 170
 const padding = 28
+const valueFormatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+})
 
 const getSortedData = (data: ChartPoint[]): ChartPoint[] => [...data].sort((left, right) => left.year - right.year)
 
@@ -60,6 +64,7 @@ export const LineChart = ({ data }: LineChartProps): React.ReactElement => {
             {points.map((point) => (
                 <g key={point.year}>
                     <ChartPointTitle point={point} />
+                    <ChartValueLabel point={point} />
                     <circle cx={point.x} cy={point.y} r="3" fill="#155a7c" />
                     <text x={point.x} y={chartHeight - 8} textAnchor="middle" className="fill-slate-500 text-[10px]">
                         {point.year}
@@ -115,10 +120,36 @@ export const ChartEmptyState = (): React.ReactElement => (
 
 const ChartPointTitle = ({ point }: { point: ChartPoint }): React.ReactElement => {
     const metadata = [
-        `${point.year}: ${point.value.toFixed(2)}`,
+        `${point.year}: ${valueFormatter.format(point.value)}`,
         point.valuationCount !== undefined ? `Valuaciones: ${point.valuationCount}` : null,
         point.propertyCount !== undefined ? `Propiedades: ${point.propertyCount}` : null
     ].filter(Boolean).join(' | ')
 
     return <title>{metadata}</title>
+}
+
+const ChartValueLabel = ({ point }: { point: ChartPoint & { x: number; y: number } }): React.ReactElement => {
+    const label = valueFormatter.format(point.value)
+    const labelWidth = Math.max(label.length * 5.6 + 8, 42)
+    const labelHeight = 16
+    const labelX = Math.min(Math.max(point.x, labelWidth / 2 + 2), chartWidth - labelWidth / 2 - 2)
+    const labelY = Math.max(point.y - 10, labelHeight)
+
+    return (
+        <g pointerEvents="none">
+            <rect
+                x={labelX - labelWidth / 2}
+                y={labelY - labelHeight + 2}
+                width={labelWidth}
+                height={labelHeight}
+                rx="3"
+                fill="#ffffff"
+                stroke="#155a7c"
+                strokeOpacity="0.22"
+            />
+            <text x={labelX} y={labelY - 3} textAnchor="middle" className="fill-slate-800 text-[9px] font-semibold">
+                L. {label}
+            </text>
+        </g>
+    )
 }

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import { AdvancedMarker, Map, useMap } from '@vis.gl/react-google-maps'
-import { ArrowLeftIcon, BanIcon, CopyIcon, DownloadIcon, FileTextIcon, PrinterIcon, Trash2Icon, WandSparklesIcon } from 'lucide-react'
+import { ArrowLeftIcon, BanIcon, CopyIcon, DownloadIcon, FileTextIcon, Loader2Icon, Trash2Icon, WandSparklesIcon } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router'
 
 import Spinner from '@/components/layouts/Spinner'
@@ -127,6 +127,16 @@ const DUPLICATE_PRE_APPRAISAL = gql`
     }
 `
 
+const DOWNLOAD_PRE_APPRAISAL_PDF = gql`
+    mutation DetailDownloadPreAppraisalPdf($id: ID!) {
+        downloadPreAppraisalPdf(id: $id) {
+            filename
+            mimeType
+            contentBase64
+        }
+    }
+`
+
 type DetailSample = {
     tag?: string | null;
     propertyId?: string | null;
@@ -192,6 +202,11 @@ type MutationData = {
     deletePreAppraisal?: { id: string };
     requestFormalPreAppraisal?: { id: string; status: PreAppraisalStatus };
     duplicatePreAppraisal?: { id: string; status: PreAppraisalStatus };
+    downloadPreAppraisalPdf?: {
+        filename: string;
+        mimeType: string;
+        contentBase64: string;
+    };
 }
 
 type MutationVariables = {
@@ -199,7 +214,7 @@ type MutationVariables = {
 }
 
 type ConfirmAction = 'generate' | 'cancel' | 'delete' | 'request-formal' | null
-type DetailTab = 'summary' | 'samples' | 'behavior'
+type DetailTab = 'summary' | 'samples'
 
 const MAP_ID = '7e4a3d97341b511756649b5f'
 const RADIUS_VIEW_PADDING = 16
@@ -228,6 +243,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
     const [deletePreAppraisal] = useMutation<MutationData, MutationVariables>(DELETE_PRE_APPRAISAL)
     const [requestFormalPreAppraisal] = useMutation<MutationData, MutationVariables>(REQUEST_FORMAL_PRE_APPRAISAL)
     const [duplicatePreAppraisal] = useMutation<MutationData, MutationVariables>(DUPLICATE_PRE_APPRAISAL)
+    const [downloadPreAppraisalPdf] = useMutation<MutationData, MutationVariables>(DOWNLOAD_PRE_APPRAISAL_PDF)
 
     const preAppraisal = data?.preAppraisalById
     const priceChartData = useMemo(() => parseChartPoints(preAppraisal?.priceByYear, 'averagePrice'), [preAppraisal?.priceByYear])
@@ -249,6 +265,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
     const reportReference = preAppraisal.reference || preAppraisal.name || preAppraisal.uuid
     const isDraft = preAppraisal.status === PreAppraisalStatus.Draft
     const isGenerated = preAppraisal.status === PreAppraisalStatus.Generated
+    const canDownloadAndReevaluate = isGenerated || preAppraisal.status === PreAppraisalStatus.FormalRequested
 
     const runAction = async (action: Exclude<ConfirmAction, null>) => {
         setRunningAction(action)
@@ -297,7 +314,28 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                 navigate(`/preavaluos/${duplicatedId}/editar`)
             }
         } catch {
-            toast.error('No se pudo duplicar el preavalúo.')
+            toast.error('No se pudo reevaluar el preavalúo.')
+        } finally {
+            setRunningAction(null)
+        }
+    }
+
+    const handleDownloadPdf = async () => {
+        setRunningAction('download-pdf')
+
+        try {
+            const result = await downloadPreAppraisalPdf({ variables: { id: preAppraisal.id } })
+            const download = result.data?.downloadPreAppraisalPdf
+
+            if (!download) {
+                toast.error('No se pudo realizar la descarga del preavalúo.')
+                return
+            }
+
+            downloadBase64File(download.contentBase64, download.mimeType, download.filename)
+            toast.success('Descarga realizada exitosamente.')
+        } catch {
+            toast.error('No se pudo descargar el preavalúo.')
         } finally {
             setRunningAction(null)
         }
@@ -330,39 +368,41 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                 <div className="flex flex-wrap items-center justify-end gap-3">
                     {isDraft && (
                         <>
-                            <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('generate')} disabled={runningAction !== null}>
-                                <WandSparklesIcon className="h-4 w-4" />
-                                Generar reporte
-                            </Button>
-                            <Button type="button" variant="outline" className="bg-white" onClick={() => setConfirmAction('cancel')} disabled={runningAction !== null}>
-                                <BanIcon className="h-4 w-4" />
-                                Cancelar
-                            </Button>
                             <Button type="button" variant="outline" className="bg-white text-red-700 hover:text-red-800" onClick={() => setConfirmAction('delete')} disabled={runningAction !== null}>
                                 <Trash2Icon className="h-4 w-4" />
                                 Eliminar
                             </Button>
+
+                            <Button type="button" variant="outline" className="bg-white" onClick={() => setConfirmAction('cancel')} disabled={runningAction !== null}>
+                                <BanIcon className="h-4 w-4" />
+                                Cancelar
+                            </Button>
+
+                            <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('generate')} disabled={runningAction !== null}>
+                                <WandSparklesIcon className="h-4 w-4" />
+                                Generar reporte
+                            </Button>
                         </>
                     )}
 
-                    {isGenerated && (
+                    {canDownloadAndReevaluate && (
                         <>
-                            <Button type="button" variant="outline" className="bg-white" onClick={() => window.print()} disabled={runningAction !== null}>
-                                <PrinterIcon className="h-4 w-4" />
-                                Imprimir
+                            <Button type="button" variant="outline" className="bg-white" onClick={handleDownloadPdf} disabled={runningAction !== null}>
+                                {runningAction === 'download-pdf' ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <DownloadIcon className="h-4 w-4" />}
+                                Descargar
                             </Button>
-                            <Button type="button" variant="outline" className="bg-white" onClick={() => window.print()} disabled={runningAction !== null}>
-                                <DownloadIcon className="h-4 w-4" />
-                                PDF
-                            </Button>
-                            <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('request-formal')} disabled={runningAction !== null}>
-                                <FileTextIcon className="h-4 w-4" />
-                                Solicitar Avalúo Formal
-                            </Button>
+
                             <Button type="button" variant="outline" className="bg-white" onClick={handleDuplicate} disabled={runningAction !== null}>
                                 <CopyIcon className="h-4 w-4" />
-                                Duplicar
+                                Reevaluar
                             </Button>
+
+                            {isGenerated && (
+                                <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('request-formal')} disabled={runningAction !== null}>
+                                    <FileTextIcon className="h-4 w-4" />
+                                    Solicitar Avalúo
+                                </Button>
+                            )}
                         </>
                     )}
                 </div>
@@ -399,27 +439,62 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                             <button type="button" className={`border-b-2 py-3 text-sm font-medium ${tabClassName(activeTab === 'samples')}`} onClick={() => setActiveTab('samples')}>
                                 Muestras ({preAppraisal.sampleCount})
                             </button>
-                            <button type="button" className={`border-b-2 py-3 text-sm font-medium ${tabClassName(activeTab === 'behavior')}`} onClick={() => setActiveTab('behavior')}>
-                                Comportamiento
-                            </button>
                         </nav>
                     </div>
 
                     <div className="pt-8">
                         {activeTab === 'summary' && (
-                            <div className="grid gap-10 lg:grid-cols-2">
-                                <ReportMap preAppraisal={preAppraisal} />
+                            <div className="space-y-12">
+                                <div className="grid gap-10 lg:grid-cols-2">
+                                    <ReportMap preAppraisal={preAppraisal} />
+
+                                    <section>
+                                        <h3 className="text-lg font-bold text-gray-900">
+                                            Resultados Generales de la Muestra
+                                        </h3>
+
+                                        <div className="mt-5 divide-y divide-gray-100">
+                                            <ReportSummaryRow label="Rango" unit="L./V2" value={`${formatNumber(preAppraisal.minAverageSquareYard)} - ${formatNumber(preAppraisal.maxAverageSquareYard)}`} />
+                                            <ReportSummaryRow label="Precio Recomendado" unit="L./V2" value={formatNumber(preAppraisal.recommendedAverageSquareYard)} strong />
+                                            <ReportSummaryRow label="Calidad Esperada" unit={formatExpectedRiskLevel(preAppraisal.expectedRiskScore)} value={formatRisk(preAppraisal.expectedRiskProfile)} />
+                                            <ReportSummaryRow label="Plusvalía Anual" unit="%" value={formatPercent(preAppraisal.annualAppreciationRate)} strong />
+                                        </div>
+                                    </section>
+                                </div>
 
                                 <section>
                                     <h3 className="text-lg font-bold text-gray-900">
-                                        Resultados Generales de la Muestra
+                                        Comportamiento
                                     </h3>
 
-                                    <div className="mt-5 divide-y divide-gray-100">
-                                        <ReportSummaryRow label="Rango" unit="L./V2" value={`${formatNumber(preAppraisal.minAverageSquareYard)} - ${formatNumber(preAppraisal.maxAverageSquareYard)}`} />
-                                        <ReportSummaryRow label="Precio Recomendado" unit="L./V2" value={formatNumber(preAppraisal.recommendedAverageSquareYard)} strong />
-                                        <ReportSummaryRow label="Calidad Esperada" unit={formatExpectedRiskLevel(preAppraisal.expectedRiskScore)} value={formatRisk(preAppraisal.expectedRiskProfile)} />
-                                        <ReportSummaryRow label="Plusvalía Anual" unit="%" value={formatPercent(preAppraisal.annualAppreciationRate)} strong />
+                                    <div className="mt-6 grid gap-10 lg:grid-cols-2">
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-900">
+                                                Precio L/V&sup2;
+                                            </h4>
+
+                                            {priceChartData.length < 2 && (
+                                                <p className="mt-2 text-sm text-slate-500">
+                                                    La gráfica de precio necesita datos de al menos dos años.
+                                                </p>
+                                            )}
+
+                                            <LineChart data={priceChartData} />
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-900">
+                                                Riesgo
+                                            </h4>
+
+                                            {riskChartData.length < 2 && (
+                                                <p className="mt-2 text-sm text-slate-500">
+                                                    La gráfica de riesgo necesita datos de al menos dos años.
+                                                </p>
+                                            )}
+
+                                            <BarChart data={riskChartData} />
+                                        </div>
                                     </div>
                                 </section>
                             </div>
@@ -437,37 +512,6 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                             </section>
                         )}
 
-                        {activeTab === 'behavior' && (
-                            <div className="grid gap-10 lg:grid-cols-2">
-                                <section>
-                                    <h3 className="text-lg font-bold text-gray-900">
-                                        Comportamiento del Precio L./V2
-                                    </h3>
-
-                                    {priceChartData.length < 2 && (
-                                        <p className="mt-2 text-sm text-slate-500">
-                                            La gráfica de precio necesita datos de al menos dos años.
-                                        </p>
-                                    )}
-
-                                    <LineChart data={priceChartData} />
-                                </section>
-
-                                <section>
-                                    <h3 className="text-lg font-bold text-gray-900">
-                                        Comportamiento del Riesgo
-                                    </h3>
-
-                                    {riskChartData.length < 2 && (
-                                        <p className="mt-2 text-sm text-slate-500">
-                                            La gráfica de riesgo necesita datos de al menos dos años.
-                                        </p>
-                                    )}
-
-                                    <BarChart data={riskChartData} />
-                                </section>
-                            </div>
-                        )}
                     </div>
                 </section>
             </main>
@@ -624,6 +668,24 @@ const formatLatLong = (sample: DetailSample): string => {
     }
 
     return `${Number(sample.latitude).toFixed(6)}, ${Number(sample.longitude).toFixed(6)}`
+}
+
+const downloadBase64File = (contentBase64: string, mimeType: string, filename: string): void => {
+    const binaryString = window.atob(contentBase64)
+    const bytes = new Uint8Array(binaryString.length)
+
+    for (let index = 0; index < binaryString.length; index += 1) {
+        bytes[index] = binaryString.charCodeAt(index)
+    }
+
+    const url = window.URL.createObjectURL(new Blob([bytes], { type: mimeType }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
 }
 
 const getConfirmCopy = (action: ConfirmAction): { title: string; message: string; cta: string } | null => {
