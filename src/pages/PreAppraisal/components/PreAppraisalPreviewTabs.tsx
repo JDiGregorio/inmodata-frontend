@@ -119,7 +119,7 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
             {activeTab === 'behavior' && (
                 <div className="space-y-5">
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900">Comportamiento del Precio L./V2</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">Comportamiento del Precio L/V&sup2;</h3>
                         <LineChart data={priceChartData} />
                     </div>
 
