@@ -2,6 +2,8 @@ import * as React from 'react'
 import { ExternalLinkIcon, XIcon, EyeOffIcon, EyeIcon } from 'lucide-react'
 
 import { Item } from './Item'
+import { ExternalValuations } from './ExternalValuations'
+import { usePermissions } from '@/hooks/usePermissions'
 
 import { getRiskProfileColor, getRiskProfileShort, getRiskProfileLabel, getRiskProfileTextColor } from './riskProfile'
 
@@ -65,6 +67,7 @@ function formatDate(value?: string | null) {
 }
 
 export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
+    const permissions = usePermissions()
     const valuation = point?.latestFinancialValuation
     const [showDetails, setShowDetails] = React.useState<boolean>(false)
 
@@ -82,7 +85,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
             <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
                 <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                        <a href={`/inmuebles/${point?.id}/editar#informacion-general`} target="_blank" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
+                        {permissions.canEdit('property') ? <a href={`/inmuebles/${point?.id}/editar#informacion-general`} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
                             <span>
                                 {point?.name ?? 'Detalle'}
                             </span>
@@ -90,9 +93,9 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             {point?.name && (
                                 <ExternalLinkIcon size={15} />
                             )}
-                        </a>
+                        </a> : <span className="text-md font-semibold text-gray-900">{point?.name ?? 'Detalle'}</span>}
 
-                        <button onClick={onClose} className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
+                        <button onClick={onClose} aria-label="Cerrar detalle" className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
                             <XIcon aria-hidden="true" className="size-5 text-gray-500" />
                         </button>
                     </div>
@@ -138,6 +141,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                     </div>
 
                     <div className="space-y-1 border-b border-gray-200 pb-4">
+                        {valuation?.institution && <p className="text-xs font-medium text-gray-700">{valuation.institution.name}</p>}
                         <h3 className="text-sm font-semibold text-gray-900">
                             Dirección:
                         </h3>
@@ -152,7 +156,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             Más Detalles
                         </p>
 
-                        <button type="button" onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1.5 flex items-center cursor-pointer rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
+                        <button type="button" aria-label="Más detalles" aria-expanded={showDetails} onClick={() => setShowDetails((prev) => !prev)} className="px-2 py-1.5 flex items-center cursor-pointer rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
                             {showDetails ? (
                                 <EyeOffIcon className="size-4 text-gray-600" />
                             ) : (
@@ -186,6 +190,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             <Item label="Última Actualización:" value={formatDate(valuation?.measuredAt)} />
                         </div>
                     )}
+                    {point && <ExternalValuations key={point.id} propertyId={point.id} />}
                 </div>
             </div>
         </div>

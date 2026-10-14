@@ -18,6 +18,10 @@ query ListUsers($first: Int!, $page: Int, $search: String) {
 
 query GetUserById($id: ID!) {
     userById(id: $id) {
+        institutions {
+            id
+            name
+        }
         id
         name
         email

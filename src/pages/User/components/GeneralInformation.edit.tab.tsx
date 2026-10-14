@@ -9,6 +9,7 @@ import { ComboBox } from '@/components/widgets/ComboBox/ComboBox'
 import { Button } from '@/components/ui/button'
 import { AlertConfirm } from '@/components/widgets/Dialog/AlertConfirm'
 import { toast } from '@/utils/toast'
+import { InstitutionsField, type SelectedInstitution } from './InstitutionsField'
 
 import { useDebounce } from '@/utils/useDebounce'
 import { buildOptionsFromQueryResult } from '@/components/widgets/ComboBox/ComboBox.utils'
@@ -33,6 +34,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
     const [confirmPassword, setConfirmPassword] = useState<string>('')
     const _role = user.roles ? user.roles[0] : null
     const [role, setRole] = useState<Role | null>(_role)
+    const [institutions, setInstitutions] = useState<SelectedInstitution[]>(user.institutions ?? [])
     const [passwdHasError, setPasswordHasError] = useState<boolean>(false)
     const [unmatchingPasswords, setUnmatchingPasswords] = useState<boolean>(false)
 
@@ -54,9 +56,9 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
     const [ updateUser, result ] = useUpdateUserMutation({
         onError: (error) => {
             const errors = error.graphQLErrors
-            const extensions = errors[0].extensions
+            const extensions = errors[0]?.extensions
 
-            if (extensions!.reason === "412") {
+            if (extensions?.reason === "412") {
                 toast.error(error.message)
             }
 
@@ -70,7 +72,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
         }
     })
 
-    const handleUpdateUser = async () => {
+    const handleUpdateUser = async (confirmedGlobal = false) => {
         if (!name || name.length === 0) {
             toast.error('Es necesario agregar el nombre.')
             return
@@ -97,6 +99,16 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
             return
         }
 
+        if (!confirmedGlobal && user.institutions?.length && institutions.length === 0) {
+            AlertConfirm({
+                title: 'Retirar todas las instituciones',
+                description: 'Este usuario tendrá alcance global. ¿Desea continuar?',
+                textAccept: 'Confirmar',
+                onAccept: () => handleUpdateUser(true),
+            })
+            return
+        }
+
         const result = await updateUser({
             variables: {
                 input: {
@@ -104,7 +116,8 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                     name: name,
                     email: email,
                     password: password && password.length > 0 ? password : null,
-                    roles: { connect: role ? [role.id] : [] }
+                    roles: { connect: role ? [role.id] : [] },
+                    institutionIds: institutions.map((institution) => institution.id)
                 }
             }
         })
@@ -284,6 +297,8 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                                 />
                             </div>
 
+                            <InstitutionsField value={institutions} onChange={setInstitutions} />
+
                             {passwdHasError && (
                                 <div className="sm:col-span-4 rounded-md bg-red-50 p-4">
                                     <div className="flex">
@@ -329,7 +344,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                             Cancelar
                         </Button>
 
-                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateUser} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={() => handleUpdateUser()} disabled={result.loading}>
                             Guardar
                         </Button>
                     </div>

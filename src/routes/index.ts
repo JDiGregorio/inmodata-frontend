@@ -62,7 +62,7 @@ const routes = (permissions: PermissionHelpers) => [
         label: 'Editar'
     },
     {
-        view: true, // permissions.canView("preappraisal"),
+        view: permissions.canView("pre-appraisal"),
         path: '/preavaluos',
         component: PreAppraisalIndex,
         label: 'Preavaluos',
@@ -72,19 +72,19 @@ const routes = (permissions: PermissionHelpers) => [
         }
     },
     {
-        view: true, // permissions.canCreate("preappraisal"),
+        view: permissions.canCreate("pre-appraisal"),
         path: '/preavaluos/crear',
         component: PreAppraisalCreate,
         label: 'Crear'
     },
     {
-        view: true, // permissions.canView("preappraisal"),
+        view: permissions.canView("pre-appraisal"),
         path: '/preavaluos/:id',
         component: PreAppraisalDetail,
         label: 'Detalle'
     },
     {
-        view: true, // permissions.canEdit("preappraisal"),
+        view: permissions.canEdit("pre-appraisal"),
         path: '/preavaluos/:id/editar',
         component: PreAppraisalEdit,
         label: 'Editar'

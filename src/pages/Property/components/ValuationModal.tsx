@@ -15,15 +15,12 @@ import { toast } from '@/utils/toast'
 
 import { cn, safeDiv, round6, toDateOnly, classNames } from '@/lib/utils'
 import { useDebounce } from '@/utils/useDebounce'
-import { buildOptionsFromQueryResult } from '@/components/widgets/ComboBox/ComboBox.utils'
 import { risks } from '../index'
 
 import { Valuation, initialValuation } from './tabs/Valuations.edit.tab'
 import {
     Property,
-    Institution,
-    useListInstitutionsQuery,
-    ListInstitutionsQuery,
+    useValuationInstitutionOptionsQuery,
     useAddPropertyValuationMutation,
     useUpdatePropertyValuationMutation,
     useDeleteValuationMutation
@@ -61,29 +58,33 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
 
     const [searchInstitutionQuery, setSearchInstitutionQuery] = useState('')
     const debouncedSearchInstitutionTerm = useDebounce(searchInstitutionQuery, 500)
-    const { data, loading } = useListInstitutionsQuery({
+    const { data, loading, error: institutionsError } = useValuationInstitutionOptionsQuery({
         fetchPolicy: 'network-only',
-        variables: {
-            first: 10,
-            search: debouncedSearchInstitutionTerm
-        }
+        skip: !open,
     })
 
+    useEffect(() => {
+        if (open && !valuation.id && !valuation.institution && data?.hasGlobalInstitutionScope === false
+            && data.valuationInstitutions.length === 1) {
+            handleUpdate({ institution: data.valuationInstitutions[0] })
+        }
+    }, [open, valuation.id, valuation.institution, data, handleUpdate])
+
     const [addValuation, resultCreate] = useAddPropertyValuationMutation({
-        onError() {
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+        onError(error) {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
 
     const [updateValuation, resultUpdate] = useUpdatePropertyValuationMutation({
-        onError() {
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+        onError(error) {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
 
     const [ deleteValuation ] = useDeleteValuationMutation({
-        onError: () => {
-            toast.error('Lo sentimos, el registro no pudo ser eliminado.')
+        onError: (error) => {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, el registro no pudo ser eliminado.')
         }
     })
 
@@ -93,6 +94,11 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
     }
 
     const handleAddNewValuation = async () => {
+        if (valuation.id && !valuation.canEdit) return
+        if (data?.hasGlobalInstitutionScope === false && !valuation.institution) {
+            toast.error('Es necesario seleccionar una de sus instituciones.')
+            return
+        }
 
         if (!valuation.sector) {
             toast.error('Es necesario seleccionar el sector.')
@@ -240,7 +246,9 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
         })
     }
 
-    const institutions = useMemo(() => buildOptionsFromQueryResult<ListInstitutionsQuery, Institution>(data, 'institutions.data'), [data])
+    const institutions = useMemo(() => (data?.valuationInstitutions ?? []).filter(
+        (institution) => institution.name.toLocaleLowerCase().includes(debouncedSearchInstitutionTerm.toLocaleLowerCase())
+    ), [data, debouncedSearchInstitutionTerm])
     const result = valuation.id === null ? resultCreate : resultUpdate
 
     return (
@@ -286,6 +294,24 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                                             </SelectContent>
                                         </Select>
                                     </div>
+
+                                    {valuation.sector === 'control' && (
+                                        <div className="sm:col-span-6 space-y-2">
+                                            <Label htmlFor="control-institution">Institución</Label>
+                                            <ComboBox
+                                                id="control-institution"
+                                                placeholder="Seleccione una institución..."
+                                                options={institutions}
+                                                loading={loading}
+                                                creatable={false}
+                                                onChange={(institution) => handleUpdate({ institution })}
+                                                onInputChange={setSearchInstitutionQuery}
+                                                selectedOption={valuation.institution}
+                                                displayValue={(institution) => institution.name}
+                                            />
+                                        </div>
+                                    )}
+                                    {institutionsError && <p role="alert" className="sm:col-span-6 text-sm text-red-600">No fue posible cargar las instituciones autorizadas.</p>}
 
                                     {(valuation.sector === null || valuation.sector === "financiero") && (
                                         <div className="sm:col-span-3 space-y-2">
@@ -627,7 +653,7 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
                             Cancelar
                         </Button>
 
-                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleAddNewValuation} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleAddNewValuation} disabled={result.loading || loading || !!institutionsError || !data || (!!valuation.id && !valuation.canEdit)}>
                             {!valuation.id ? "Añadir" : "Actualizar"}
                         </Button>
                     </div>

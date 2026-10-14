@@ -45,7 +45,9 @@ export const SelectMultiple = <T extends Identifiable>({
                 <div className="flex-grow">{selectedOptions?.map((option) => <Pill value={displayValue(option)} id={option.id} key={option.id} onRemove={onOptionDelete} />)}</div>
                 <div className="flex justify-center items-center pr-1">
                     <PopoverTrigger asChild>
-                        <ChevronUpDownIcon className="h-5 w-5 text-gray-400 hover:cursor-pointer" aria-hidden="true" />
+                        <button type="button" aria-label="Seleccionar opciones" title="Seleccionar opciones" className="cursor-pointer text-gray-400">
+                            <ChevronUpDownIcon className="h-5 w-5" aria-hidden="true" />
+                        </button>
                     </PopoverTrigger>
                 </div>
             </div>

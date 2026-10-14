@@ -29,14 +29,14 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
     const permissions = usePermissions()
     
     const [updateProperty, result] = useUpdatePropertyMutation({
-        onError() {
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+        onError(error) {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
 
     const [deleteProperty] = useDeletePropertyMutation({
-        onError: () => {
-            toast.error('Lo sentimos, el registro no pudo ser eliminado.')
+        onError: (error) => {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, el registro no pudo ser eliminado.')
         }
     })
 
@@ -102,7 +102,8 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl">
                     <form className="space-y-12">
-                        <div className="space-y-6">
+                        {!property.canEdit && <p className="text-sm text-gray-600">Solo lectura. No tiene autorización para modificar los datos compartidos de este inmueble.</p>}
+                        <fieldset disabled={!property.canEdit} className="space-y-6">
                             <div className="space-y-1">
                                 <h2 className="text-base font-semibold leading-7 text-gray-900">
                                     Información General
@@ -222,10 +223,10 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                                     setLongitude(lng)
                                 }}
                             />
-                        </div>
+                        </fieldset>
 
                         <div className="flex items-center justify-end gap-x-4">
-                            {permissions.canDelete("user") && (
+                            {permissions.canDelete("property") && property.canDelete && (
                                 <Button type="button" variant={'ghost'} size={'default'} className={'w-auto px-4 cursor-pointer hover:bg-red-600 hover:text-white'} onClick={handleDeleteProperty}>
                                     Eliminar
                                 </Button>
@@ -235,9 +236,9 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
                                 Cancelar
                             </Button>
 
-                            <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateProperty} disabled={result.loading}>
+                            {property.canEdit && <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateProperty} disabled={result.loading}>
                                 Guardar
-                            </Button>
+                            </Button>}
                         </div>
                     </form>
                 </div>

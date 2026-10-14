@@ -144,7 +144,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
     const [hasLoadedOnce, setHasLoadedOnce] = React.useState<boolean>(false)
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const [fetchWithinBounds, { data, loading }] = usePropertiesWithinBoundsLazyQuery({
+    const [fetchWithinBounds, { data, loading, error }] = usePropertiesWithinBoundsLazyQuery({
         fetchPolicy: 'network-only',
         notifyOnNetworkStatusChange: true,
     })
@@ -165,13 +165,19 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
     }, [data])
 
     React.useEffect(() => {
+        if (error) {
+            setPoints([])
+            setSelectedSnapshot(null)
+            setIsPanelOpen(false)
+            return
+        }
         if (!data) {
             return
         }
 
         setPoints(mappedPoints)
         setHasLoadedOnce(true)
-    }, [data, mappedPoints])
+    }, [data, mappedPoints, error])
 
     React.useEffect(() => {
         if (!selectedId) {
@@ -312,6 +318,8 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
             {isPanelOpen && selectedPoint && (
                 <RightPanel point={selectedPoint} expanded={expanded} onClose={handleClosePanel} />
             )}
+
+            {error && <p role="alert" className="absolute bottom-4 left-4 right-4 z-20 bg-white p-3 text-sm text-red-700 shadow">No fue posible cargar las propiedades. Verifique sus permisos de acceso e intente nuevamente.</p>}
 
             {!hasLoadedOnce && loading && (
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/45">

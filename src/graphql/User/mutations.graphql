@@ -7,6 +7,10 @@ mutation CreateUser($input: CreateUserInput!) {
 
 mutation UpdateUser($input: UpdateUserInput!) {
 	updateUser(input: $input) {
+		institutions {
+			id
+			name
+		}
 		id
 		name
 		email

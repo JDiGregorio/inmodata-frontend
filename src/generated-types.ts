@@ -70,6 +70,7 @@ export type CreateRoleInput = {
 
 export type CreateUserInput = {
   email?: InputMaybe<Scalars['String']['input']>;
+  institutionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   name: Scalars['String']['input'];
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UpdateRolesBelongsToMany>;
@@ -472,12 +473,17 @@ export enum PreAppraisalValuationSelectionMode {
 export type Property = {
   __typename?: 'Property';
   cadastralKey?: Maybe<Scalars['String']['output']>;
+  canDelete?: Maybe<Scalars['Boolean']['output']>;
+  canEdit?: Maybe<Scalars['Boolean']['output']>;
   exactAddress?: Maybe<Scalars['String']['output']>;
+  externalValuationSummary: ExternalValuationSummary;
+  externalValuations: ExternalValuationPage;
   id: Scalars['ID']['output'];
   latestFinancialValuation?: Maybe<PropertyValuation>;
   latestValuation?: Maybe<PropertyValuation>;
   latitude: Scalars['Float']['output'];
   longitude: Scalars['Float']['output'];
+  mapValuation?: Maybe<PropertyValuation>;
   name?: Maybe<Scalars['String']['output']>;
   quantity: Scalars['Int']['output'];
   user?: Maybe<User>;
@@ -499,6 +505,8 @@ export type PropertyValuation = {
   averageSquareMeter: Scalars['Float']['output'];
   averageSquareYard: Scalars['Float']['output'];
   averageValue: Scalars['Float']['output'];
+  canDelete?: Maybe<Scalars['Boolean']['output']>;
+  canEdit?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   improvementArea: Scalars['Float']['output'];
   institution?: Maybe<Institution>;
@@ -530,6 +538,9 @@ export type Query = {
   user?: Maybe<User>;
   userById?: Maybe<User>;
   users: UserPaginator;
+  hasGlobalInstitutionScope: Scalars['Boolean']['output'];
+  propertyMapDetails: Property;
+  valuationInstitutions: Array<Institution>;
 };
 
 
@@ -693,6 +704,7 @@ export type UpdateRolesBelongsToMany = {
 export type UpdateUserInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
+  institutionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   permisos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -722,6 +734,7 @@ export type User = {
   __typename?: 'User';
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  institutions: Array<Institution>;
   name: Scalars['String']['output'];
   permisos?: Maybe<Array<Scalars['String']['output']>>;
   permisosExtra?: Maybe<Array<Scalars['String']['output']>>;
@@ -860,7 +873,7 @@ export type GetPropertyByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', canEdit?: boolean | null, canDelete?: boolean | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', canEdit?: boolean | null, canDelete?: boolean | null, id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type GetPropertiesWithinRadiusQueryVariables = Exact<{
   latitude: Scalars['Float']['input'];
@@ -871,7 +884,7 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 
 export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
-export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null };
+export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null };
 
 export type PropertiesWithinBoundsQueryVariables = Exact<{
   northLatitude: Scalars['Float']['input'];
@@ -882,7 +895,7 @@ export type PropertiesWithinBoundsQueryVariables = Exact<{
 }>;
 
 
-export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null } | null }> };
+export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null }> };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -933,7 +946,7 @@ export type UpdateUserMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } };
+export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, institutions: Array<{ __typename?: 'Institution', id: string, name: string }>, roles: Array<{ __typename?: 'Role', id: string, name: string }> } };
 
 export type DeleteUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -956,7 +969,7 @@ export type GetUserByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
+export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, institutions: Array<{ __typename?: 'Institution', id: string, name: string }>, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
 
 export const PropertyPointFieldsFragmentDoc = gql`
     fragment PropertyPointFields on Property {
@@ -967,7 +980,11 @@ export const PropertyPointFieldsFragmentDoc = gql`
   latitude
   longitude
   quantity
-  latestFinancialValuation {
+  latestFinancialValuation: mapValuation {
+    institution {
+      id
+      name
+    }
     reference
     sector
     averageValue
@@ -1654,6 +1671,8 @@ export type ListPropertiesQueryResult = Apollo.QueryResult<ListPropertiesQuery, 
 export const GetPropertyByIdDocument = gql`
     query GetPropertyById($id: ID!) {
   propertyById(id: $id) {
+    canEdit
+    canDelete
     id
     name
     exactAddress
@@ -1665,6 +1684,8 @@ export const GetPropertyByIdDocument = gql`
       id
     }
     valuations {
+      canEdit
+      canDelete
       id
       reference
       owner
@@ -2057,6 +2078,10 @@ export type CreateUserMutationOptions = Apollo.BaseMutationOptions<CreateUserMut
 export const UpdateUserDocument = gql`
     mutation UpdateUser($input: UpdateUserInput!) {
   updateUser(input: $input) {
+    institutions {
+      id
+      name
+    }
     id
     name
     email
@@ -2185,6 +2210,10 @@ export type ListUsersQueryResult = Apollo.QueryResult<ListUsersQuery, ListUsersQ
 export const GetUserByIdDocument = gql`
     query GetUserById($id: ID!) {
   userById(id: $id) {
+    institutions {
+      id
+      name
+    }
     id
     name
     email
@@ -2230,3 +2259,169 @@ export type GetUserByIdQueryHookResult = ReturnType<typeof useGetUserByIdQuery>;
 export type GetUserByIdLazyQueryHookResult = ReturnType<typeof useGetUserByIdLazyQuery>;
 export type GetUserByIdSuspenseQueryHookResult = ReturnType<typeof useGetUserByIdSuspenseQuery>;
 export type GetUserByIdQueryResult = Apollo.QueryResult<GetUserByIdQuery, GetUserByIdQueryVariables>;
+
+export type ExternalValuation = {
+  __typename?: 'ExternalValuation';
+  averageSquareYard?: Maybe<Scalars['Float']['output']>;
+  averageValue?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  institutionName?: Maybe<Scalars['String']['output']>;
+  isNewer: Scalars['Boolean']['output'];
+  landArea?: Maybe<Scalars['Float']['output']>;
+  measuredAt?: Maybe<Scalars['Date']['output']>;
+  riskProfile?: Maybe<RiskAggregates>;
+  sector?: Maybe<Scalars['String']['output']>;
+};
+
+export type ExternalValuationPage = {
+  __typename?: 'ExternalValuationPage';
+  currentPage: Scalars['Int']['output'];
+  data: Array<ExternalValuation>;
+  hasMorePages: Scalars['Boolean']['output'];
+};
+
+export type ExternalValuationSummary = {
+  __typename?: 'ExternalValuationSummary';
+  count: Scalars['Int']['output'];
+  hasNewer: Scalars['Boolean']['output'];
+};
+
+export type PropertyExternalValuationsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryPropertyMapDetailsArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type PropertyMapSummaryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type PropertyMapSummaryQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuationSummary: { __typename?: 'ExternalValuationSummary', count: number, hasNewer: boolean } } };
+
+export type PropertyExternalValuationsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  page: Scalars['Int']['input'];
+}>;
+
+export type PropertyExternalValuationsQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuations: { __typename?: 'ExternalValuationPage', currentPage: number, hasMorePages: boolean, data: Array<{ __typename?: 'ExternalValuation', id: string, institutionName?: string | null, measuredAt?: Scalars['Date']['output'] | null, sector?: string | null, averageValue?: number | null, averageSquareYard?: number | null, landArea?: number | null, riskProfile?: RiskAggregates | null, isNewer: boolean }> } } };
+
+export type ValuationInstitutionOptionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+export type ValuationInstitutionOptionsQuery = { __typename?: 'Query', hasGlobalInstitutionScope: boolean, valuationInstitutions: Array<{ __typename?: 'Institution', id: string, name: string }> };
+
+export const PropertyMapSummaryDocument = gql`
+    query PropertyMapSummary($id: ID!) {
+  propertyMapDetails(id: $id) {
+    id
+    externalValuationSummary {
+      count
+      hasNewer
+    }
+  }
+}
+    `;
+
+export function usePropertyMapSummaryQuery(baseOptions: Apollo.QueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables> & ({ variables: PropertyMapSummaryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+      }
+
+export function usePropertyMapSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+        }
+
+export function usePropertyMapSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+        }
+
+export type PropertyMapSummaryQueryHookResult = ReturnType<typeof usePropertyMapSummaryQuery>;
+
+export type PropertyMapSummaryLazyQueryHookResult = ReturnType<typeof usePropertyMapSummaryLazyQuery>;
+
+export type PropertyMapSummarySuspenseQueryHookResult = ReturnType<typeof usePropertyMapSummarySuspenseQuery>;
+
+export type PropertyMapSummaryQueryResult = Apollo.QueryResult<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>;
+
+export const PropertyExternalValuationsDocument = gql`
+    query PropertyExternalValuations($id: ID!, $page: Int!) {
+  propertyMapDetails(id: $id) {
+    id
+    externalValuations(first: 10, page: $page) {
+      currentPage
+      hasMorePages
+      data {
+        id
+        institutionName
+        measuredAt
+        sector
+        averageValue
+        averageSquareYard
+        landArea
+        riskProfile
+        isNewer
+      }
+    }
+  }
+}
+    `;
+
+export function usePropertyExternalValuationsQuery(baseOptions: Apollo.QueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables> & ({ variables: PropertyExternalValuationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+      }
+
+export function usePropertyExternalValuationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+        }
+
+export function usePropertyExternalValuationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+        }
+
+export type PropertyExternalValuationsQueryHookResult = ReturnType<typeof usePropertyExternalValuationsQuery>;
+
+export type PropertyExternalValuationsLazyQueryHookResult = ReturnType<typeof usePropertyExternalValuationsLazyQuery>;
+
+export type PropertyExternalValuationsSuspenseQueryHookResult = ReturnType<typeof usePropertyExternalValuationsSuspenseQuery>;
+
+export type PropertyExternalValuationsQueryResult = Apollo.QueryResult<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>;
+
+export const ValuationInstitutionOptionsDocument = gql`
+    query ValuationInstitutionOptions {
+  hasGlobalInstitutionScope
+  valuationInstitutions {
+    id
+    name
+  }
+}
+    `;
+
+export function useValuationInstitutionOptionsQuery(baseOptions?: Apollo.QueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+      }
+
+export function useValuationInstitutionOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+        }
+
+export function useValuationInstitutionOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+        }
+
+export type ValuationInstitutionOptionsQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsQuery>;
+
+export type ValuationInstitutionOptionsLazyQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsLazyQuery>;
+
+export type ValuationInstitutionOptionsSuspenseQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsSuspenseQuery>;
+
+export type ValuationInstitutionOptionsQueryResult = Apollo.QueryResult<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>;

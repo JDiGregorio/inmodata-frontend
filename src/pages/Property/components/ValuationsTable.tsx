@@ -27,7 +27,10 @@ interface ValuationsTableProps {
 export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setModalOpen, handleUpdate }: ValuationsTableProps): React.ReactElement => {
     const handleUpdateLine = (valuation: Maybe<PropertyValuation>) => {
         if (valuation) {
+            if (!valuation.canEdit) return
             const editValuation = {
+                canEdit: valuation.canEdit,
+                canDelete: valuation.canDelete,
                 id: valuation.id,
                 reference: valuation.reference,
                 institution: valuation.institution,
@@ -59,7 +62,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                     </h1>
 
                     <p className="mt-2 text-sm text-gray-700">
-                        Lista de todas las valuaciones relacionadas al inmueble.
+                        Historial de valuaciones autorizadas del inmueble.
                     </p>
                 </div>
 
@@ -131,11 +134,11 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                                 </TableCell>
                                                 
                                                 <TableCell className="flex justify-center whitespace-nowrap py-2 pl-3 pr-4 sm:pr-6 items-center">
-                                                    {canEdit && (
+                                                    {canEdit && valuation?.canEdit ? (
                                                         <Button variant="ghost" onClick={() => handleUpdateLine(valuation)} className="text-orange-600 hover:text-orange-900 cursor-pointer">
                                                             <SquarePenIcon size={16} color="#646464" />
                                                         </Button>
-                                                    )}
+                                                    ) : <span className="text-xs text-gray-500">Solo lectura</span>}
                                                 </TableCell>
                                             </TableRow>
                                         ))

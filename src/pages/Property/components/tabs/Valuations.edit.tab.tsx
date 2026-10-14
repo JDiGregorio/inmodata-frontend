@@ -65,7 +65,7 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
                 title={`${!valuation.id ? 'Agregar' : 'Actualizar'} Valuación`}
                 valuation={valuation}
                 property={property}
-                canDelete={permissions.canDelete("valuation")}
+                canDelete={permissions.canDelete("valuation") && valuation.canDelete === true}
                 setModalOpen={setModalOpen}
                 handleUpdate={handleUpdateValuation}
                 refetch={refetch}

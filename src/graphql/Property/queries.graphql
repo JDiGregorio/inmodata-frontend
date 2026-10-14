@@ -25,6 +25,8 @@ query ListProperties($first: Int!, $page: Int, $search: String) {
 
 query GetPropertyById($id: ID!) {
     propertyById(id: $id) {
+        canEdit
+        canDelete
         id
         name
         exactAddress
@@ -36,6 +38,8 @@ query GetPropertyById($id: ID!) {
             id
         }
         valuations {
+            canEdit
+            canDelete
             id
             reference
             owner
@@ -82,7 +86,11 @@ fragment PropertyPointFields on Property {
     latitude
     longitude
     quantity
-    latestFinancialValuation {
+    latestFinancialValuation: mapValuation {
+        institution {
+            id
+            name
+        }
         reference
         sector
         averageValue
@@ -94,6 +102,45 @@ fragment PropertyPointFields on Property {
         averageSquareMeter
         riskProfile
         measuredAt
+    }
+}
+
+query PropertyMapSummary($id: ID!) {
+    propertyMapDetails(id: $id) {
+        id
+        externalValuationSummary {
+            count
+            hasNewer
+        }
+    }
+}
+
+query PropertyExternalValuations($id: ID!, $page: Int!) {
+    propertyMapDetails(id: $id) {
+        id
+        externalValuations(first: 10, page: $page) {
+            currentPage
+            hasMorePages
+            data {
+                id
+                institutionName
+                measuredAt
+                sector
+                averageValue
+                averageSquareYard
+                landArea
+                riskProfile
+                isNewer
+            }
+        }
+    }
+}
+
+query ValuationInstitutionOptions {
+    hasGlobalInstitutionScope
+    valuationInstitutions {
+        id
+        name
     }
 }
 

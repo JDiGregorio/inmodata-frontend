@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ComboBox } from '@/components/widgets/ComboBox/ComboBox'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/utils/toast'
+import { InstitutionsField, type SelectedInstitution } from './InstitutionsField'
 
 import { useDebounce } from '@/utils/useDebounce'
 import { buildOptionsFromQueryResult } from '@/components/widgets/ComboBox/ComboBox.utils'
@@ -24,6 +25,7 @@ export const GeneralInformationTab = (): React.ReactElement => {
     const [password, setPassword] = useState<string | null>(null)
     const [confirmPassword, setConfirmPassword] = useState<string>('')
     const [role, setRole] = useState<Role | undefined | null>(null)
+    const [institutions, setInstitutions] = useState<SelectedInstitution[]>([])
     const [passwdHasError, setPasswordHasError] = useState<boolean>(false)
     const [unmatchingPasswords, setUnmatchingPasswords] = useState<boolean>(false)
 
@@ -90,7 +92,8 @@ export const GeneralInformationTab = (): React.ReactElement => {
                     name: name,
                     email: email,
                     password: password,
-                    roles: { connect: role ? [role.id] : [] }
+                    roles: { connect: role ? [role.id] : [] },
+                    institutionIds: institutions.map((institution) => institution.id)
                 }
             }
         })
@@ -225,6 +228,8 @@ export const GeneralInformationTab = (): React.ReactElement => {
                                         displayValue={(role) => role.name}
                                     />
                                 </div>
+
+                                <InstitutionsField value={institutions} onChange={setInstitutions} />
 
                                 {passwdHasError && (
                                     <div className="sm:col-span-4 rounded-md bg-red-50 p-4">
