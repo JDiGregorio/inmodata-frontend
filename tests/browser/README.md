@@ -21,6 +21,9 @@ Coverage:
 - Existing assignments preload and can be changed.
 - Removing the last institution requires confirmation before sending an empty list.
 - Valuation edit controls follow backend authorization flags.
+- Pre-appraisal samples show four columns for non-administrators and the full table for administrators.
+- Sample references link only to authorized valuations, including global access.
+- Deep links open a readonly valuation modal; unavailable IDs show no valuation data.
 
 This is component integration coverage, not a real-account end-to-end test of Google
 Maps. Backend GraphQL and database authorization are tested separately in Sail.

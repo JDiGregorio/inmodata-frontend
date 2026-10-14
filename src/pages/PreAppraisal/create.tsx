@@ -28,7 +28,7 @@ const initialForm: PreAppraisalCreateForm = {
     targetLongitude: null,
     targetPropertyId: null,
     radiusMeters: DEFAULT_RADIUS_METERS,
-    sectorFilter: PreAppraisalSectorFilter.Financiero
+    sectorFilter: PreAppraisalSectorFilter.Both
 }
 
 const PreAppraisalCreateView = (): React.ReactElement => {

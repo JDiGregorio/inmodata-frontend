@@ -56,7 +56,7 @@ const routes = (permissions: PermissionHelpers) => [
         label: 'Crear'
     },
     {
-        view: permissions.canEdit("property"),
+        view: permissions.canEdit("property") || (permissions.canView("property") && permissions.canView("valuation")),
         path: '/inmuebles/:id/editar',
         component: PropertyEdit,
         label: 'Editar'

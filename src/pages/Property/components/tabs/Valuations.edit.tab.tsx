@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
+import { ValuationDetailModal } from '../ValuationDetailModal'
 
 import { ValuationModal } from '../ValuationModal'
 import { ValuationsTable } from '../ValuationsTable'
@@ -42,6 +44,16 @@ export const initialValuation = {
 }
 
 export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.ReactElement => {
+    const [searchParams] = useSearchParams()
+    const location = useLocation()
+    const navigate = useNavigate()
+    const requestedValuationId = searchParams.get('valuation')
+    const requestedValuation = property.valuations?.find(item => item?.id === requestedValuationId) ?? undefined
+    const closeDetail = () => {
+        const next = new URLSearchParams(searchParams)
+        next.delete('valuation')
+        navigate({ pathname: location.pathname, search: next.toString(), hash: '#valuaciones' }, { replace: true })
+    }
     const [modalOpen, setModalOpen] = useState(false)
     const [valuation, setValuation] = useState<Valuation>(initialValuation)
 
@@ -60,6 +72,7 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
 
     return (
         <div className="mt-6 px-4 py-5">
+            {requestedValuationId && <ValuationDetailModal valuation={requestedValuation} onClose={closeDetail} />}
             <ValuationModal 
                 open={modalOpen}
                 title={`${!valuation.id ? 'Agregar' : 'Actualizar'} Valuación`}

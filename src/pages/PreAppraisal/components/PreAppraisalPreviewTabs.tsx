@@ -10,6 +10,8 @@ import { formatDate, formatDistance, formatExpectedRiskLevel, formatLempiras, fo
 import { parseChartPoints } from './createUtils'
 import { BarChart, LineChart } from './SimpleCharts'
 import { PreAppraisalPreview } from './createTypes'
+import { SampleSummaryTable } from './SampleSummaryTable'
+import { useFullSampleTable } from './useFullSampleTable'
 
 interface PreAppraisalPreviewTabsProps {
     preview?: PreAppraisalPreview;
@@ -34,6 +36,7 @@ const riskBadgeClass = (risk?: RiskAggregates | null): string => {
 }
 
 export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError }: PreAppraisalPreviewTabsProps): React.ReactElement => {
+    const fullSampleTable = useFullSampleTable()
     const [activeTab, setActiveTab] = useState<'summary' | 'behavior' | 'samples'>('summary')
 
     const priceChartData = useMemo(() => parseChartPoints(preview?.priceByYear, 'averagePrice'), [preview?.priceByYear])
@@ -136,7 +139,7 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
                         <div className="px-4 py-10 text-center text-sm text-gray-500">
                             No hay propiedades dentro de la muestra.
                         </div>
-                    ) : (
+                    ) : !fullSampleTable ? <SampleSummaryTable samples={preview.samples} /> : (
                         <Table className="min-w-[1040px] table-fixed">
                             <colgroup>
                                 <col className="w-[4rem]" />

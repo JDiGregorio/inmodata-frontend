@@ -23,6 +23,8 @@ import { formatDate, formatExpectedRiskLevel, formatNumber, formatPercent, forma
 import { DEFAULT_CENTER } from './components/createUtils'
 import { statusMeta } from './components/constants'
 import { parseChartPoints } from './components/createUtils'
+import { SampleSummaryTable } from './components/SampleSummaryTable'
+import { useFullSampleTable } from './components/useFullSampleTable'
 
 const GET_PRE_APPRAISAL_DETAIL = gql`
     query GetPreAppraisalDetail($id: ID!) {
@@ -138,6 +140,7 @@ const DOWNLOAD_PRE_APPRAISAL_PDF = gql`
 `
 
 type DetailSample = {
+    valuationReference?: string | null;
     tag?: string | null;
     propertyId?: string | null;
     propertyValuationId?: string | null;
@@ -539,7 +542,10 @@ const ReportSummaryRow = ({ label, unit, value, strong = false }: { label: strin
     </div>
 )
 
-const SamplesTable = ({ samples }: { samples: DetailSample[] }) => (
+const SamplesTable = ({ samples }: { samples: DetailSample[] }) => {
+    const fullSampleTable = useFullSampleTable()
+    if (!fullSampleTable) return <SampleSummaryTable samples={samples} />
+    return (
     <Table className="min-w-[1080px] table-fixed">
         <colgroup>
             <col className="w-[11rem]" />
@@ -589,7 +595,8 @@ const SamplesTable = ({ samples }: { samples: DetailSample[] }) => (
             ))}
         </TableBody>
     </Table>
-)
+    )
+}
 
 const ReportMap = ({ preAppraisal }: { preAppraisal: DetailPreAppraisal }) => {
     const center = { lat: Number(preAppraisal.targetLatitude), lng: Number(preAppraisal.targetLongitude) }
