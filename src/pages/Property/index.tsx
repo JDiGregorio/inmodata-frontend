@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ChevronDownIcon, DownloadIcon, UploadIcon, MapPinnedIcon } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
 
 import { HandleRefetchingProps, SearchableTable } from '@/components/widgets/ListView/SearchableTable'
 import { ImportModal } from './components/ImportModal'
+import { PropertyFilters } from './components/PropertyFilters'
 
 import { defineModel } from '@/utils/modelUtils'
 import { PermissionHelpers, usePermissions } from '@/hooks/usePermissions'
@@ -103,20 +104,32 @@ const PropertiesActionsDropdown = ({ loading, progress, permissions, onDownloadT
 }
 
 const PropertiesListView = (): React.ReactElement => {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const rawYear = searchParams.get('valuationYear')
+    const year = rawYear && /^\d{4}$/.test(rawYear) && Number(rawYear) >= 1000 && Number(rawYear) <= 9998 ? Number(rawYear) : undefined
+    const [tableArgs, setTableArgs] = useState<HandleRefetchingProps>({ first: 10, page: 1, search: '' })
     const [modal, setModal] = useState<boolean>(false)
     const permissions = usePermissions()
     const { download, loading: loadingDownload, progress } = useDownloadTemplate()
 
-    const { data, loading, error, refetch } = useListPropertiesQuery({
+    const { data, loading, error } = useListPropertiesQuery({
         fetchPolicy: 'network-only',
         variables: {
-            first: 10,
-            page: 1
+            ...tableArgs,
+            valuationYear: year
         }
     })
 
-    const handleRefetching = (args: HandleRefetchingProps) => {
-        refetch(args)
+    const handleRefetching = useCallback((args: HandleRefetchingProps) => {
+        setTableArgs(previous => previous.first === args.first && previous.page === args.page && previous.search === args.search ? previous : args)
+    }, [])
+
+    const applyYear = (value?: number) => {
+        setTableArgs(previous => ({ ...previous, page: 1 }))
+        const next = new URLSearchParams(searchParams)
+        if (value) next.set('valuationYear', String(value))
+        else next.delete('valuationYear')
+        setSearchParams(next)
     }
 
     const handleDownloadTemplate = () => {
@@ -150,7 +163,7 @@ const PropertiesListView = (): React.ReactElement => {
                 exactAddress: property.exactAddress ?? '',
                 latitude: property.latitude,
                 longitude: property.longitude,
-                measuredAt: moment(measuredAt).format("DD/MM/YYYY") ?? '',
+                measuredAt: measuredAt ? moment(measuredAt).format("DD/MM/YYYY") : '-',
                 quantity: property.quantity
             }
         }
@@ -160,9 +173,12 @@ const PropertiesListView = (): React.ReactElement => {
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="pt-6">
                 <SearchableTable<PropertyRow>
+                    resetPageKey={String(year ?? '')}
                     model={defineModel('inmueble')}
                     title="Inmuebles"
                     toolbarActions={
+                        <div className="flex flex-wrap items-center gap-2">
+                        {permissions.canView('valuation') && <PropertyFilters year={year} onApply={applyYear} />}
                         <PropertiesActionsDropdown
                             loading={loadingDownload}
                             progress={progress}
@@ -170,6 +186,7 @@ const PropertiesListView = (): React.ReactElement => {
                             onDownloadTemplate={handleDownloadTemplate}
                             onImport={handleImport}
                         />
+                        </div>
                     }
                     canCreate={permissions.canCreate("property")}
                     canEdit={permissions.canEdit("property")}

@@ -25,11 +25,18 @@ import { statusMeta } from './components/constants'
 import { parseChartPoints } from './components/createUtils'
 import { SampleSummaryTable } from './components/SampleSummaryTable'
 import { useFullSampleTable } from './components/useFullSampleTable'
+import { usePermissions } from '@/hooks/usePermissions'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { PreAppraisalInstitutionSelect } from './components/PreAppraisalInstitutionSelect'
 
 const GET_PRE_APPRAISAL_DETAIL = gql`
     query GetPreAppraisalDetail($id: ID!) {
         preAppraisalById(id: $id) {
             id
+            institutionId
+            institution { id name }
+            canEdit
+            canDelete
             uuid
             reference
             name
@@ -121,8 +128,8 @@ const REQUEST_FORMAL_PRE_APPRAISAL = gql`
 `
 
 const DUPLICATE_PRE_APPRAISAL = gql`
-    mutation DetailDuplicatePreAppraisal($id: ID!) {
-        duplicatePreAppraisal(id: $id) {
+    mutation DetailDuplicatePreAppraisal($id: ID!, $institutionId: ID) {
+        duplicatePreAppraisal(id: $id, institutionId: $institutionId) {
             id
             status
         }
@@ -165,6 +172,10 @@ type DetailSample = {
 
 type DetailPreAppraisal = {
     id: string;
+    institutionId: string | null;
+    institution?: { id: string; name: string } | null;
+    canEdit: boolean;
+    canDelete: boolean;
     uuid: string;
     reference?: string | null;
     name?: string | null;
@@ -214,6 +225,7 @@ type MutationData = {
 
 type MutationVariables = {
     id: string;
+    institutionId?: string | null;
 }
 
 type ConfirmAction = 'generate' | 'cancel' | 'delete' | 'request-formal' | null
@@ -227,6 +239,9 @@ const tabClassName = (active: boolean) => active
     : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
 
 const PreAppraisalDetailView = (): React.ReactElement => {
+    const permissions = usePermissions()
+    const [duplicateOpen, setDuplicateOpen] = useState(false)
+    const [duplicateInstitutionId, setDuplicateInstitutionId] = useState<string | null | undefined>()
     const navigate = useNavigate()
     const { id } = useParams()
     const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
@@ -241,12 +256,12 @@ const PreAppraisalDetailView = (): React.ReactElement => {
         skip: !id
     })
 
-    const [generatePreAppraisal] = useMutation<MutationData, MutationVariables>(GENERATE_PRE_APPRAISAL)
-    const [cancelPreAppraisal] = useMutation<MutationData, MutationVariables>(CANCEL_PRE_APPRAISAL)
-    const [deletePreAppraisal] = useMutation<MutationData, MutationVariables>(DELETE_PRE_APPRAISAL)
-    const [requestFormalPreAppraisal] = useMutation<MutationData, MutationVariables>(REQUEST_FORMAL_PRE_APPRAISAL)
-    const [duplicatePreAppraisal] = useMutation<MutationData, MutationVariables>(DUPLICATE_PRE_APPRAISAL)
-    const [downloadPreAppraisalPdf] = useMutation<MutationData, MutationVariables>(DOWNLOAD_PRE_APPRAISAL_PDF)
+    const [generatePreAppraisal] = useMutation<MutationData, MutationVariables>(GENERATE_PRE_APPRAISAL, { errorPolicy: 'none' })
+    const [cancelPreAppraisal] = useMutation<MutationData, MutationVariables>(CANCEL_PRE_APPRAISAL, { errorPolicy: 'none' })
+    const [deletePreAppraisal] = useMutation<MutationData, MutationVariables>(DELETE_PRE_APPRAISAL, { errorPolicy: 'none' })
+    const [requestFormalPreAppraisal] = useMutation<MutationData, MutationVariables>(REQUEST_FORMAL_PRE_APPRAISAL, { errorPolicy: 'none' })
+    const [duplicatePreAppraisal] = useMutation<MutationData, MutationVariables>(DUPLICATE_PRE_APPRAISAL, { errorPolicy: 'none' })
+    const [downloadPreAppraisalPdf] = useMutation<MutationData, MutationVariables>(DOWNLOAD_PRE_APPRAISAL_PDF, { errorPolicy: 'none' })
 
     const preAppraisal = data?.preAppraisalById
     const priceChartData = useMemo(() => parseChartPoints(preAppraisal?.priceByYear, 'averagePrice'), [preAppraisal?.priceByYear])
@@ -309,7 +324,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
         setRunningAction('duplicate')
 
         try {
-            const result = await duplicatePreAppraisal({ variables: { id: preAppraisal.id } })
+            const result = await duplicatePreAppraisal({ variables: { id: preAppraisal.id, institutionId: duplicateInstitutionId } })
             const duplicatedId = result.data?.duplicatePreAppraisal?.id
 
             if (duplicatedId) {
@@ -348,6 +363,13 @@ const PreAppraisalDetailView = (): React.ReactElement => {
 
     return (
         <div className="min-h-[calc(100dvh-4rem)] bg-slate-100">
+            <Dialog open={duplicateOpen} onOpenChange={setDuplicateOpen}>
+                <DialogContent aria-describedby={undefined}>
+                    <DialogTitle>Reevaluar preavalúo</DialogTitle>
+                    <PreAppraisalInstitutionSelect value={duplicateInstitutionId} onChange={setDuplicateInstitutionId} />
+                    <Button onClick={handleDuplicate} disabled={runningAction !== null || duplicateInstitutionId === undefined}>Reevaluar</Button>
+                </DialogContent>
+            </Dialog>
             <div className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-5 py-3 shadow-sm">
                 <div className="flex items-center gap-3">
                     <button type="button" onClick={() => navigate('/preavaluos')} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100">
@@ -371,20 +393,20 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                 <div className="flex flex-wrap items-center justify-end gap-3">
                     {isDraft && (
                         <>
-                            <Button type="button" variant="outline" className="bg-white text-red-700 hover:text-red-800" onClick={() => setConfirmAction('delete')} disabled={runningAction !== null}>
+                            {preAppraisal.canDelete && <Button type="button" variant="outline" className="bg-white text-red-700 hover:text-red-800" onClick={() => setConfirmAction('delete')} disabled={runningAction !== null}>
                                 <Trash2Icon className="h-4 w-4" />
                                 Eliminar
-                            </Button>
+                            </Button>}
 
-                            <Button type="button" variant="outline" className="bg-white" onClick={() => setConfirmAction('cancel')} disabled={runningAction !== null}>
+                            {preAppraisal.canEdit && <Button type="button" variant="outline" className="bg-white" onClick={() => setConfirmAction('cancel')} disabled={runningAction !== null}>
                                 <BanIcon className="h-4 w-4" />
                                 Cancelar
-                            </Button>
+                            </Button>}
 
-                            <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('generate')} disabled={runningAction !== null}>
+                            {preAppraisal.canEdit && <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('generate')} disabled={runningAction !== null}>
                                 <WandSparklesIcon className="h-4 w-4" />
                                 Generar reporte
-                            </Button>
+                            </Button>}
                         </>
                     )}
 
@@ -395,12 +417,12 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                                 Descargar
                             </Button>
 
-                            <Button type="button" variant="outline" className="bg-white" onClick={handleDuplicate} disabled={runningAction !== null}>
+                            {permissions.canCreate('pre-appraisal') && <Button type="button" variant="outline" className="bg-white" onClick={() => { setDuplicateInstitutionId(undefined); setDuplicateOpen(true) }} disabled={runningAction !== null}>
                                 <CopyIcon className="h-4 w-4" />
                                 Reevaluar
-                            </Button>
+                            </Button>}
 
-                            {isGenerated && (
+                            {isGenerated && preAppraisal.canEdit && (
                                 <Button type="button" className="bg-[#155a7c] hover:bg-[#104761]" onClick={() => setConfirmAction('request-formal')} disabled={runningAction !== null}>
                                     <FileTextIcon className="h-4 w-4" />
                                     Solicitar Avalúo
@@ -424,6 +446,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                             <p className="text-sm text-slate-500">
                                 Radio: {preAppraisal.radiusMeters}m | Sector: {sectorLabels[preAppraisal.sectorFilter]}
                             </p>
+                            <p className="text-sm text-slate-500">Institución: {preAppraisal.institution?.name ?? 'Sin institución'}</p>
                             {preAppraisal.targetAddress && (
                                 <p className="mt-2 max-w-2xl text-sm text-slate-500">
                                     {preAppraisal.targetAddress}

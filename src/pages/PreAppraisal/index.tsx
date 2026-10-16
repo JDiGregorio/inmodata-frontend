@@ -3,6 +3,7 @@ import { FilterIcon, PlusIcon, SearchIcon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
 import Spinner from '@/components/layouts/Spinner'
+import { usePermissions } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -35,6 +36,7 @@ import { AdvancedFilters, SectorFilter, StatusFilter } from './components/types'
 
 const PreAppraisalsIndexView = (): React.ReactElement => {
     const navigate = useNavigate()
+    const permissions = usePermissions()
     const [searchQuery, setSearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [status, setStatus] = useState<StatusFilter>('all')
@@ -102,10 +104,10 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                         </h1>
                     </div>
 
-                    <Button type="button" variant="default" size="default" className="bg-[#155a7c] hover:bg-[#104761] cursor-pointer" onClick={handleCreate}>
+                    {permissions.canCreate('pre-appraisal') && <Button type="button" variant="default" size="default" className="bg-[#155a7c] hover:bg-[#104761] cursor-pointer" onClick={handleCreate}>
                         <PlusIcon className="h-4 w-4" />
                         Crear preavalúo
-                    </Button>
+                    </Button>}
                 </div>
 
                 <div className="mt-8 pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-sm ring-1 ring-black/5 backdrop-blur-sm">
@@ -248,7 +250,7 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                                                     }) : (
                                                         <TableRow>
                                                             <TableCell colSpan={7}>
-                                                                <EmptyState onCreate={handleCreate} />
+                                                                <EmptyState onCreate={permissions.canCreate('pre-appraisal') ? handleCreate : undefined} />
                                                             </TableCell>
                                                         </TableRow>
                                                     )}

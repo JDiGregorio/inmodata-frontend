@@ -11,10 +11,12 @@ import { PreAppraisalSectorFilter } from '@/generated-types'
 
 import { formatDate, sectorLabels } from './createFormatters'
 import { PreAppraisalCreateForm } from './createTypes'
+import { PreAppraisalInstitutionSelect } from './PreAppraisalInstitutionSelect'
 
 interface PreAppraisalConfigurationPanelProps {
     form: PreAppraisalCreateForm;
     readOnlyName?: string | null;
+    preserveUnassignedInstitution?: boolean;
     valuationDate?: string | null;
     validationErrors: Partial<Record<keyof PreAppraisalCreateForm, string>>;
     previewLoading: boolean;
@@ -24,7 +26,7 @@ interface PreAppraisalConfigurationPanelProps {
     onRecalculate: () => void;
 }
 
-export const PreAppraisalConfigurationPanel = ({ form, readOnlyName, valuationDate, validationErrors, previewLoading, addressAutofillLoading, onChange, onAutofillAddress, onRecalculate }: PreAppraisalConfigurationPanelProps): React.ReactElement => {
+export const PreAppraisalConfigurationPanel = ({ form, readOnlyName, preserveUnassignedInstitution, valuationDate, validationErrors, previewLoading, addressAutofillLoading, onChange, onAutofillAddress, onRecalculate }: PreAppraisalConfigurationPanelProps): React.ReactElement => {
     const hasSelectedPoint = form.targetLatitude !== null && form.targetLongitude !== null
 
     return (
@@ -48,6 +50,9 @@ export const PreAppraisalConfigurationPanel = ({ form, readOnlyName, valuationDa
                     <Input id="valuationDate" value={formatDate(valuationDate)} readOnly className="bg-slate-50 text-slate-600" />
                 </div>
             )}
+
+            <PreAppraisalInstitutionSelect value={form.institutionId} onChange={institutionId => onChange({ institutionId })} preserveUnassigned={preserveUnassignedInstitution} />
+            {validationErrors.institutionId && <p className="text-xs text-red-600">{validationErrors.institutionId}</p>}
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">

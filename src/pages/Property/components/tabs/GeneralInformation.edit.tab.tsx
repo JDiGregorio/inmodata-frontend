@@ -116,6 +116,10 @@ export const GeneralInformationTab = ({ property }: { property: Property }): Rea
 
                             <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                                 <div className="sm:col-span-6 space-y-2">
+                                    <Label htmlFor="property-code">Referencia</Label>
+                                    <Input id="property-code" value={property.name || ''} readOnly className="bg-gray-50" />
+                                </div>
+                                <div className="sm:col-span-6 space-y-2">
                                     <Label htmlFor="cadastralKey">
                                         Clave Catastral
                                     </Label>

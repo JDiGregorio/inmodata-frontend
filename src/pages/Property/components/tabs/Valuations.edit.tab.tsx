@@ -4,6 +4,7 @@ import { ValuationDetailModal } from '../ValuationDetailModal'
 
 import { ValuationModal } from '../ValuationModal'
 import { ValuationsTable } from '../ValuationsTable'
+import { ValuationHistoryDashboard } from '../ValuationHistoryDashboard'
 
 import { usePermissions } from '@/hooks/usePermissions'
 
@@ -72,6 +73,7 @@ export const ValuationsTab = ({ property, refetch }: ValuationsTabProps): React.
 
     return (
         <div className="mt-6 px-4 py-5">
+            <ValuationHistoryDashboard history={property.valuationHistory} />
             {requestedValuationId && <ValuationDetailModal valuation={requestedValuation} onClose={closeDetail} />}
             <ValuationModal 
                 open={modalOpen}

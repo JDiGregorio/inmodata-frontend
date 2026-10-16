@@ -1,3 +1,4 @@
+import { isPasswordAllowed } from '@/utils/passwordPolicy'
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { XCircleIcon } from '@heroicons/react/20/solid'
@@ -153,7 +154,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
     }
 
     const validatePassword = () => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+
         setUnmatchingPasswords(false)
         setPasswordHasError(false)
 
@@ -163,7 +164,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
             return false
         }
 
-        const isValid = passwordRegex.test(password)
+        const isValid = isPasswordAllowed(password)
 
         if (!isValid) {
             setPasswordHasError(true)
@@ -317,11 +318,12 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                                                         <li>Ambas contraseñas deben coincidir.</li>
                                                     ) : (
                                                         <>
-                                                            <li>Su contraseña debe contener al menos 8 carácteres.</li>
-                                                            <li>Su contraseña debe contener al menos una letra minúscula.</li>
-                                                            <li>Su contraseña debe contener al menos una letra mayúscula.</li>
-                                                            <li>Su contraseña debe contener al menos un número.</li>
-                                                            <li>Su contraseña debe contener al menos un carácter especial (@$!%*?&).</li>
+                                                            <li>Use al menos 15 caracteres y un máximo de 72 bytes.</li>
+                                                                <li>Puede usar espacios y frases largas.</li>
+
+
+
+
                                                         </>
                                                     )}
                                                 </ul>

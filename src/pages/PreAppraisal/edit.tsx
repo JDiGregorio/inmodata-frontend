@@ -31,6 +31,8 @@ const EDIT_GET_PRE_APPRAISAL_BY_ID = gql`
     query EditGetPreAppraisalById($id: ID!) {
         preAppraisalById(id: $id) {
             id
+            institutionId
+            canEdit
             uuid
             reference
             name
@@ -116,6 +118,8 @@ type EditPreAppraisalSample = PreAppraisalPreviewSample
 
 type EditPreAppraisal = {
     id: string;
+    institutionId: string | null;
+    canEdit: boolean;
     name?: string | null;
     targetPropertyId?: string | null;
     targetAddress?: string | null;
@@ -152,6 +156,7 @@ type GetPreAppraisalByIdVariables = {
 
 type UpdatePreAppraisalInput = {
     id: string;
+    institutionId?: string | null;
     targetPropertyId?: string | null;
     targetAddress?: string | null;
     targetLatitude: number;
@@ -175,6 +180,7 @@ type UpdatePreAppraisalVariables = {
 }
 
 const initialFormFromPreAppraisal = (preAppraisal: EditPreAppraisal): PreAppraisalCreateForm => ({
+    institutionId: preAppraisal.institutionId,
     targetAddress: preAppraisal.targetAddress ?? '',
     targetLatitude: Number(preAppraisal.targetLatitude),
     targetLongitude: Number(preAppraisal.targetLongitude),
@@ -235,6 +241,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
     })
 
     const [updatePreAppraisal] = useMutation<UpdatePreAppraisalData, UpdatePreAppraisalVariables>(EDIT_UPDATE_PRE_APPRAISAL, {
+        errorPolicy: 'none',
         onError: () => {
             toast.error('Lo sentimos, el preavalúo no pudo ser actualizado.')
         }
@@ -368,6 +375,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
     }
 
     const buildUpdateInput = (action: PreAppraisalCreateAction): UpdatePreAppraisalInput => ({
+        institutionId: form?.institutionId,
         id: preAppraisal!.id,
         action,
         targetPropertyId: form!.targetPropertyId,
@@ -432,7 +440,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
         return <Spinner />
     }
 
-    if (error || !preAppraisal || preAppraisal.status !== PreAppraisalStatus.Draft) {
+    if (error || !preAppraisal || !preAppraisal.canEdit || preAppraisal.status !== PreAppraisalStatus.Draft) {
         return <Page404 />
     }
 
@@ -501,6 +509,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
                 <aside className="min-h-0 overflow-hidden border-l border-gray-200 bg-white">
                     <div className="h-full space-y-6 overflow-y-auto p-6">
                         <PreAppraisalConfigurationPanel
+                            preserveUnassignedInstitution={preAppraisal.institutionId === null}
                             form={form}
                             readOnlyName={preAppraisal.name}
                             valuationDate={preAppraisal.valuationDate}

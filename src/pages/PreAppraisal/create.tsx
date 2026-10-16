@@ -53,6 +53,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
     })
 
     const [createPreAppraisal] = useCreatePreAppraisalMutation({
+        errorPolicy: 'none',
         onError: () => {
             toast.error('Lo sentimos, el preavalúo no pudo ser guardado.')
         }
@@ -143,6 +144,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
 
     const validate = (): boolean => {
         const errors: Partial<Record<keyof PreAppraisalCreateForm, string>> = {}
+        if (form.institutionId === undefined) errors.institutionId = 'Selecciona una institución.'
 
         if (form.targetLatitude === null || form.targetLongitude === null) {
             errors.targetLatitude = 'Selecciona un punto en el mapa para crear el preavalúo.'
@@ -165,6 +167,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
     const buildCreateInput = (action: PreAppraisalCreateAction): CreatePreAppraisalInput => {
         return {
             action,
+            institutionId: form.institutionId,
             targetPropertyId: form.targetPropertyId,
             targetAddress: form.targetAddress || null,
             targetLatitude: form.targetLatitude!,

@@ -1,5 +1,5 @@
-query ListProperties($first: Int!, $page: Int, $search: String) {
-    properties(first: $first, page: $page, search: $search) {
+query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int) {
+    properties(first: $first, page: $page, search: $search, valuationYear: $valuationYear) {
         data {
             id
             name
@@ -25,6 +25,11 @@ query ListProperties($first: Int!, $page: Int, $search: String) {
 
 query GetPropertyById($id: ID!) {
     propertyById(id: $id) {
+        valuationHistory {
+            total financialCount controlCount otherCount valueChange valueChangePercent
+            valuePoints { id date sector value }
+            riskPoints { id date sector value }
+        }
         canEdit
         canDelete
         id
@@ -79,6 +84,8 @@ query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMe
 }
 
 fragment PropertyPointFields on Property {
+    canViewHistory
+    latestAuthorizedValuationDate
     id
     name
     exactAddress
@@ -103,6 +110,10 @@ fragment PropertyPointFields on Property {
         riskProfile
         measuredAt
     }
+}
+
+query PropertyValuationYears {
+    propertyValuationYears
 }
 
 query PropertyMapSummary($id: ID!) {

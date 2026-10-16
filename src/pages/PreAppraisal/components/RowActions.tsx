@@ -22,7 +22,7 @@ export const RowActions = ({ preAppraisal }: RowActionsProps): React.ReactElemen
         }
     ]
 
-    if (preAppraisal.status === PreAppraisalStatus.Draft) {
+    if (preAppraisal.canEdit && preAppraisal.status === PreAppraisalStatus.Draft) {
         actionItems.push(
             {
                 key: 'edit',

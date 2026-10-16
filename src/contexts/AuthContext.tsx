@@ -1,7 +1,8 @@
-import { createContext, useEffect, useReducer, useState} from 'react'
+import { createContext, useCallback, useEffect, useReducer } from 'react'
 import type { ReactNode } from 'react'
 import type { AuthContextValue, AuthReducerAction, AuthReducerState } from './AuthContext.types.ts'
 import { useCookies } from 'react-cookie'
+import { advanceSession, onSessionExpired } from '../lib/session'
 
 export const AuthContext = createContext<AuthContextValue>({
     user: null,
@@ -12,12 +13,11 @@ export const AuthContext = createContext<AuthContextValue>({
 const authReducer = (state: AuthReducerState, action: AuthReducerAction) => {
     switch (action.type) {
         case 'LOGIN':
-            return { user: action.payload, isReady: true }
+            return { user: action.payload, isReady: true, sessionVersion: (state.sessionVersion ?? 0) + 1 }
         case 'UPDATE':
-            return { user: action.payload, isReady: true }
+            return { ...state, user: action.payload, isReady: true }
         case 'LOGOUT':
-            localStorage.removeItem('user')
-            return { user: null, isReady: true }
+            return { user: null, isReady: true, sessionVersion: (state.sessionVersion ?? 0) + 1 }
         default:
             return state
     } 
@@ -29,30 +29,32 @@ interface AuthContextProviderProps {
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
     const [cookies] = useCookies(['XSRF-TOKEN'])
-    const [isReady, setIsReady] = useState(false)
-    const [state, dispatch] = useReducer(authReducer, {
+    const [state, reduce] = useReducer(authReducer, {
         user: null,
-        isReady: isReady
+        isReady: false,
+        sessionVersion: 0,
     })
+    const dispatch = useCallback((action: AuthReducerAction) => {
+        if (action.type === 'LOGIN' || action.type === 'LOGOUT') advanceSession()
+        if (action.type === 'LOGOUT') localStorage.removeItem('user')
+        reduce(action)
+    }, [])
+
+    useEffect(() => onSessionExpired(() => dispatch({ type: 'LOGOUT', payload: null })), [dispatch])
 
     useEffect(() => {
-        setIsReady(true)
-        if (cookies['XSRF-TOKEN']) {
-            const user = JSON.parse(localStorage.getItem('user') ?? '{}')
-
-            if (user) {
+        try {
+            const user = JSON.parse(localStorage.getItem('user') ?? 'null')
+            if (cookies['XSRF-TOKEN'] && user && (typeof user.id === 'string' || typeof user.id === 'number')) {
                 dispatch({
                     type: 'LOGIN',
                     payload: user
                 })
+                return
             }
-        } else {
-            dispatch({
-                type: 'LOGOUT',
-                payload: null
-            })
-        }
-    }, [cookies])
+        } catch { /* Discard malformed persisted profile data. */ }
+        dispatch({ type: 'LOGOUT', payload: null })
+    }, [cookies, dispatch])
 
     return (
         <AuthContext.Provider value={{ ...state, dispatch }}>

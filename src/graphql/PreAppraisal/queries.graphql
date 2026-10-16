@@ -2,6 +2,9 @@ query ListPreAppraisals($first: Int!, $page: Int, $filter: PreAppraisalFilterInp
     preAppraisals(first: $first, page: $page, filter: $filter, orderBy: $orderBy) {
         data {
             id
+            canEdit
+            canDelete
+            institutionId
             uuid
             reference
             name
@@ -45,6 +48,9 @@ query ListPreAppraisals($first: Int!, $page: Int, $filter: PreAppraisalFilterInp
 query GetPreAppraisalById($id: ID!) {
     preAppraisalById(id: $id) {
         id
+        canEdit
+        canDelete
+        institutionId
         uuid
         reference
         name

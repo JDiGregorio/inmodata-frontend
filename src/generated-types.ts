@@ -16,7 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
+  /** A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`. */
   DateTime: { input: any; output: any; }
+  /** Arbitrary data encoded in JavaScript Object Notation. See https://www.json.org. */
   JSON: { input: any; output: any; }
 };
 
@@ -46,6 +48,7 @@ export type CreateInstitutionInput = {
 export type CreatePreAppraisalInput = {
   action?: InputMaybe<PreAppraisalCreateAction>;
   includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
+  institutionId?: InputMaybe<Scalars['ID']['input']>;
   radiusMeters: Scalars['Int']['input'];
   reference?: InputMaybe<Scalars['String']['input']>;
   sectorFilter: PreAppraisalSectorFilter;
@@ -54,6 +57,7 @@ export type CreatePreAppraisalInput = {
   targetLongitude: Scalars['Float']['input'];
   targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
   timeFactor?: InputMaybe<Scalars['Float']['input']>;
+  valuationDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 export type CreatePropertyInput = {
@@ -76,6 +80,32 @@ export type CreateUserInput = {
   roles?: InputMaybe<UpdateRolesBelongsToMany>;
 };
 
+export type ExternalValuation = {
+  __typename?: 'ExternalValuation';
+  averageSquareYard?: Maybe<Scalars['Float']['output']>;
+  averageValue?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  institutionName?: Maybe<Scalars['String']['output']>;
+  isNewer: Scalars['Boolean']['output'];
+  landArea?: Maybe<Scalars['Float']['output']>;
+  measuredAt?: Maybe<Scalars['Date']['output']>;
+  riskProfile?: Maybe<RiskAggregates>;
+  sector?: Maybe<Scalars['String']['output']>;
+};
+
+export type ExternalValuationPage = {
+  __typename?: 'ExternalValuationPage';
+  currentPage: Scalars['Int']['output'];
+  data: Array<ExternalValuation>;
+  hasMorePages: Scalars['Boolean']['output'];
+};
+
+export type ExternalValuationSummary = {
+  __typename?: 'ExternalValuationSummary';
+  count: Scalars['Int']['output'];
+  hasNewer: Scalars['Boolean']['output'];
+};
+
 export type Institution = {
   __typename?: 'Institution';
   id: Scalars['ID']['output'];
@@ -94,18 +124,24 @@ export type InstitutionPaginator = {
 export type Mutation = {
   __typename?: 'Mutation';
   addPropertyValuation?: Maybe<PropertyValuation>;
+  cancelPreAppraisal: PreAppraisal;
   createInstitution: Institution;
   createPreAppraisal: PreAppraisal;
   createProperty: Property;
   createRole: Role;
   createUser: User;
   deleteInstitution?: Maybe<Institution>;
+  deletePreAppraisal: PreAppraisal;
   deleteProperty?: Maybe<Property>;
   deleteRole?: Maybe<Role>;
   deleteUser?: Maybe<User>;
   deleteValuation?: Maybe<PropertyValuation>;
+  downloadPreAppraisalPdf: PreAppraisalPdfDownload;
+  duplicatePreAppraisal: PreAppraisal;
   generatePreAppraisal: PreAppraisal;
+  requestFormalPreAppraisal: PreAppraisal;
   updateInstitution: Institution;
+  updatePreAppraisal: PreAppraisal;
   updateProperty: Property;
   updateRole: Role;
   updateUser: User;
@@ -116,6 +152,11 @@ export type Mutation = {
 export type MutationAddPropertyValuationArgs = {
   input: AddValuationInput;
   propertyId: Scalars['ID']['input'];
+};
+
+
+export type MutationCancelPreAppraisalArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -149,6 +190,11 @@ export type MutationDeleteInstitutionArgs = {
 };
 
 
+export type MutationDeletePreAppraisalArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeletePropertyArgs = {
   id: Scalars['ID']['input'];
 };
@@ -169,13 +215,34 @@ export type MutationDeleteValuationArgs = {
 };
 
 
+export type MutationDownloadPreAppraisalPdfArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDuplicatePreAppraisalArgs = {
+  id: Scalars['ID']['input'];
+  institutionId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationGeneratePreAppraisalArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRequestFormalPreAppraisalArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type MutationUpdateInstitutionArgs = {
   input: UpdateInstitutionInput;
+};
+
+
+export type MutationUpdatePreAppraisalArgs = {
+  input: UpdatePreAppraisalInput;
 };
 
 
@@ -250,6 +317,8 @@ export type PaginatorInfo = {
 export type PreAppraisal = {
   __typename?: 'PreAppraisal';
   annualAppreciationRate?: Maybe<Scalars['Float']['output']>;
+  canDelete: Scalars['Boolean']['output'];
+  canEdit: Scalars['Boolean']['output'];
   candidateCount: Scalars['Int']['output'];
   controlSamples: Array<PreAppraisalSample>;
   createdAt: Scalars['DateTime']['output'];
@@ -260,6 +329,8 @@ export type PreAppraisal = {
   financialSamples: Array<PreAppraisalSample>;
   generatedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
+  institution?: Maybe<Institution>;
+  institutionId?: Maybe<Scalars['ID']['output']>;
   maxAverageSquareYard?: Maybe<Scalars['Float']['output']>;
   minAverageSquareYard?: Maybe<Scalars['Float']['output']>;
   name?: Maybe<Scalars['String']['output']>;
@@ -296,6 +367,7 @@ export type PreAppraisalCalculationInput = {
   targetLongitude: Scalars['Float']['input'];
   targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
   timeFactor?: InputMaybe<Scalars['Float']['input']>;
+  valuationDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 export enum PreAppraisalCreateAction {
@@ -325,6 +397,12 @@ export type PreAppraisalFilterInput = {
   valuationSelectionMode?: InputMaybe<PreAppraisalValuationSelectionMode>;
 };
 
+export type PreAppraisalInstitutionOptions = {
+  __typename?: 'PreAppraisalInstitutionOptions';
+  canSelectNone: Scalars['Boolean']['output'];
+  institutions: Array<Institution>;
+};
+
 export type PreAppraisalOrderByInput = {
   direction?: InputMaybe<SortDirection>;
   field: PreAppraisalOrderField;
@@ -350,16 +428,28 @@ export type PreAppraisalPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+export type PreAppraisalPdfDownload = {
+  __typename?: 'PreAppraisalPdfDownload';
+  contentBase64: Scalars['String']['output'];
+  filename: Scalars['String']['output'];
+  mimeType: Scalars['String']['output'];
+};
+
 export type PreAppraisalPreviewPayload = {
   __typename?: 'PreAppraisalPreviewPayload';
   annualAppreciationRate?: Maybe<Scalars['Float']['output']>;
   candidateCount: Scalars['Int']['output'];
+  candidateLimitReached: Scalars['Boolean']['output'];
+  excludedInvalidValuationCount: Scalars['Int']['output'];
+  excludedWithoutSectorValuationCount: Scalars['Int']['output'];
   excludedWithoutValidValuationCount: Scalars['Int']['output'];
+  excludedWithoutValuationsCount: Scalars['Int']['output'];
   expectedRiskProfile?: Maybe<RiskAggregates>;
   expectedRiskScore?: Maybe<Scalars['Float']['output']>;
   maxAverageSquareYard?: Maybe<Scalars['Float']['output']>;
   minAverageSquareYard?: Maybe<Scalars['Float']['output']>;
   priceByYear?: Maybe<Scalars['JSON']['output']>;
+  propertiesWithinRadiusCount: Scalars['Int']['output'];
   radiusMeters: Scalars['Int']['output'];
   recommendedAverageSquareYard?: Maybe<Scalars['Float']['output']>;
   riskByYear?: Maybe<Scalars['JSON']['output']>;
@@ -452,6 +542,12 @@ export type PreAppraisalSample = {
   weightedRisk?: Maybe<Scalars['Float']['output']>;
 };
 
+export type PreAppraisalSampleLink = {
+  __typename?: 'PreAppraisalSampleLink';
+  propertyId: Scalars['ID']['output'];
+  valuationId: Scalars['ID']['output'];
+};
+
 export enum PreAppraisalSectorFilter {
   Both = 'Both',
   Control = 'Control',
@@ -475,10 +571,12 @@ export type Property = {
   cadastralKey?: Maybe<Scalars['String']['output']>;
   canDelete?: Maybe<Scalars['Boolean']['output']>;
   canEdit?: Maybe<Scalars['Boolean']['output']>;
+  canViewHistory: Scalars['Boolean']['output'];
   exactAddress?: Maybe<Scalars['String']['output']>;
   externalValuationSummary: ExternalValuationSummary;
   externalValuations: ExternalValuationPage;
   id: Scalars['ID']['output'];
+  latestAuthorizedValuationDate?: Maybe<Scalars['Date']['output']>;
   latestFinancialValuation?: Maybe<PropertyValuation>;
   latestValuation?: Maybe<PropertyValuation>;
   latitude: Scalars['Float']['output'];
@@ -487,7 +585,14 @@ export type Property = {
   name?: Maybe<Scalars['String']['output']>;
   quantity: Scalars['Int']['output'];
   user?: Maybe<User>;
+  valuationHistory?: Maybe<PropertyValuationHistory>;
   valuations?: Maybe<Array<Maybe<PropertyValuation>>>;
+};
+
+
+export type PropertyExternalValuationsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** A paginated list of Property items. */
@@ -502,44 +607,60 @@ export type PropertyPaginator = {
 export type PropertyValuation = {
   __typename?: 'PropertyValuation';
   applicant?: Maybe<Scalars['String']['output']>;
-  averageSquareMeter: Scalars['Float']['output'];
-  averageSquareYard: Scalars['Float']['output'];
-  averageValue: Scalars['Float']['output'];
+  averageSquareMeter?: Maybe<Scalars['Float']['output']>;
+  averageSquareYard?: Maybe<Scalars['Float']['output']>;
+  averageValue?: Maybe<Scalars['Float']['output']>;
   canDelete?: Maybe<Scalars['Boolean']['output']>;
   canEdit?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
-  improvementArea: Scalars['Float']['output'];
+  improvementArea?: Maybe<Scalars['Float']['output']>;
   institution?: Maybe<Institution>;
-  landArea: Scalars['Float']['output'];
-  landValue: Scalars['Float']['output'];
+  landArea?: Maybe<Scalars['Float']['output']>;
+  landValue?: Maybe<Scalars['Float']['output']>;
   measuredAt?: Maybe<Scalars['Date']['output']>;
   owner?: Maybe<Scalars['String']['output']>;
   phone?: Maybe<Scalars['String']['output']>;
   property_id?: Maybe<Scalars['ID']['output']>;
   reference?: Maybe<Scalars['String']['output']>;
-  riskProfile: RiskAggregates;
+  riskProfile?: Maybe<RiskAggregates>;
   sector?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
-  utilizationRatio: Scalars['Float']['output'];
+  utilizationRatio?: Maybe<Scalars['Float']['output']>;
+};
+
+export type PropertyValuationHistory = {
+  __typename?: 'PropertyValuationHistory';
+  controlCount: Scalars['Int']['output'];
+  financialCount: Scalars['Int']['output'];
+  otherCount: Scalars['Int']['output'];
+  riskPoints: Array<ValuationHistoryPoint>;
+  total: Scalars['Int']['output'];
+  valueChange?: Maybe<Scalars['Float']['output']>;
+  valueChangePercent?: Maybe<Scalars['Float']['output']>;
+  valuePoints: Array<ValuationHistoryPoint>;
 };
 
 export type Query = {
   __typename?: 'Query';
+  hasGlobalInstitutionScope: Scalars['Boolean']['output'];
   institutionById?: Maybe<Institution>;
   institutions: InstitutionPaginator;
+  preAppraisalById?: Maybe<PreAppraisal>;
+  preAppraisalInstitutionOptions: PreAppraisalInstitutionOptions;
+  preAppraisalSampleLinks: Array<PreAppraisalSampleLink>;
   preAppraisals: PreAppraisalPaginator;
   previewPreAppraisal: PreAppraisalPreviewPayload;
   properties: PropertyPaginator;
   propertiesWithinBounds: Array<Property>;
   propertiesWithinRadius: Array<Property>;
   propertyById?: Maybe<Property>;
+  propertyMapDetails: Property;
+  propertyValuationYears: Array<Scalars['Int']['output']>;
   roleById?: Maybe<Role>;
   roles: RolePaginator;
   user?: Maybe<User>;
   userById?: Maybe<User>;
   users: UserPaginator;
-  hasGlobalInstitutionScope: Scalars['Boolean']['output'];
-  propertyMapDetails: Property;
   valuationInstitutions: Array<Institution>;
 };
 
@@ -553,6 +674,16 @@ export type QueryInstitutionsArgs = {
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPreAppraisalByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPreAppraisalSampleLinksArgs = {
+  valuationIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -573,6 +704,7 @@ export type QueryPropertiesArgs = {
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+  valuationYear?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -593,6 +725,11 @@ export type QueryPropertiesWithinRadiusArgs = {
 
 
 export type QueryPropertyByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPropertyMapDetailsArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -683,6 +820,21 @@ export type UpdateInstitutionInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdatePreAppraisalInput = {
+  action?: InputMaybe<PreAppraisalCreateAction>;
+  id: Scalars['ID']['input'];
+  includeTargetProperty?: InputMaybe<Scalars['Boolean']['input']>;
+  institutionId?: InputMaybe<Scalars['ID']['input']>;
+  radiusMeters: Scalars['Int']['input'];
+  sectorFilter: PreAppraisalSectorFilter;
+  targetAddress?: InputMaybe<Scalars['String']['input']>;
+  targetLatitude: Scalars['Float']['input'];
+  targetLongitude: Scalars['Float']['input'];
+  targetPropertyId?: InputMaybe<Scalars['ID']['input']>;
+  timeFactor?: InputMaybe<Scalars['Float']['input']>;
+  valuationDate?: InputMaybe<Scalars['Date']['input']>;
+};
+
 export type UpdatePropertyInput = {
   cadastralKey?: InputMaybe<Scalars['String']['input']>;
   exactAddress?: InputMaybe<Scalars['String']['input']>;
@@ -750,6 +902,14 @@ export type UserPaginator = {
   paginatorInfo: PaginatorInfo;
 };
 
+export type ValuationHistoryPoint = {
+  __typename?: 'ValuationHistoryPoint';
+  date: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  sector?: Maybe<Scalars['String']['output']>;
+  value: Scalars['Float']['output'];
+};
+
 export enum ValuationSector {
   Control = 'Control',
   Financiero = 'Financiero'
@@ -799,6 +959,48 @@ export type CreatePreAppraisalMutationVariables = Exact<{
 
 export type CreatePreAppraisalMutation = { __typename?: 'Mutation', createPreAppraisal: { __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, candidateCount: number, sampleCount: number, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any } };
 
+export type UpdatePreAppraisalMutationVariables = Exact<{
+  input: UpdatePreAppraisalInput;
+}>;
+
+
+export type UpdatePreAppraisalMutation = { __typename?: 'Mutation', updatePreAppraisal: { __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, candidateCount: number, sampleCount: number, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any } };
+
+export type GeneratePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GeneratePreAppraisalMutation = { __typename?: 'Mutation', generatePreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus, generatedAt?: any | null } };
+
+export type CancelPreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelPreAppraisalMutation = { __typename?: 'Mutation', cancelPreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
+export type DeletePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePreAppraisalMutation = { __typename?: 'Mutation', deletePreAppraisal: { __typename?: 'PreAppraisal', id: string } };
+
+export type RequestFormalPreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RequestFormalPreAppraisalMutation = { __typename?: 'Mutation', requestFormalPreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
+export type DuplicatePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DuplicatePreAppraisalMutation = { __typename?: 'Mutation', duplicatePreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
 export type ListPreAppraisalsQueryVariables = Exact<{
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -807,7 +1009,14 @@ export type ListPreAppraisalsQueryVariables = Exact<{
 }>;
 
 
-export type ListPreAppraisalsQuery = { __typename?: 'Query', preAppraisals: { __typename?: 'PreAppraisalPaginator', data: Array<{ __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationSelectionMode: PreAppraisalValuationSelectionMode, valuationDate?: any | null, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, targetProperty?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null } | null, user: { __typename?: 'User', id: string, name: string } }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+export type ListPreAppraisalsQuery = { __typename?: 'Query', preAppraisals: { __typename?: 'PreAppraisalPaginator', data: Array<{ __typename?: 'PreAppraisal', id: string, canEdit: boolean, canDelete: boolean, institutionId?: string | null, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationSelectionMode: PreAppraisalValuationSelectionMode, valuationDate?: any | null, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, targetProperty?: { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null } | null, user: { __typename?: 'User', id: string, name: string } }>, paginatorInfo: { __typename?: 'PaginatorInfo', currentPage: number, lastPage: number, total: number } } };
+
+export type GetPreAppraisalByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPreAppraisalByIdQuery = { __typename?: 'Query', preAppraisalById?: { __typename?: 'PreAppraisal', id: string, canEdit: boolean, canDelete: boolean, institutionId?: string | null, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationSelectionMode: PreAppraisalValuationSelectionMode, valuationDate?: any | null, timeFactor: number, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, filters?: any | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, samples: Array<{ __typename?: 'PreAppraisalSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } | null };
 
 export type PreviewPreAppraisalQueryVariables = Exact<{
   input: PreAppraisalCalculationInput;
@@ -863,6 +1072,7 @@ export type ListPropertiesQueryVariables = Exact<{
   first: Scalars['Int']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+  valuationYear?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -873,7 +1083,7 @@ export type GetPropertyByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', canEdit?: boolean | null, canDelete?: boolean | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', canEdit?: boolean | null, canDelete?: boolean | null, id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue: number, measuredAt?: any | null, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', canEdit?: boolean | null, canDelete?: boolean | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, valuationHistory?: { __typename?: 'PropertyValuationHistory', total: number, financialCount: number, controlCount: number, otherCount: number, valueChange?: number | null, valueChangePercent?: number | null, valuePoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }>, riskPoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }> } | null, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', canEdit?: boolean | null, canDelete?: boolean | null, id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue?: number | null, measuredAt?: any | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type GetPropertiesWithinRadiusQueryVariables = Exact<{
   latitude: Scalars['Float']['input'];
@@ -884,7 +1094,32 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 
 export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
-export type PropertyPointFieldsFragment = { __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null };
+export type PropertyPointFieldsFragment = { __typename?: 'Property', canViewHistory: boolean, latestAuthorizedValuationDate?: any | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue?: number | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null };
+
+export type PropertyValuationYearsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PropertyValuationYearsQuery = { __typename?: 'Query', propertyValuationYears: Array<number> };
+
+export type PropertyMapSummaryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PropertyMapSummaryQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuationSummary: { __typename?: 'ExternalValuationSummary', count: number, hasNewer: boolean } } };
+
+export type PropertyExternalValuationsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  page: Scalars['Int']['input'];
+}>;
+
+
+export type PropertyExternalValuationsQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuations: { __typename?: 'ExternalValuationPage', currentPage: number, hasMorePages: boolean, data: Array<{ __typename?: 'ExternalValuation', id: string, institutionName?: string | null, measuredAt?: any | null, sector?: string | null, averageValue?: number | null, averageSquareYard?: number | null, landArea?: number | null, riskProfile?: RiskAggregates | null, isNewer: boolean }> } } };
+
+export type ValuationInstitutionOptionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ValuationInstitutionOptionsQuery = { __typename?: 'Query', hasGlobalInstitutionScope: boolean, valuationInstitutions: Array<{ __typename?: 'Institution', id: string, name: string }> };
 
 export type PropertiesWithinBoundsQueryVariables = Exact<{
   northLatitude: Scalars['Float']['input'];
@@ -895,7 +1130,7 @@ export type PropertiesWithinBoundsQueryVariables = Exact<{
 }>;
 
 
-export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue: number, landArea: number, improvementArea: number, landValue: number, utilizationRatio: number, averageSquareYard: number, averageSquareMeter: number, riskProfile: RiskAggregates, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null }> };
+export type PropertiesWithinBoundsQuery = { __typename?: 'Query', propertiesWithinBounds: Array<{ __typename?: 'Property', canViewHistory: boolean, latestAuthorizedValuationDate?: any | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue?: number | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null }> };
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
@@ -971,8 +1206,86 @@ export type GetUserByIdQueryVariables = Exact<{
 
 export type GetUserByIdQuery = { __typename?: 'Query', userById?: { __typename?: 'User', id: string, name: string, email: string, permisos?: Array<string> | null, permisosExtra?: Array<string> | null, institutions: Array<{ __typename?: 'Institution', id: string, name: string }>, roles: Array<{ __typename?: 'Role', id: string, name: string }> } | null };
 
+export type PreAppraisalInstitutionOptionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PreAppraisalInstitutionOptionsQuery = { __typename?: 'Query', preAppraisalInstitutionOptions: { __typename?: 'PreAppraisalInstitutionOptions', canSelectNone: boolean, institutions: Array<{ __typename?: 'Institution', id: string, name: string }> } };
+
+export type PreAppraisalSampleLinksQueryVariables = Exact<{
+  valuationIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type PreAppraisalSampleLinksQuery = { __typename?: 'Query', preAppraisalSampleLinks: Array<{ __typename?: 'PreAppraisalSampleLink', valuationId: string, propertyId: string }> };
+
+export type GetPreAppraisalDetailQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPreAppraisalDetailQuery = { __typename?: 'Query', preAppraisalById?: { __typename?: 'PreAppraisal', id: string, institutionId?: string | null, canEdit: boolean, canDelete: boolean, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, timeFactor: number, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, filters?: any | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, institution?: { __typename?: 'Institution', id: string, name: string } | null, samples: Array<{ __typename?: 'PreAppraisalSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } | null };
+
+export type DetailGeneratePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetailGeneratePreAppraisalMutation = { __typename?: 'Mutation', generatePreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus, generatedAt?: any | null } };
+
+export type DetailCancelPreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetailCancelPreAppraisalMutation = { __typename?: 'Mutation', cancelPreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
+export type DetailDeletePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetailDeletePreAppraisalMutation = { __typename?: 'Mutation', deletePreAppraisal: { __typename?: 'PreAppraisal', id: string } };
+
+export type DetailRequestFormalPreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetailRequestFormalPreAppraisalMutation = { __typename?: 'Mutation', requestFormalPreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
+export type DetailDuplicatePreAppraisalMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  institutionId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DetailDuplicatePreAppraisalMutation = { __typename?: 'Mutation', duplicatePreAppraisal: { __typename?: 'PreAppraisal', id: string, status: PreAppraisalStatus } };
+
+export type DetailDownloadPreAppraisalPdfMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetailDownloadPreAppraisalPdfMutation = { __typename?: 'Mutation', downloadPreAppraisalPdf: { __typename?: 'PreAppraisalPdfDownload', filename: string, mimeType: string, contentBase64: string } };
+
+export type EditGetPreAppraisalByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type EditGetPreAppraisalByIdQuery = { __typename?: 'Query', preAppraisalById?: { __typename?: 'PreAppraisal', id: string, institutionId?: string | null, canEdit: boolean, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationSelectionMode: PreAppraisalValuationSelectionMode, valuationDate?: any | null, timeFactor: number, candidateCount: number, sampleCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, filters?: any | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any, samples: Array<{ __typename?: 'PreAppraisalSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } | null };
+
+export type EditUpdatePreAppraisalMutationVariables = Exact<{
+  input: UpdatePreAppraisalInput;
+}>;
+
+
+export type EditUpdatePreAppraisalMutation = { __typename?: 'Mutation', updatePreAppraisal: { __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, candidateCount: number, sampleCount: number, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any } };
+
 export const PropertyPointFieldsFragmentDoc = gql`
     fragment PropertyPointFields on Property {
+  canViewHistory
+  latestAuthorizedValuationDate
   id
   name
   exactAddress
@@ -1242,11 +1555,235 @@ export function useCreatePreAppraisalMutation(baseOptions?: Apollo.MutationHookO
 export type CreatePreAppraisalMutationHookResult = ReturnType<typeof useCreatePreAppraisalMutation>;
 export type CreatePreAppraisalMutationResult = Apollo.MutationResult<CreatePreAppraisalMutation>;
 export type CreatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<CreatePreAppraisalMutation, CreatePreAppraisalMutationVariables>;
+export const UpdatePreAppraisalDocument = gql`
+    mutation UpdatePreAppraisal($input: UpdatePreAppraisalInput!) {
+  updatePreAppraisal(input: $input) {
+    id
+    uuid
+    reference
+    name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationDate
+    candidateCount
+    sampleCount
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    status
+    generatedAt
+    createdAt
+  }
+}
+    `;
+export type UpdatePreAppraisalMutationFn = Apollo.MutationFunction<UpdatePreAppraisalMutation, UpdatePreAppraisalMutationVariables>;
+
+/**
+ * __useUpdatePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useUpdatePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePreAppraisalMutation, { data, loading, error }] = useUpdatePreAppraisalMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePreAppraisalMutation, UpdatePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePreAppraisalMutation, UpdatePreAppraisalMutationVariables>(UpdatePreAppraisalDocument, options);
+      }
+export type UpdatePreAppraisalMutationHookResult = ReturnType<typeof useUpdatePreAppraisalMutation>;
+export type UpdatePreAppraisalMutationResult = Apollo.MutationResult<UpdatePreAppraisalMutation>;
+export type UpdatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<UpdatePreAppraisalMutation, UpdatePreAppraisalMutationVariables>;
+export const GeneratePreAppraisalDocument = gql`
+    mutation GeneratePreAppraisal($id: ID!) {
+  generatePreAppraisal(id: $id) {
+    id
+    status
+    generatedAt
+  }
+}
+    `;
+export type GeneratePreAppraisalMutationFn = Apollo.MutationFunction<GeneratePreAppraisalMutation, GeneratePreAppraisalMutationVariables>;
+
+/**
+ * __useGeneratePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useGeneratePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGeneratePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generatePreAppraisalMutation, { data, loading, error }] = useGeneratePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGeneratePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<GeneratePreAppraisalMutation, GeneratePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GeneratePreAppraisalMutation, GeneratePreAppraisalMutationVariables>(GeneratePreAppraisalDocument, options);
+      }
+export type GeneratePreAppraisalMutationHookResult = ReturnType<typeof useGeneratePreAppraisalMutation>;
+export type GeneratePreAppraisalMutationResult = Apollo.MutationResult<GeneratePreAppraisalMutation>;
+export type GeneratePreAppraisalMutationOptions = Apollo.BaseMutationOptions<GeneratePreAppraisalMutation, GeneratePreAppraisalMutationVariables>;
+export const CancelPreAppraisalDocument = gql`
+    mutation CancelPreAppraisal($id: ID!) {
+  cancelPreAppraisal(id: $id) {
+    id
+    status
+  }
+}
+    `;
+export type CancelPreAppraisalMutationFn = Apollo.MutationFunction<CancelPreAppraisalMutation, CancelPreAppraisalMutationVariables>;
+
+/**
+ * __useCancelPreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useCancelPreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelPreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelPreAppraisalMutation, { data, loading, error }] = useCancelPreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelPreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<CancelPreAppraisalMutation, CancelPreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelPreAppraisalMutation, CancelPreAppraisalMutationVariables>(CancelPreAppraisalDocument, options);
+      }
+export type CancelPreAppraisalMutationHookResult = ReturnType<typeof useCancelPreAppraisalMutation>;
+export type CancelPreAppraisalMutationResult = Apollo.MutationResult<CancelPreAppraisalMutation>;
+export type CancelPreAppraisalMutationOptions = Apollo.BaseMutationOptions<CancelPreAppraisalMutation, CancelPreAppraisalMutationVariables>;
+export const DeletePreAppraisalDocument = gql`
+    mutation DeletePreAppraisal($id: ID!) {
+  deletePreAppraisal(id: $id) {
+    id
+  }
+}
+    `;
+export type DeletePreAppraisalMutationFn = Apollo.MutationFunction<DeletePreAppraisalMutation, DeletePreAppraisalMutationVariables>;
+
+/**
+ * __useDeletePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDeletePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePreAppraisalMutation, { data, loading, error }] = useDeletePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DeletePreAppraisalMutation, DeletePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePreAppraisalMutation, DeletePreAppraisalMutationVariables>(DeletePreAppraisalDocument, options);
+      }
+export type DeletePreAppraisalMutationHookResult = ReturnType<typeof useDeletePreAppraisalMutation>;
+export type DeletePreAppraisalMutationResult = Apollo.MutationResult<DeletePreAppraisalMutation>;
+export type DeletePreAppraisalMutationOptions = Apollo.BaseMutationOptions<DeletePreAppraisalMutation, DeletePreAppraisalMutationVariables>;
+export const RequestFormalPreAppraisalDocument = gql`
+    mutation RequestFormalPreAppraisal($id: ID!) {
+  requestFormalPreAppraisal(id: $id) {
+    id
+    status
+  }
+}
+    `;
+export type RequestFormalPreAppraisalMutationFn = Apollo.MutationFunction<RequestFormalPreAppraisalMutation, RequestFormalPreAppraisalMutationVariables>;
+
+/**
+ * __useRequestFormalPreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useRequestFormalPreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRequestFormalPreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [requestFormalPreAppraisalMutation, { data, loading, error }] = useRequestFormalPreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRequestFormalPreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<RequestFormalPreAppraisalMutation, RequestFormalPreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RequestFormalPreAppraisalMutation, RequestFormalPreAppraisalMutationVariables>(RequestFormalPreAppraisalDocument, options);
+      }
+export type RequestFormalPreAppraisalMutationHookResult = ReturnType<typeof useRequestFormalPreAppraisalMutation>;
+export type RequestFormalPreAppraisalMutationResult = Apollo.MutationResult<RequestFormalPreAppraisalMutation>;
+export type RequestFormalPreAppraisalMutationOptions = Apollo.BaseMutationOptions<RequestFormalPreAppraisalMutation, RequestFormalPreAppraisalMutationVariables>;
+export const DuplicatePreAppraisalDocument = gql`
+    mutation DuplicatePreAppraisal($id: ID!) {
+  duplicatePreAppraisal(id: $id) {
+    id
+    status
+  }
+}
+    `;
+export type DuplicatePreAppraisalMutationFn = Apollo.MutationFunction<DuplicatePreAppraisalMutation, DuplicatePreAppraisalMutationVariables>;
+
+/**
+ * __useDuplicatePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDuplicatePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDuplicatePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [duplicatePreAppraisalMutation, { data, loading, error }] = useDuplicatePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDuplicatePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DuplicatePreAppraisalMutation, DuplicatePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DuplicatePreAppraisalMutation, DuplicatePreAppraisalMutationVariables>(DuplicatePreAppraisalDocument, options);
+      }
+export type DuplicatePreAppraisalMutationHookResult = ReturnType<typeof useDuplicatePreAppraisalMutation>;
+export type DuplicatePreAppraisalMutationResult = Apollo.MutationResult<DuplicatePreAppraisalMutation>;
+export type DuplicatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<DuplicatePreAppraisalMutation, DuplicatePreAppraisalMutationVariables>;
 export const ListPreAppraisalsDocument = gql`
     query ListPreAppraisals($first: Int!, $page: Int, $filter: PreAppraisalFilterInput, $orderBy: [PreAppraisalOrderByInput!]) {
   preAppraisals(first: $first, page: $page, filter: $filter, orderBy: $orderBy) {
     data {
       id
+      canEdit
+      canDelete
+      institutionId
       uuid
       reference
       name
@@ -1323,6 +1860,100 @@ export type ListPreAppraisalsQueryHookResult = ReturnType<typeof useListPreAppra
 export type ListPreAppraisalsLazyQueryHookResult = ReturnType<typeof useListPreAppraisalsLazyQuery>;
 export type ListPreAppraisalsSuspenseQueryHookResult = ReturnType<typeof useListPreAppraisalsSuspenseQuery>;
 export type ListPreAppraisalsQueryResult = Apollo.QueryResult<ListPreAppraisalsQuery, ListPreAppraisalsQueryVariables>;
+export const GetPreAppraisalByIdDocument = gql`
+    query GetPreAppraisalById($id: ID!) {
+  preAppraisalById(id: $id) {
+    id
+    canEdit
+    canDelete
+    institutionId
+    uuid
+    reference
+    name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationSelectionMode
+    valuationDate
+    timeFactor
+    candidateCount
+    sampleCount
+    minAverageSquareYard
+    maxAverageSquareYard
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    priceByYear
+    riskByYear
+    filters
+    status
+    generatedAt
+    createdAt
+    samples {
+      tag
+      propertyId
+      propertyValuationId
+      institutionId
+      propertyName
+      exactAddress
+      cadastralKey
+      latitude
+      longitude
+      valuationReference
+      valuationSector
+      averageSquareYard
+      averageSquareMeter
+      riskProfile
+      riskScore
+      measuredAt
+      distanceMeters
+      isWithinRadius
+      valuationAgeYears
+      timeWeight
+      distanceWeight
+      factor
+      weightedPrice
+      weightedRisk
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPreAppraisalByIdQuery__
+ *
+ * To run a query within a React component, call `useGetPreAppraisalByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPreAppraisalByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPreAppraisalByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetPreAppraisalByIdQuery(baseOptions: Apollo.QueryHookOptions<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables> & ({ variables: GetPreAppraisalByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>(GetPreAppraisalByIdDocument, options);
+      }
+export function useGetPreAppraisalByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>(GetPreAppraisalByIdDocument, options);
+        }
+export function useGetPreAppraisalByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>(GetPreAppraisalByIdDocument, options);
+        }
+export type GetPreAppraisalByIdQueryHookResult = ReturnType<typeof useGetPreAppraisalByIdQuery>;
+export type GetPreAppraisalByIdLazyQueryHookResult = ReturnType<typeof useGetPreAppraisalByIdLazyQuery>;
+export type GetPreAppraisalByIdSuspenseQueryHookResult = ReturnType<typeof useGetPreAppraisalByIdSuspenseQuery>;
+export type GetPreAppraisalByIdQueryResult = Apollo.QueryResult<GetPreAppraisalByIdQuery, GetPreAppraisalByIdQueryVariables>;
 export const PreviewPreAppraisalDocument = gql`
     query PreviewPreAppraisal($input: PreAppraisalCalculationInput!) {
   previewPreAppraisal(input: $input) {
@@ -1608,8 +2239,13 @@ export type DeleteValuationMutationHookResult = ReturnType<typeof useDeleteValua
 export type DeleteValuationMutationResult = Apollo.MutationResult<DeleteValuationMutation>;
 export type DeleteValuationMutationOptions = Apollo.BaseMutationOptions<DeleteValuationMutation, DeleteValuationMutationVariables>;
 export const ListPropertiesDocument = gql`
-    query ListProperties($first: Int!, $page: Int, $search: String) {
-  properties(first: $first, page: $page, search: $search) {
+    query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int) {
+  properties(
+    first: $first
+    page: $page
+    search: $search
+    valuationYear: $valuationYear
+  ) {
     data {
       id
       name
@@ -1649,6 +2285,7 @@ export const ListPropertiesDocument = gql`
  *      first: // value for 'first'
  *      page: // value for 'page'
  *      search: // value for 'search'
+ *      valuationYear: // value for 'valuationYear'
  *   },
  * });
  */
@@ -1671,6 +2308,26 @@ export type ListPropertiesQueryResult = Apollo.QueryResult<ListPropertiesQuery, 
 export const GetPropertyByIdDocument = gql`
     query GetPropertyById($id: ID!) {
   propertyById(id: $id) {
+    valuationHistory {
+      total
+      financialCount
+      controlCount
+      otherCount
+      valueChange
+      valueChangePercent
+      valuePoints {
+        id
+        date
+        sector
+        value
+      }
+      riskPoints {
+        id
+        date
+        sector
+        value
+      }
+    }
     canEdit
     canDelete
     id
@@ -1797,6 +2454,184 @@ export type GetPropertiesWithinRadiusQueryHookResult = ReturnType<typeof useGetP
 export type GetPropertiesWithinRadiusLazyQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusLazyQuery>;
 export type GetPropertiesWithinRadiusSuspenseQueryHookResult = ReturnType<typeof useGetPropertiesWithinRadiusSuspenseQuery>;
 export type GetPropertiesWithinRadiusQueryResult = Apollo.QueryResult<GetPropertiesWithinRadiusQuery, GetPropertiesWithinRadiusQueryVariables>;
+export const PropertyValuationYearsDocument = gql`
+    query PropertyValuationYears {
+  propertyValuationYears
+}
+    `;
+
+/**
+ * __usePropertyValuationYearsQuery__
+ *
+ * To run a query within a React component, call `usePropertyValuationYearsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePropertyValuationYearsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePropertyValuationYearsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePropertyValuationYearsQuery(baseOptions?: Apollo.QueryHookOptions<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>(PropertyValuationYearsDocument, options);
+      }
+export function usePropertyValuationYearsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>(PropertyValuationYearsDocument, options);
+        }
+export function usePropertyValuationYearsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>(PropertyValuationYearsDocument, options);
+        }
+export type PropertyValuationYearsQueryHookResult = ReturnType<typeof usePropertyValuationYearsQuery>;
+export type PropertyValuationYearsLazyQueryHookResult = ReturnType<typeof usePropertyValuationYearsLazyQuery>;
+export type PropertyValuationYearsSuspenseQueryHookResult = ReturnType<typeof usePropertyValuationYearsSuspenseQuery>;
+export type PropertyValuationYearsQueryResult = Apollo.QueryResult<PropertyValuationYearsQuery, PropertyValuationYearsQueryVariables>;
+export const PropertyMapSummaryDocument = gql`
+    query PropertyMapSummary($id: ID!) {
+  propertyMapDetails(id: $id) {
+    id
+    externalValuationSummary {
+      count
+      hasNewer
+    }
+  }
+}
+    `;
+
+/**
+ * __usePropertyMapSummaryQuery__
+ *
+ * To run a query within a React component, call `usePropertyMapSummaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePropertyMapSummaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePropertyMapSummaryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePropertyMapSummaryQuery(baseOptions: Apollo.QueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables> & ({ variables: PropertyMapSummaryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+      }
+export function usePropertyMapSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+        }
+export function usePropertyMapSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+        }
+export type PropertyMapSummaryQueryHookResult = ReturnType<typeof usePropertyMapSummaryQuery>;
+export type PropertyMapSummaryLazyQueryHookResult = ReturnType<typeof usePropertyMapSummaryLazyQuery>;
+export type PropertyMapSummarySuspenseQueryHookResult = ReturnType<typeof usePropertyMapSummarySuspenseQuery>;
+export type PropertyMapSummaryQueryResult = Apollo.QueryResult<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>;
+export const PropertyExternalValuationsDocument = gql`
+    query PropertyExternalValuations($id: ID!, $page: Int!) {
+  propertyMapDetails(id: $id) {
+    id
+    externalValuations(first: 10, page: $page) {
+      currentPage
+      hasMorePages
+      data {
+        id
+        institutionName
+        measuredAt
+        sector
+        averageValue
+        averageSquareYard
+        landArea
+        riskProfile
+        isNewer
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __usePropertyExternalValuationsQuery__
+ *
+ * To run a query within a React component, call `usePropertyExternalValuationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePropertyExternalValuationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePropertyExternalValuationsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePropertyExternalValuationsQuery(baseOptions: Apollo.QueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables> & ({ variables: PropertyExternalValuationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+      }
+export function usePropertyExternalValuationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+        }
+export function usePropertyExternalValuationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+        }
+export type PropertyExternalValuationsQueryHookResult = ReturnType<typeof usePropertyExternalValuationsQuery>;
+export type PropertyExternalValuationsLazyQueryHookResult = ReturnType<typeof usePropertyExternalValuationsLazyQuery>;
+export type PropertyExternalValuationsSuspenseQueryHookResult = ReturnType<typeof usePropertyExternalValuationsSuspenseQuery>;
+export type PropertyExternalValuationsQueryResult = Apollo.QueryResult<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>;
+export const ValuationInstitutionOptionsDocument = gql`
+    query ValuationInstitutionOptions {
+  hasGlobalInstitutionScope
+  valuationInstitutions {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useValuationInstitutionOptionsQuery__
+ *
+ * To run a query within a React component, call `useValuationInstitutionOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useValuationInstitutionOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useValuationInstitutionOptionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useValuationInstitutionOptionsQuery(baseOptions?: Apollo.QueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+      }
+export function useValuationInstitutionOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+        }
+export function useValuationInstitutionOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+        }
+export type ValuationInstitutionOptionsQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsQuery>;
+export type ValuationInstitutionOptionsLazyQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsLazyQuery>;
+export type ValuationInstitutionOptionsSuspenseQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsSuspenseQuery>;
+export type ValuationInstitutionOptionsQueryResult = Apollo.QueryResult<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>;
 export const PropertiesWithinBoundsDocument = gql`
     query PropertiesWithinBounds($northLatitude: Float!, $eastLongitude: Float!, $southLatitude: Float!, $westLongitude: Float!, $limit: Int) {
   propertiesWithinBounds(
@@ -2259,169 +3094,534 @@ export type GetUserByIdQueryHookResult = ReturnType<typeof useGetUserByIdQuery>;
 export type GetUserByIdLazyQueryHookResult = ReturnType<typeof useGetUserByIdLazyQuery>;
 export type GetUserByIdSuspenseQueryHookResult = ReturnType<typeof useGetUserByIdSuspenseQuery>;
 export type GetUserByIdQueryResult = Apollo.QueryResult<GetUserByIdQuery, GetUserByIdQueryVariables>;
-
-export type ExternalValuation = {
-  __typename?: 'ExternalValuation';
-  averageSquareYard?: Maybe<Scalars['Float']['output']>;
-  averageValue?: Maybe<Scalars['Float']['output']>;
-  id: Scalars['ID']['output'];
-  institutionName?: Maybe<Scalars['String']['output']>;
-  isNewer: Scalars['Boolean']['output'];
-  landArea?: Maybe<Scalars['Float']['output']>;
-  measuredAt?: Maybe<Scalars['Date']['output']>;
-  riskProfile?: Maybe<RiskAggregates>;
-  sector?: Maybe<Scalars['String']['output']>;
-};
-
-export type ExternalValuationPage = {
-  __typename?: 'ExternalValuationPage';
-  currentPage: Scalars['Int']['output'];
-  data: Array<ExternalValuation>;
-  hasMorePages: Scalars['Boolean']['output'];
-};
-
-export type ExternalValuationSummary = {
-  __typename?: 'ExternalValuationSummary';
-  count: Scalars['Int']['output'];
-  hasNewer: Scalars['Boolean']['output'];
-};
-
-export type PropertyExternalValuationsArgs = {
-  first?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type QueryPropertyMapDetailsArgs = {
-  id: Scalars['ID']['input'];
-};
-
-export type PropertyMapSummaryQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-export type PropertyMapSummaryQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuationSummary: { __typename?: 'ExternalValuationSummary', count: number, hasNewer: boolean } } };
-
-export type PropertyExternalValuationsQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-  page: Scalars['Int']['input'];
-}>;
-
-export type PropertyExternalValuationsQuery = { __typename?: 'Query', propertyMapDetails: { __typename?: 'Property', id: string, externalValuations: { __typename?: 'ExternalValuationPage', currentPage: number, hasMorePages: boolean, data: Array<{ __typename?: 'ExternalValuation', id: string, institutionName?: string | null, measuredAt?: Scalars['Date']['output'] | null, sector?: string | null, averageValue?: number | null, averageSquareYard?: number | null, landArea?: number | null, riskProfile?: RiskAggregates | null, isNewer: boolean }> } } };
-
-export type ValuationInstitutionOptionsQueryVariables = Exact<{ [key: string]: never; }>;
-
-export type ValuationInstitutionOptionsQuery = { __typename?: 'Query', hasGlobalInstitutionScope: boolean, valuationInstitutions: Array<{ __typename?: 'Institution', id: string, name: string }> };
-
-export const PropertyMapSummaryDocument = gql`
-    query PropertyMapSummary($id: ID!) {
-  propertyMapDetails(id: $id) {
-    id
-    externalValuationSummary {
-      count
-      hasNewer
+export const PreAppraisalInstitutionOptionsDocument = gql`
+    query PreAppraisalInstitutionOptions {
+  preAppraisalInstitutionOptions {
+    canSelectNone
+    institutions {
+      id
+      name
     }
   }
 }
     `;
 
-export function usePropertyMapSummaryQuery(baseOptions: Apollo.QueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables> & ({ variables: PropertyMapSummaryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+/**
+ * __usePreAppraisalInstitutionOptionsQuery__
+ *
+ * To run a query within a React component, call `usePreAppraisalInstitutionOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePreAppraisalInstitutionOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePreAppraisalInstitutionOptionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePreAppraisalInstitutionOptionsQuery(baseOptions?: Apollo.QueryHookOptions<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+        return Apollo.useQuery<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>(PreAppraisalInstitutionOptionsDocument, options);
       }
-
-export function usePropertyMapSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+export function usePreAppraisalInstitutionOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+          return Apollo.useLazyQuery<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>(PreAppraisalInstitutionOptionsDocument, options);
         }
-
-export function usePropertyMapSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>) {
+export function usePreAppraisalInstitutionOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>(PropertyMapSummaryDocument, options);
+          return Apollo.useSuspenseQuery<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>(PreAppraisalInstitutionOptionsDocument, options);
         }
-
-export type PropertyMapSummaryQueryHookResult = ReturnType<typeof usePropertyMapSummaryQuery>;
-
-export type PropertyMapSummaryLazyQueryHookResult = ReturnType<typeof usePropertyMapSummaryLazyQuery>;
-
-export type PropertyMapSummarySuspenseQueryHookResult = ReturnType<typeof usePropertyMapSummarySuspenseQuery>;
-
-export type PropertyMapSummaryQueryResult = Apollo.QueryResult<PropertyMapSummaryQuery, PropertyMapSummaryQueryVariables>;
-
-export const PropertyExternalValuationsDocument = gql`
-    query PropertyExternalValuations($id: ID!, $page: Int!) {
-  propertyMapDetails(id: $id) {
-    id
-    externalValuations(first: 10, page: $page) {
-      currentPage
-      hasMorePages
-      data {
-        id
-        institutionName
-        measuredAt
-        sector
-        averageValue
-        averageSquareYard
-        landArea
-        riskProfile
-        isNewer
-      }
-    }
+export type PreAppraisalInstitutionOptionsQueryHookResult = ReturnType<typeof usePreAppraisalInstitutionOptionsQuery>;
+export type PreAppraisalInstitutionOptionsLazyQueryHookResult = ReturnType<typeof usePreAppraisalInstitutionOptionsLazyQuery>;
+export type PreAppraisalInstitutionOptionsSuspenseQueryHookResult = ReturnType<typeof usePreAppraisalInstitutionOptionsSuspenseQuery>;
+export type PreAppraisalInstitutionOptionsQueryResult = Apollo.QueryResult<PreAppraisalInstitutionOptionsQuery, PreAppraisalInstitutionOptionsQueryVariables>;
+export const PreAppraisalSampleLinksDocument = gql`
+    query PreAppraisalSampleLinks($valuationIds: [ID!]!) {
+  preAppraisalSampleLinks(valuationIds: $valuationIds) {
+    valuationId
+    propertyId
   }
 }
     `;
 
-export function usePropertyExternalValuationsQuery(baseOptions: Apollo.QueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables> & ({ variables: PropertyExternalValuationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+/**
+ * __usePreAppraisalSampleLinksQuery__
+ *
+ * To run a query within a React component, call `usePreAppraisalSampleLinksQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePreAppraisalSampleLinksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePreAppraisalSampleLinksQuery({
+ *   variables: {
+ *      valuationIds: // value for 'valuationIds'
+ *   },
+ * });
+ */
+export function usePreAppraisalSampleLinksQuery(baseOptions: Apollo.QueryHookOptions<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables> & ({ variables: PreAppraisalSampleLinksQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+        return Apollo.useQuery<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>(PreAppraisalSampleLinksDocument, options);
       }
-
-export function usePropertyExternalValuationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+export function usePreAppraisalSampleLinksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+          return Apollo.useLazyQuery<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>(PreAppraisalSampleLinksDocument, options);
         }
-
-export function usePropertyExternalValuationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>) {
+export function usePreAppraisalSampleLinksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>(PropertyExternalValuationsDocument, options);
+          return Apollo.useSuspenseQuery<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>(PreAppraisalSampleLinksDocument, options);
         }
-
-export type PropertyExternalValuationsQueryHookResult = ReturnType<typeof usePropertyExternalValuationsQuery>;
-
-export type PropertyExternalValuationsLazyQueryHookResult = ReturnType<typeof usePropertyExternalValuationsLazyQuery>;
-
-export type PropertyExternalValuationsSuspenseQueryHookResult = ReturnType<typeof usePropertyExternalValuationsSuspenseQuery>;
-
-export type PropertyExternalValuationsQueryResult = Apollo.QueryResult<PropertyExternalValuationsQuery, PropertyExternalValuationsQueryVariables>;
-
-export const ValuationInstitutionOptionsDocument = gql`
-    query ValuationInstitutionOptions {
-  hasGlobalInstitutionScope
-  valuationInstitutions {
+export type PreAppraisalSampleLinksQueryHookResult = ReturnType<typeof usePreAppraisalSampleLinksQuery>;
+export type PreAppraisalSampleLinksLazyQueryHookResult = ReturnType<typeof usePreAppraisalSampleLinksLazyQuery>;
+export type PreAppraisalSampleLinksSuspenseQueryHookResult = ReturnType<typeof usePreAppraisalSampleLinksSuspenseQuery>;
+export type PreAppraisalSampleLinksQueryResult = Apollo.QueryResult<PreAppraisalSampleLinksQuery, PreAppraisalSampleLinksQueryVariables>;
+export const GetPreAppraisalDetailDocument = gql`
+    query GetPreAppraisalDetail($id: ID!) {
+  preAppraisalById(id: $id) {
     id
+    institutionId
+    institution {
+      id
+      name
+    }
+    canEdit
+    canDelete
+    uuid
+    reference
     name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationDate
+    timeFactor
+    candidateCount
+    sampleCount
+    minAverageSquareYard
+    maxAverageSquareYard
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    priceByYear
+    riskByYear
+    filters
+    status
+    generatedAt
+    createdAt
+    samples {
+      tag
+      propertyId
+      propertyValuationId
+      institutionId
+      propertyName
+      exactAddress
+      cadastralKey
+      latitude
+      longitude
+      valuationReference
+      valuationSector
+      averageSquareYard
+      averageSquareMeter
+      riskProfile
+      riskScore
+      measuredAt
+      distanceMeters
+      isWithinRadius
+      valuationAgeYears
+      timeWeight
+      distanceWeight
+      factor
+      weightedPrice
+      weightedRisk
+    }
   }
 }
     `;
 
-export function useValuationInstitutionOptionsQuery(baseOptions?: Apollo.QueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+/**
+ * __useGetPreAppraisalDetailQuery__
+ *
+ * To run a query within a React component, call `useGetPreAppraisalDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPreAppraisalDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPreAppraisalDetailQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetPreAppraisalDetailQuery(baseOptions: Apollo.QueryHookOptions<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables> & ({ variables: GetPreAppraisalDetailQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+        return Apollo.useQuery<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>(GetPreAppraisalDetailDocument, options);
       }
-
-export function useValuationInstitutionOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+export function useGetPreAppraisalDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+          return Apollo.useLazyQuery<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>(GetPreAppraisalDetailDocument, options);
         }
-
-export function useValuationInstitutionOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>) {
+export function useGetPreAppraisalDetailSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>(ValuationInstitutionOptionsDocument, options);
+          return Apollo.useSuspenseQuery<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>(GetPreAppraisalDetailDocument, options);
         }
+export type GetPreAppraisalDetailQueryHookResult = ReturnType<typeof useGetPreAppraisalDetailQuery>;
+export type GetPreAppraisalDetailLazyQueryHookResult = ReturnType<typeof useGetPreAppraisalDetailLazyQuery>;
+export type GetPreAppraisalDetailSuspenseQueryHookResult = ReturnType<typeof useGetPreAppraisalDetailSuspenseQuery>;
+export type GetPreAppraisalDetailQueryResult = Apollo.QueryResult<GetPreAppraisalDetailQuery, GetPreAppraisalDetailQueryVariables>;
+export const DetailGeneratePreAppraisalDocument = gql`
+    mutation DetailGeneratePreAppraisal($id: ID!) {
+  generatePreAppraisal(id: $id) {
+    id
+    status
+    generatedAt
+  }
+}
+    `;
+export type DetailGeneratePreAppraisalMutationFn = Apollo.MutationFunction<DetailGeneratePreAppraisalMutation, DetailGeneratePreAppraisalMutationVariables>;
 
-export type ValuationInstitutionOptionsQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsQuery>;
+/**
+ * __useDetailGeneratePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDetailGeneratePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailGeneratePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailGeneratePreAppraisalMutation, { data, loading, error }] = useDetailGeneratePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetailGeneratePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DetailGeneratePreAppraisalMutation, DetailGeneratePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailGeneratePreAppraisalMutation, DetailGeneratePreAppraisalMutationVariables>(DetailGeneratePreAppraisalDocument, options);
+      }
+export type DetailGeneratePreAppraisalMutationHookResult = ReturnType<typeof useDetailGeneratePreAppraisalMutation>;
+export type DetailGeneratePreAppraisalMutationResult = Apollo.MutationResult<DetailGeneratePreAppraisalMutation>;
+export type DetailGeneratePreAppraisalMutationOptions = Apollo.BaseMutationOptions<DetailGeneratePreAppraisalMutation, DetailGeneratePreAppraisalMutationVariables>;
+export const DetailCancelPreAppraisalDocument = gql`
+    mutation DetailCancelPreAppraisal($id: ID!) {
+  cancelPreAppraisal(id: $id) {
+    id
+    status
+  }
+}
+    `;
+export type DetailCancelPreAppraisalMutationFn = Apollo.MutationFunction<DetailCancelPreAppraisalMutation, DetailCancelPreAppraisalMutationVariables>;
 
-export type ValuationInstitutionOptionsLazyQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsLazyQuery>;
+/**
+ * __useDetailCancelPreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDetailCancelPreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailCancelPreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailCancelPreAppraisalMutation, { data, loading, error }] = useDetailCancelPreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetailCancelPreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DetailCancelPreAppraisalMutation, DetailCancelPreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailCancelPreAppraisalMutation, DetailCancelPreAppraisalMutationVariables>(DetailCancelPreAppraisalDocument, options);
+      }
+export type DetailCancelPreAppraisalMutationHookResult = ReturnType<typeof useDetailCancelPreAppraisalMutation>;
+export type DetailCancelPreAppraisalMutationResult = Apollo.MutationResult<DetailCancelPreAppraisalMutation>;
+export type DetailCancelPreAppraisalMutationOptions = Apollo.BaseMutationOptions<DetailCancelPreAppraisalMutation, DetailCancelPreAppraisalMutationVariables>;
+export const DetailDeletePreAppraisalDocument = gql`
+    mutation DetailDeletePreAppraisal($id: ID!) {
+  deletePreAppraisal(id: $id) {
+    id
+  }
+}
+    `;
+export type DetailDeletePreAppraisalMutationFn = Apollo.MutationFunction<DetailDeletePreAppraisalMutation, DetailDeletePreAppraisalMutationVariables>;
 
-export type ValuationInstitutionOptionsSuspenseQueryHookResult = ReturnType<typeof useValuationInstitutionOptionsSuspenseQuery>;
+/**
+ * __useDetailDeletePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDetailDeletePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailDeletePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailDeletePreAppraisalMutation, { data, loading, error }] = useDetailDeletePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetailDeletePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DetailDeletePreAppraisalMutation, DetailDeletePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailDeletePreAppraisalMutation, DetailDeletePreAppraisalMutationVariables>(DetailDeletePreAppraisalDocument, options);
+      }
+export type DetailDeletePreAppraisalMutationHookResult = ReturnType<typeof useDetailDeletePreAppraisalMutation>;
+export type DetailDeletePreAppraisalMutationResult = Apollo.MutationResult<DetailDeletePreAppraisalMutation>;
+export type DetailDeletePreAppraisalMutationOptions = Apollo.BaseMutationOptions<DetailDeletePreAppraisalMutation, DetailDeletePreAppraisalMutationVariables>;
+export const DetailRequestFormalPreAppraisalDocument = gql`
+    mutation DetailRequestFormalPreAppraisal($id: ID!) {
+  requestFormalPreAppraisal(id: $id) {
+    id
+    status
+  }
+}
+    `;
+export type DetailRequestFormalPreAppraisalMutationFn = Apollo.MutationFunction<DetailRequestFormalPreAppraisalMutation, DetailRequestFormalPreAppraisalMutationVariables>;
 
-export type ValuationInstitutionOptionsQueryResult = Apollo.QueryResult<ValuationInstitutionOptionsQuery, ValuationInstitutionOptionsQueryVariables>;
+/**
+ * __useDetailRequestFormalPreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDetailRequestFormalPreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailRequestFormalPreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailRequestFormalPreAppraisalMutation, { data, loading, error }] = useDetailRequestFormalPreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetailRequestFormalPreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DetailRequestFormalPreAppraisalMutation, DetailRequestFormalPreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailRequestFormalPreAppraisalMutation, DetailRequestFormalPreAppraisalMutationVariables>(DetailRequestFormalPreAppraisalDocument, options);
+      }
+export type DetailRequestFormalPreAppraisalMutationHookResult = ReturnType<typeof useDetailRequestFormalPreAppraisalMutation>;
+export type DetailRequestFormalPreAppraisalMutationResult = Apollo.MutationResult<DetailRequestFormalPreAppraisalMutation>;
+export type DetailRequestFormalPreAppraisalMutationOptions = Apollo.BaseMutationOptions<DetailRequestFormalPreAppraisalMutation, DetailRequestFormalPreAppraisalMutationVariables>;
+export const DetailDuplicatePreAppraisalDocument = gql`
+    mutation DetailDuplicatePreAppraisal($id: ID!, $institutionId: ID) {
+  duplicatePreAppraisal(id: $id, institutionId: $institutionId) {
+    id
+    status
+  }
+}
+    `;
+export type DetailDuplicatePreAppraisalMutationFn = Apollo.MutationFunction<DetailDuplicatePreAppraisalMutation, DetailDuplicatePreAppraisalMutationVariables>;
+
+/**
+ * __useDetailDuplicatePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useDetailDuplicatePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailDuplicatePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailDuplicatePreAppraisalMutation, { data, loading, error }] = useDetailDuplicatePreAppraisalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      institutionId: // value for 'institutionId'
+ *   },
+ * });
+ */
+export function useDetailDuplicatePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<DetailDuplicatePreAppraisalMutation, DetailDuplicatePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailDuplicatePreAppraisalMutation, DetailDuplicatePreAppraisalMutationVariables>(DetailDuplicatePreAppraisalDocument, options);
+      }
+export type DetailDuplicatePreAppraisalMutationHookResult = ReturnType<typeof useDetailDuplicatePreAppraisalMutation>;
+export type DetailDuplicatePreAppraisalMutationResult = Apollo.MutationResult<DetailDuplicatePreAppraisalMutation>;
+export type DetailDuplicatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<DetailDuplicatePreAppraisalMutation, DetailDuplicatePreAppraisalMutationVariables>;
+export const DetailDownloadPreAppraisalPdfDocument = gql`
+    mutation DetailDownloadPreAppraisalPdf($id: ID!) {
+  downloadPreAppraisalPdf(id: $id) {
+    filename
+    mimeType
+    contentBase64
+  }
+}
+    `;
+export type DetailDownloadPreAppraisalPdfMutationFn = Apollo.MutationFunction<DetailDownloadPreAppraisalPdfMutation, DetailDownloadPreAppraisalPdfMutationVariables>;
+
+/**
+ * __useDetailDownloadPreAppraisalPdfMutation__
+ *
+ * To run a mutation, you first call `useDetailDownloadPreAppraisalPdfMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetailDownloadPreAppraisalPdfMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detailDownloadPreAppraisalPdfMutation, { data, loading, error }] = useDetailDownloadPreAppraisalPdfMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetailDownloadPreAppraisalPdfMutation(baseOptions?: Apollo.MutationHookOptions<DetailDownloadPreAppraisalPdfMutation, DetailDownloadPreAppraisalPdfMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetailDownloadPreAppraisalPdfMutation, DetailDownloadPreAppraisalPdfMutationVariables>(DetailDownloadPreAppraisalPdfDocument, options);
+      }
+export type DetailDownloadPreAppraisalPdfMutationHookResult = ReturnType<typeof useDetailDownloadPreAppraisalPdfMutation>;
+export type DetailDownloadPreAppraisalPdfMutationResult = Apollo.MutationResult<DetailDownloadPreAppraisalPdfMutation>;
+export type DetailDownloadPreAppraisalPdfMutationOptions = Apollo.BaseMutationOptions<DetailDownloadPreAppraisalPdfMutation, DetailDownloadPreAppraisalPdfMutationVariables>;
+export const EditGetPreAppraisalByIdDocument = gql`
+    query EditGetPreAppraisalById($id: ID!) {
+  preAppraisalById(id: $id) {
+    id
+    institutionId
+    canEdit
+    uuid
+    reference
+    name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationSelectionMode
+    valuationDate
+    timeFactor
+    candidateCount
+    sampleCount
+    minAverageSquareYard
+    maxAverageSquareYard
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    priceByYear
+    riskByYear
+    filters
+    status
+    generatedAt
+    createdAt
+    samples {
+      tag
+      propertyId
+      propertyValuationId
+      institutionId
+      propertyName
+      exactAddress
+      cadastralKey
+      latitude
+      longitude
+      valuationReference
+      valuationSector
+      averageSquareYard
+      averageSquareMeter
+      riskProfile
+      riskScore
+      measuredAt
+      distanceMeters
+      isWithinRadius
+      valuationAgeYears
+      timeWeight
+      distanceWeight
+      factor
+      weightedPrice
+      weightedRisk
+    }
+  }
+}
+    `;
+
+/**
+ * __useEditGetPreAppraisalByIdQuery__
+ *
+ * To run a query within a React component, call `useEditGetPreAppraisalByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEditGetPreAppraisalByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEditGetPreAppraisalByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useEditGetPreAppraisalByIdQuery(baseOptions: Apollo.QueryHookOptions<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables> & ({ variables: EditGetPreAppraisalByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>(EditGetPreAppraisalByIdDocument, options);
+      }
+export function useEditGetPreAppraisalByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>(EditGetPreAppraisalByIdDocument, options);
+        }
+export function useEditGetPreAppraisalByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>(EditGetPreAppraisalByIdDocument, options);
+        }
+export type EditGetPreAppraisalByIdQueryHookResult = ReturnType<typeof useEditGetPreAppraisalByIdQuery>;
+export type EditGetPreAppraisalByIdLazyQueryHookResult = ReturnType<typeof useEditGetPreAppraisalByIdLazyQuery>;
+export type EditGetPreAppraisalByIdSuspenseQueryHookResult = ReturnType<typeof useEditGetPreAppraisalByIdSuspenseQuery>;
+export type EditGetPreAppraisalByIdQueryResult = Apollo.QueryResult<EditGetPreAppraisalByIdQuery, EditGetPreAppraisalByIdQueryVariables>;
+export const EditUpdatePreAppraisalDocument = gql`
+    mutation EditUpdatePreAppraisal($input: UpdatePreAppraisalInput!) {
+  updatePreAppraisal(input: $input) {
+    id
+    uuid
+    reference
+    name
+    targetAddress
+    targetLatitude
+    targetLongitude
+    radiusMeters
+    sectorFilter
+    valuationDate
+    candidateCount
+    sampleCount
+    recommendedAverageSquareYard
+    expectedRiskScore
+    expectedRiskProfile
+    annualAppreciationRate
+    status
+    generatedAt
+    createdAt
+  }
+}
+    `;
+export type EditUpdatePreAppraisalMutationFn = Apollo.MutationFunction<EditUpdatePreAppraisalMutation, EditUpdatePreAppraisalMutationVariables>;
+
+/**
+ * __useEditUpdatePreAppraisalMutation__
+ *
+ * To run a mutation, you first call `useEditUpdatePreAppraisalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditUpdatePreAppraisalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editUpdatePreAppraisalMutation, { data, loading, error }] = useEditUpdatePreAppraisalMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditUpdatePreAppraisalMutation(baseOptions?: Apollo.MutationHookOptions<EditUpdatePreAppraisalMutation, EditUpdatePreAppraisalMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditUpdatePreAppraisalMutation, EditUpdatePreAppraisalMutationVariables>(EditUpdatePreAppraisalDocument, options);
+      }
+export type EditUpdatePreAppraisalMutationHookResult = ReturnType<typeof useEditUpdatePreAppraisalMutation>;
+export type EditUpdatePreAppraisalMutationResult = Apollo.MutationResult<EditUpdatePreAppraisalMutation>;
+export type EditUpdatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<EditUpdatePreAppraisalMutation, EditUpdatePreAppraisalMutationVariables>;

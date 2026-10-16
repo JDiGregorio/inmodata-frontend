@@ -1,13 +1,16 @@
 import axios from 'axios'
+import { expireSession, isExpiredStatus, sessionGeneration } from './lib/session'
 
 const APP_ENV = import.meta.env.APP_ENV
 
 const setupInterceptors = () => {
+    const generations = new WeakMap<object, number>()
     axios.defaults.withCredentials = true
     axios.defaults.withXSRFToken = true
 
     axios.interceptors.request.use(
         (config) => {
+            generations.set(config, sessionGeneration())
             if (APP_ENV === "production") {
                 if (config.url?.startsWith('http://')) {
                     config.url = config.url.replace('http://', 'https://')
@@ -30,8 +33,8 @@ const setupInterceptors = () => {
             return response
         },
         (error) => {
-            if (error.response?.status === 401) {
-                localStorage.clear()
+            if (isExpiredStatus(error.response?.status) && error.config && generations.has(error.config)) {
+                expireSession(generations.get(error.config))
             }
 
             return Promise.reject(error)

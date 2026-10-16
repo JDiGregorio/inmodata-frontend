@@ -4,6 +4,12 @@ import { ChartPoint } from './createTypes'
 
 interface LineChartProps {
     data: ChartPoint[];
+    width?: number;
+    height?: number;
+    formatValue?: (value: number) => string;
+    showValues?: boolean;
+    showYAxis?: boolean;
+    domain?: [number, number];
 }
 
 interface BarChartProps {
@@ -31,26 +37,27 @@ const getRange = (data: ChartPoint[]) => {
     }
 }
 
-const getYearPosition = (year: number, minYear: number, maxYear: number, leftPadding = padding, rightPadding = padding): number => {
+const getYearPosition = (year: number, minYear: number, maxYear: number, leftPadding = padding, rightPadding = padding, width = chartWidth): number => {
     if (maxYear === minYear) {
-        return chartWidth / 2
+        return width / 2
     }
 
-    return leftPadding + ((year - minYear) / (maxYear - minYear)) * (chartWidth - leftPadding - rightPadding)
+    return leftPadding + ((year - minYear) / (maxYear - minYear)) * (width - leftPadding - rightPadding)
 }
 
-export const LineChart = ({ data }: LineChartProps): React.ReactElement => {
+export const LineChart = ({ data, width = chartWidth, height = chartHeight, formatValue, showValues = true, showYAxis = false, domain }: LineChartProps): React.ReactElement => {
     if (data.length < 2) {
         return <ChartEmptyState />
     }
 
     const sortedData = getSortedData(data)
-    const range = getRange(sortedData)
+    const range = domain ? { min: domain[0], max: domain[1] } : getRange(sortedData)
+    const leftPadding = showYAxis ? 95 : padding
     const minYear = Math.min(...sortedData.map((item) => item.year))
     const maxYear = Math.max(...sortedData.map((item) => item.year))
     const points = sortedData.map((item) => {
-        const x = getYearPosition(item.year, minYear, maxYear)
-        const y = chartHeight - padding - ((item.value - range.min) / (range.max - range.min)) * (chartHeight - padding * 2)
+        const x = getYearPosition(item.year, minYear, maxYear, leftPadding, padding, width)
+        const y = height - padding - ((item.value - range.min) / (range.max - range.min)) * (height - padding * 2)
 
         return { ...item, x, y }
     })
@@ -58,16 +65,20 @@ export const LineChart = ({ data }: LineChartProps): React.ReactElement => {
     const path = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ')
 
     return (
-        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-44 w-full">
-            <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#e5e7eb" />
+        <svg viewBox={`0 0 ${width} ${height}`} className={showYAxis ? 'block' : 'h-44 w-full'} style={showYAxis ? { width, height } : undefined} role="img" aria-label="Gráfica histórica">
+            <line x1={leftPadding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#e5e7eb" />
+            {showYAxis && [range.min, (range.min + range.max) / 2, range.max].map(value => {
+                const y = height - padding - (value - range.min) / (range.max - range.min) * (height - padding * 2)
+                return <g key={value}><line x1={leftPadding} x2={width - padding} y1={y} y2={y} stroke="#e5e7eb" /><text x={leftPadding - 8} y={y + 3} textAnchor="end" className="fill-slate-500 text-[10px]">{formatValue?.(value) ?? valueFormatter.format(value)}</text></g>
+            })}
             <path d={path} fill="none" stroke="#155a7c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             {points.map((point) => (
                 <g key={point.year}>
                     <ChartPointTitle point={point} />
-                    <ChartValueLabel point={point} />
+                    {showValues && <ChartValueLabel point={point} />}
                     <circle cx={point.x} cy={point.y} r="3" fill="#155a7c" />
-                    <text x={point.x} y={chartHeight - 8} textAnchor="middle" className="fill-slate-500 text-[10px]">
-                        {point.year}
+                    <text x={point.x} y={height - 8} textAnchor="middle" className="fill-slate-500 text-[10px]">
+                        {point.label ?? point.year}
                     </text>
                 </g>
             ))}
@@ -125,7 +136,7 @@ const ChartPointTitle = ({ point }: { point: ChartPoint }): React.ReactElement =
         point.propertyCount !== undefined ? `Propiedades: ${point.propertyCount}` : null
     ].filter(Boolean).join(' | ')
 
-    return <title>{metadata}</title>
+    return <title>{point.tooltip ?? metadata}</title>
 }
 
 const ChartValueLabel = ({ point }: { point: ChartPoint & { x: number; y: number } }): React.ReactElement => {

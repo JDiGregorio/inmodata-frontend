@@ -158,6 +158,8 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
             exactAddress: property.exactAddress?.trim() || 'Sin dirección',
             cadastralKey: property.cadastralKey,
             quantity: property.quantity,
+            canViewHistory: property.canViewHistory,
+            latestAuthorizedValuationDate: property.latestAuthorizedValuationDate,
             latestFinancialValuation: property.latestFinancialValuation,
             latitude: property.latitude,
             longitude: property.longitude,

@@ -1,3 +1,4 @@
+import { isPasswordAllowed } from '@/utils/passwordPolicy'
 import React, { useState, useEffect } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
@@ -140,7 +141,7 @@ export const ProfileDrawer = ({ open, onClose }: ProfileDrawerProps): React.Reac
     }
 
     const validatePassword = (profile: Profile) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+
         setUnmatchingPasswords(false)
         setPasswordHasError(false)
 
@@ -150,7 +151,7 @@ export const ProfileDrawer = ({ open, onClose }: ProfileDrawerProps): React.Reac
             return false
         }
 
-        const isValid = passwordRegex.test(profile.password)
+        const isValid = isPasswordAllowed(profile.password)
 
         if (!isValid) {
             setPasswordHasError(true)

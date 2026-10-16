@@ -11,6 +11,7 @@ import {
     PropertyPointFieldsFragment
 } from '@/generated-types'
 import { classNames } from '@/lib/utils'
+import { Tooltip } from '@/components/ui/tooltip'
 
 type Property = PropertyPointFieldsFragment & {
     position: {
@@ -68,6 +69,7 @@ function formatDate(value?: string | null) {
 
 export function RightPanel({ point, expanded = false, onClose }: RightPanelProps) {
     const permissions = usePermissions()
+    const canViewHistory = permissions.canView('property') && permissions.canView('valuation') && point?.canViewHistory === true
     const valuation = point?.latestFinancialValuation
     const [showDetails, setShowDetails] = React.useState<boolean>(false)
 
@@ -85,7 +87,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
             <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
                 <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                        {permissions.canEdit('property') ? <a href={`/inmuebles/${point?.id}/editar#informacion-general`} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
+                        {canViewHistory ? <Tooltip content="Ver historial"><a href={`/inmuebles/${point?.id}/editar#valuaciones`} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
                             <span>
                                 {point?.name ?? 'Detalle'}
                             </span>
@@ -93,7 +95,7 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             {point?.name && (
                                 <ExternalLinkIcon size={15} />
                             )}
-                        </a> : <span className="text-md font-semibold text-gray-900">{point?.name ?? 'Detalle'}</span>}
+                        </a></Tooltip> : <span className="text-md font-semibold text-gray-900">{point?.name ?? 'Detalle'}</span>}
 
                         <button onClick={onClose} aria-label="Cerrar detalle" className="cursor-pointer rounded-lg py-1 text-sm text-gray-500 hover:bg-gray-100">
                             <XIcon aria-hidden="true" className="size-5 text-gray-500" />
@@ -118,24 +120,24 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                         </dd>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 border-b border-gray-200 pb-4">
-                        <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
-                            <p className="text-sm text-gray-600">
-                                Perfil de Riesgo:
-                            </p>
-
-                            <p className="text-sm font-semibold text-gray-900">
-                                {getRiskProfileLabel(valuation?.riskProfile)}
-                            </p>
-                        </div>
-
-                        <div className="flex justify-between items-center rounded bg-gray-100 border border-gray-200 py-2 px-4 sm:col-span-2">
+                    <div className="grid grid-cols-1 gap-2 border-b border-gray-200 pb-4">
+                        <div className="flex justify-between items-center gap-3 rounded bg-gray-100 border border-gray-200 py-2 px-4">
                             <p className="text-sm text-gray-600">
                                 Precio de L/v&sup2;:
                             </p>
 
                             <p className="text-sm font-semibold text-gray-900">
                                 {formatNumber(valuation?.averageSquareYard)}
+                            </p>
+                        </div>
+
+                        <div className="flex justify-between items-center gap-3 rounded bg-gray-100 border border-gray-200 py-2 px-4">
+                            <p className="text-sm text-gray-600">
+                                Fecha de última valuación:
+                            </p>
+
+                            <p className="text-right text-sm font-semibold text-gray-900">
+                                {formatDate(point?.latestAuthorizedValuationDate)}
                             </p>
                         </div>
                     </div>

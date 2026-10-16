@@ -14,6 +14,7 @@ export type Role = {
 }
 
 export interface AuthReducerState {
+    sessionVersion?: number;
     user: User | null;
     isReady: boolean;
 }

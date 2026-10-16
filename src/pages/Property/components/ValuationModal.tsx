@@ -42,11 +42,11 @@ const FACTOR_UTILIZATION = 1.43426
 export const ValuationModal = ({ open, title, valuation, property, canDelete, setModalOpen, handleUpdate, refetch }: ValuationModalProps): React.ReactElement => {
     useEffect(() => {
         if (valuation.sector === "financiero") {
-            const nextUtilization = round6(safeDiv((valuation.improvementArea * FACTOR_UTILIZATION), valuation.landArea))
+            const nextUtilization = round6(safeDiv(((valuation.improvementArea ?? 0) * FACTOR_UTILIZATION), valuation.landArea ?? 0))
 
-            const nextAvgYard = round6(safeDiv(valuation.landValue, valuation.landArea))
+            const nextAvgYard = round6(safeDiv(valuation.landValue ?? 0, valuation.landArea ?? 0))
 
-            const nextAvgMeter = round6(safeDiv((valuation.averageValue - valuation.landValue), valuation.improvementArea))
+            const nextAvgMeter = round6(safeDiv(((valuation.averageValue ?? 0) - (valuation.landValue ?? 0)), valuation.improvementArea ?? 0))
 
             handleUpdate({
                 utilizationRatio: nextUtilization,
@@ -258,9 +258,10 @@ export const ValuationModal = ({ open, title, valuation, property, canDelete, se
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <DialogPanel className="flex w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-xl h-[90vh] md:h-auto md:max-h-[90vh]">
                     <div className="flex items-center justify-between border-b border-gray-100 px-6 py-2">
-                        <DialogTitle className="text-base font-semibold text-gray-900">
-                            {title}
-                        </DialogTitle>
+                        <div className="min-w-0">
+                            <DialogTitle className="text-base font-semibold text-gray-900">{title}</DialogTitle>
+                            <p className="mt-1 break-words text-xs text-gray-500">Inmueble: {property.name || '-'}</p>
+                        </div>
 
                         <Button type="button" onClick={() => handleClose(false)} size="icon" className="py-1 px-2 bg-white shadow-none hover:bg-transparent cursor-pointer">
                             <span className="sr-only">Remove</span>

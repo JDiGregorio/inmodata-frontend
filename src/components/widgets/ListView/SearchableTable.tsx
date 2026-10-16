@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from 'react'
+import React, { useEffect, useRef, useState, ReactNode } from 'react'
 import { ApolloError } from '@apollo/client'
 
 import Spinner from '@/components/layouts/Spinner'
@@ -16,6 +16,7 @@ export interface HandleRefetchingProps {
 }
 
 export interface SearchableTableProps<T> {
+    resetPageKey?: string;
     model: ModelDefinition;
     title: string;
     toolbarActions?: ReactNode;
@@ -30,21 +31,25 @@ export interface SearchableTableProps<T> {
     refetch: (args: HandleRefetchingProps) => void;
 }
 
-export const SearchableTable = <T,> ({ model, title, toolbarActions, canCreate, canEdit, headers, rowActions, data, loading, error, paginatorInfo, refetch }: SearchableTableProps<T>): React.ReactElement => {
+export const SearchableTable = <T,> ({ model, title, toolbarActions, canCreate, canEdit, headers, rowActions, data, loading, error, paginatorInfo, refetch, resetPageKey }: SearchableTableProps<T>): React.ReactElement => {
     const [searchQuery, setSearchQuery] = useState("")
     const debouncedSearchTerm = useDebounce(searchQuery, 500)
     const [currentPage, setCurrentPage] = useState(1)
+    const previousResetKey = useRef(resetPageKey)
 
     useEffect(() => {
+        const reset = previousResetKey.current !== resetPageKey
+        previousResetKey.current = resetPageKey
+        if (reset) setCurrentPage(1)
         const refetchArgs = {
             first: 10,
-            page: currentPage,
+            page: reset ? 1 : currentPage,
             search: debouncedSearchTerm
         }
 
         refetch(refetchArgs)
 
-    }, [refetch, debouncedSearchTerm, currentPage])
+    }, [refetch, debouncedSearchTerm, currentPage, resetPageKey])
 
     const handlePageChanged = (newPage: number) => {
         setCurrentPage(newPage)

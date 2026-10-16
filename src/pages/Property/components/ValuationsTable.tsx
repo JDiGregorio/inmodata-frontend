@@ -64,6 +64,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                     <p className="mt-2 text-sm text-gray-700">
                         Historial de valuaciones autorizadas del inmueble.
                     </p>
+                    <p className="mt-1 text-xs text-gray-500">Inmueble: <span className="font-medium text-gray-700">{property.name || '-'}</span></p>
                 </div>
 
                 {canCreate && (
