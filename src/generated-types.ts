@@ -16,9 +16,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
-  /** A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`. */
   DateTime: { input: any; output: any; }
-  /** Arbitrary data encoded in JavaScript Object Notation. See https://www.json.org. */
   JSON: { input: any; output: any; }
 };
 
