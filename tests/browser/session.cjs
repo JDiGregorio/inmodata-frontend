@@ -7,7 +7,16 @@ const path = require('node:path')
 async function main() {
     const built = await build({ entryPoints: [path.join(__dirname, 'session-harness.tsx')], bundle: true, write: false, jsx: 'automatic',
         define: { 'process.env.NODE_ENV': '"development"', 'import.meta.env.APP_BASE_URL': '""', 'import.meta.env.APP_ENV': '"test"', 'import.meta.env.DEV': 'false' }, logLevel: 'silent' })
+    let automaticRequests = 0
+    const csrfHeaders = []
     const server = http.createServer((req, res) => {
+        if (req.url === '/graphql') {
+            automaticRequests++
+            csrfHeaders.push(req.headers['x-xsrf-token'])
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Set-Cookie', `XSRF-TOKEN=rotation-${automaticRequests}; Path=/`)
+            return res.end(JSON.stringify({ data: { health: 'ready' } }))
+        }
         if (req.url === '/app.js') { res.setHeader('Content-Type', 'text/javascript'); return res.end(built.outputFiles[0].text) }
         res.setHeader('Content-Type', 'text/html')
         res.end('<html><body><div id="root"></div><script src="/app.js"></script></body></html>')
@@ -70,8 +79,28 @@ async function main() {
         await page.reload()
         await user('guest')
         assert.equal(await page.evaluate(() => localStorage.getItem('user')), null)
+
+        await page.evaluate(() => {
+            localStorage.setItem('user', JSON.stringify({ id: 'A', name: 'A', roles: [], permissions: [] }))
+            document.cookie = 'XSRF-TOKEN=initial; path=/'
+        })
+        await page.unroute('**/graphql')
+        await page.goto(`http://127.0.0.1:${server.address().port}/?automatic`)
+        await user('A')
+        const version = await page.evaluate(() => window.sessionTest.version())
+        await page.waitForFunction(() => document.querySelector('[data-testid=automatic]')?.textContent === 'ready')
+        await page.waitForTimeout(1800)
+        assert.equal(await page.evaluate(() => window.sessionTest.version()), version, 'CSRF refresh must not recreate the session')
+        assert.ok(automaticRequests <= 2, `Automatic query loop: ${automaticRequests} requests`)
+        const beforeRefresh = automaticRequests
+        await page.getByRole('button', { name: 'Refresh query' }).click()
+        await page.waitForTimeout(1800)
+        assert.equal(automaticRequests, beforeRefresh + 1, 'Explicit refresh must send only one request')
+        assert.equal(csrfHeaders.at(-1), `rotation-${beforeRefresh}`, 'Requests must use the refreshed CSRF cookie')
+        assert.equal(await page.evaluate(() => window.sessionTest.version()), version)
+        assert.equal(await page.getByTestId('automatic').textContent(), 'ready')
         assert.deepEqual(errors, [])
-        console.log('PASS: session cache isolation, logout, account switch, 401/419, 403 preservation, Lighthouse auth error, stale HTTP/GraphQL responses, malformed profile, remembered email, StrictMode')
+        console.log('PASS: session cache isolation, logout, account switch, 401/419, 403 preservation, Lighthouse auth error, stale HTTP/GraphQL responses, malformed profile, remembered email, StrictMode automatic queries, CSRF rotation without remount/refetch loop, fresh CSRF header')
     } finally {
         await browser?.close()
         await new Promise(resolve => server.close(resolve))

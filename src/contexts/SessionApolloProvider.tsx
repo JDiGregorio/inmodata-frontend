@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
@@ -13,6 +13,7 @@ export function SessionApolloProvider({ children }: { children: ReactNode }) {
 }
 
 function SessionClient({ children }: { children: ReactNode }) {
+    const lifecycle = useRef(0)
     const [client] = useState(() => {
         const generation = sessionGeneration()
         const errors = onError(({ graphQLErrors, networkError }) => {
@@ -35,10 +36,17 @@ function SessionClient({ children }: { children: ReactNode }) {
         })
     })
 
-    useEffect(() => () => {
-        client.stop()
-        // Clear without refetching private queries after logout. A new session owns a new cache.
-        void client.clearStore().catch(() => {})
+    useEffect(() => {
+        const mounted = ++lifecycle.current
+        return () => {
+            // StrictMode immediately replays setup; only dispose after a real unmount.
+            queueMicrotask(() => {
+                if (lifecycle.current !== mounted) return
+                client.stop()
+                // A new session owns a different cache; never refetch the old session.
+                void client.clearStore().catch(() => {})
+            })
+        }
     }, [client])
 
     return <ApolloProvider client={client}>{children}</ApolloProvider>

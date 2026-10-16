@@ -1,7 +1,7 @@
-import { createContext, useCallback, useEffect, useReducer } from 'react'
+import { createContext, useCallback, useEffect, useReducer, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { AuthContextValue, AuthReducerAction, AuthReducerState } from './AuthContext.types.ts'
-import { useCookies } from 'react-cookie'
+import Cookies from 'js-cookie'
 import { advanceSession, onSessionExpired } from '../lib/session'
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -28,7 +28,7 @@ interface AuthContextProviderProps {
 }
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
-    const [cookies] = useCookies(['XSRF-TOKEN'])
+    const restored = useRef(false)
     const [state, reduce] = useReducer(authReducer, {
         user: null,
         isReady: false,
@@ -43,9 +43,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     useEffect(() => onSessionExpired(() => dispatch({ type: 'LOGOUT', payload: null })), [dispatch])
 
     useEffect(() => {
+        // CSRF cookie refreshes are not new logins. Restore once per provider mount.
+        if (restored.current) return
+        restored.current = true
         try {
             const user = JSON.parse(localStorage.getItem('user') ?? 'null')
-            if (cookies['XSRF-TOKEN'] && user && (typeof user.id === 'string' || typeof user.id === 'number')) {
+            if (Cookies.get('XSRF-TOKEN') && user && (typeof user.id === 'string' || typeof user.id === 'number')) {
                 dispatch({
                     type: 'LOGIN',
                     payload: user
@@ -54,7 +57,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
             }
         } catch { /* Discard malformed persisted profile data. */ }
         dispatch({ type: 'LOGOUT', payload: null })
-    }, [cookies, dispatch])
+    }, [dispatch])
 
     return (
         <AuthContext.Provider value={{ ...state, dispatch }}>
