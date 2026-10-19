@@ -16,6 +16,7 @@ const UserEdit = (): React.ReactElement => {
     const { id } = useParams()
 
     const { data, loading, error } = useGetUserByIdQuery({
+        fetchPolicy: 'network-only',
         variables: {
             id: id!
         }
@@ -25,14 +26,14 @@ const UserEdit = (): React.ReactElement => {
         return <Spinner />
     }
 
+    if (error) {
+        return <p role="alert">No se pudo cargar el usuario. {error.graphQLErrors[0]?.message}</p>
+    }
+
     if (!data?.userById?.id) {
         return (
             <Page404 />
         )
-    }
-
-    if (error) {
-        return <>Oops, algo sucedió.</>
     }
 
     const user = data.userById as User

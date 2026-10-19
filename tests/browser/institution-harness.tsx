@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, ApolloLink, ApolloProvider, InMemoryCache, Observable } from '@apollo/client'
 import { MemoryRouter } from 'react-router'
+import { Toaster } from 'sonner'
 import { AuthContext } from '../../src/contexts/AuthContext'
 import { GeneralInformationTab as CreateUser } from '../../src/pages/User/components/GeneralInformation.create.tab'
 import { GeneralInformationTab as EditUser } from '../../src/pages/User/components/GeneralInformation.edit.tab'
@@ -22,6 +23,11 @@ const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: new ApolloLink((operation) => new Observable((observer) => {
         requests.push({ name: operation.operationName, variables: operation.variables })
+        if (params.has('mutationError') && ['CreateUser', 'UpdateUser'].includes(operation.operationName)) {
+            observer.next({ errors: [{ message: 'No se pudo guardar el usuario de prueba.' }] })
+            observer.complete()
+            return
+        }
         let data: object
         switch (operation.operationName) {
             case 'UpdateProperty': data = { updateProperty: { id: '1', name: 'INMO000656' } }; break
@@ -72,6 +78,7 @@ export function App() {
             : screen === 'create' ? <CreateUser /> : screen === 'edit' ? <EditUser user={user as never} /> : screen === 'valuations'
             ? <ValuationsTable canCreate canEdit property={{ id: '1', latestValuation: own } as never} valuations={[own, external] as never} setModalOpen={() => {}} handleUpdate={() => {}} />
             : <div style={{ position: 'relative', height: '100vh', background: '#f3f4f6' }}><RightPanel point={point as never} onClose={() => {}} /></div>}
+        <Toaster />
     </AuthContext.Provider></MemoryRouter></ApolloProvider>
 }
 

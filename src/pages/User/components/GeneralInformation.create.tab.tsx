@@ -1,5 +1,5 @@
 import { isPasswordAllowed } from '@/utils/passwordPolicy'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { XCircleIcon } from '@heroicons/react/20/solid'
 
@@ -42,13 +42,10 @@ export const GeneralInformationTab = (): React.ReactElement => {
 
     const navigate = useNavigate()
     
-    const [createUser, result] = useCreateUserMutation()
-
-    useEffect(() => {
-        if (result.error) {
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
-        }
-    }, [result.error])
+    const [createUser, result] = useCreateUserMutation({
+        errorPolicy: 'none',
+        onError: (error) => toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.'),
+    })
 
     const handleCreateUser = async () => {
         if (!name || name.length === 0) {
@@ -99,7 +96,7 @@ export const GeneralInformationTab = (): React.ReactElement => {
             }
         })
 
-        if (result.data) {
+        if (result.data?.createUser?.id) {
             toast.success('Registro creado exitosamente!')
 
             const newUserId = result.data?.createUser.id

@@ -92,6 +92,25 @@ async function main() {
         }
         console.log('PASS: creating users with zero and multiple institutions')
 
+        for (const screen of ['create', 'edit']) {
+            await page.goto(`${url}/?screen=${screen}&mutationError=1`)
+            if (screen === 'create') {
+                await page.locator('#name').fill('Nuevo usuario')
+                await page.locator('#email').fill('nuevo@example.test')
+                await page.locator('#password').fill('a long test passphrase')
+                await page.locator('#confirm-password').fill('a long test passphrase')
+                await page.locator('#role').fill('Analista')
+                await page.getByRole('option', { name: 'Analista' }).click()
+            } else {
+                await page.locator('#name').fill('Usuario editado')
+            }
+            await page.getByRole('button', { name: screen === 'create' ? 'Crear' : 'Guardar', exact: true }).click()
+            await page.getByText('No se pudo guardar el usuario de prueba.', { exact: true }).waitFor()
+            assert.equal(await page.getByText(/Registro (creado|actualizado) exitosamente/).count(), 0)
+            assert.equal(await page.locator('#name').inputValue(), screen === 'create' ? 'Nuevo usuario' : 'Usuario editado')
+        }
+        console.log('PASS: create/edit errors preserve inputs and never announce success')
+
         await page.goto(`${url}/?screen=valuations`)
         const ownRow = page.getByRole('row').filter({ hasText: 'PROPIA' })
         const externalRow = page.getByRole('row').filter({ hasText: 'EXTERNA' })

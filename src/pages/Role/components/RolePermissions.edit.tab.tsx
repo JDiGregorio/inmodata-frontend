@@ -95,6 +95,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
     })
 
     const [ updateRole, result ] = useUpdateRoleMutation({
+        errorPolicy: 'none',
         onCompleted: () => {
             if (storeUser) {
                 getUserData({
@@ -105,8 +106,8 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
                 })
             }
         },
-        onError: () => {
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+        onError: (error) => {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
 
@@ -158,7 +159,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
             }
         })
 
-        if (result.data) {
+        if (result.data?.updateRole) {
             toast.success('Registro actualizado exitosamente!')
         }
     }

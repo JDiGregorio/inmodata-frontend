@@ -55,15 +55,9 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
     const permissions = usePermissions()
     
     const [ updateUser, result ] = useUpdateUserMutation({
+        errorPolicy: 'none',
         onError: (error) => {
-            const errors = error.graphQLErrors
-            const extensions = errors[0]?.extensions
-
-            if (extensions?.reason === "412") {
-                toast.error(error.message)
-            }
-
-            toast.error('Lo sentimos, sus cambios no pudieron ser aplicados.')
+            toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
 
@@ -123,7 +117,7 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
             }
         })
 
-        if (result.data) {
+        if (result.data?.updateUser?.id) {
             if (_user && _user.id.toString() === user.id) {
                 if (password && password.length > 0) {
                     axios.post(`${BASE_URL}/logout`)
@@ -137,7 +131,10 @@ export const GeneralInformationTab = ({ user }: { user: User }): React.ReactElem
                 
                 const updateUser = {
                     ..._user,
-                    name: name
+                    name: result.data.updateUser.name,
+                    email: result.data.updateUser.email,
+                    roles: result.data.updateUser.roles ?? [],
+                    permissions: result.data.updateUser.permisos ?? [],
                 }
 
                 localStorage.removeItem('user')
