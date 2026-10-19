@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import { Label } from '@/components/ui/label'
@@ -17,7 +17,7 @@ const Login = () => {
     const { authenticate, loading } = useLogin()
 
     useEffect(() => {
-        const isRemembered = !!localStorage.getItem("isRemembered")
+        const isRemembered = localStorage.getItem("isRemembered") === 'true'
 
         if (isRemembered) {
             const email = localStorage.getItem("email") ?? ""
@@ -26,12 +26,6 @@ const Login = () => {
             setRemember(true)
         }
     }, [])
-
-    const handlePressEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            handleLogin()
-        }
-    }
 
     const handleLogin = () => {
         if (remember) {
@@ -61,7 +55,7 @@ const Login = () => {
             </div>
 
             <div className="space-y-4">
-                <form className="space-y-6" onSubmit={handleLogin} noValidate>
+                <form className="space-y-6" onSubmit={(event) => { event.preventDefault(); handleLogin() }} noValidate>
                     <fieldset className="space-y-6">
                         <legend className="sr-only">
                             Credenciales
@@ -83,7 +77,6 @@ const Login = () => {
                                 autoCapitalize="none"
                                 enterKeyHint="next"
                                 onChange={(e) => setEmail(e.target.value)}
-                                onKeyDown={handlePressEnter}
                             />
                         </div>
 
@@ -103,7 +96,6 @@ const Login = () => {
                                     enterKeyHint="go"
                                     className="pr-12"
                                     onChange={(e) => setPassword(e.target.value)}
-                                    onKeyDown={handlePressEnter}
                                 />
 
                                 <button type="button" className="absolute inset-y-0 right-0 px-3 text-sm text-gray-400 hover:text-zinc-900 focus:outline-none"  onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword}>
@@ -129,7 +121,7 @@ const Login = () => {
                         </div>
                     </fieldset>
 
-                    <Button type="button" variant={"default"} onClick={handleLogin} disabled={loading} aria-busy={loading} aria-describedby="form-status" className="w-full cursor-pointer bg-red-700 hover:bg-red-800">
+                    <Button type="submit" variant={"default"} disabled={loading} aria-busy={loading} aria-describedby="form-status" className="w-full cursor-pointer bg-red-700 hover:bg-red-800">
                         {loading && <Loader2 aria-hidden="true" className="animate-spin -ml-0.5 mr-1.5 h-5 w-5" />}
                         {loading ? "Iniciando sesión" : "Iniciar sesión"}
                     </Button>

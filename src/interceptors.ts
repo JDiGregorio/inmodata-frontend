@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { expireSession, isExpiredStatus, sessionGeneration } from './lib/session'
 
-const APP_ENV = import.meta.env.APP_ENV
-
 const setupInterceptors = () => {
     const generations = new WeakMap<object, number>()
     axios.defaults.withCredentials = true
@@ -11,13 +9,14 @@ const setupInterceptors = () => {
     axios.interceptors.request.use(
         (config) => {
             generations.set(config, sessionGeneration())
-            if (APP_ENV === "production") {
-                if (config.url?.startsWith('http://')) {
-                    config.url = config.url.replace('http://', 'https://')
+            // The page's transport, not a build-time label, determines mixed-content safety.
+            if (window.location.protocol === 'https:') {
+                if (config.url) {
+                    config.url = config.url.replace(/^http:\/\//i, 'https://')
                 }
 
-                if (config.baseURL?.startsWith('http://')) {
-                    config.baseURL = config.baseURL.replace('http://', 'https://')
+                if (config.baseURL) {
+                    config.baseURL = config.baseURL.replace(/^http:\/\//i, 'https://')
                 }
             }
 

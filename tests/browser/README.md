@@ -41,3 +41,16 @@ Checks isolated Apollo caches across logout/account changes, 401/419 expiration,
 403 preservation, Lighthouse authentication errors, stale HTTP/GraphQL responses,
 malformed stored profiles, retained preferences, and React StrictMode.
 Requires local Chrome and the existing esbuild development dependency; no production credentials.
+
+## Login Regression
+
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/login.cjs`
+
+Uses the actual login form with intercepted HTTP only. Covers CSRF failures,
+419/422/429 responses, profile 401/500 responses, invalid profile responses,
+successful login, single submission with Enter, and loading-state recovery.
+It does not access a database or authenticate against a real backend.
+
+`node tests/browser/login-transport.cjs` verifies HTTPS normalization of Axios
+URLs on HTTPS pages and preservation of local HTTP, using a fake adapter with no
+network access. This does not test server-generated redirects.
