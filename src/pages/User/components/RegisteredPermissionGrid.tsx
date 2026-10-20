@@ -27,23 +27,24 @@ export function RegisteredPermissionGrid({ selected, onChange, onReady }: {
     }
     const toggle = (name: string) => onChange(selected.includes(name) ? selected.filter(item => item !== name) : [...selected, name])
     const checkbox = (name: string, label: string) => <Checkbox aria-label={label}
-        checked={selected.includes(name)} onCheckedChange={() => toggle(name)} />
+        checked={selected.includes(name)} onCheckedChange={() => toggle(name)}
+        className="h-4 w-4 p-2 rounded bg-gray-50 border-gray-300 cursor-pointer data-[state=checked]:border-red-700 data-[state=checked]:bg-red-700 data-[state=checked]:text-white data-[state=checked]:p-2" />
     if (loading) return <p role="status">Cargando permisos...</p>
     if (error) return <p role="alert">No se pudo cargar el catálogo de permisos.</p>
     return <div className="overflow-x-auto"><Table className="min-w-full">
         <TableHeader className="bg-gray-900"><TableRow>
-            <TableHead className="px-1 text-xs sm:text-sm text-white">Módulo</TableHead>
-            {actions.map(action => <TableHead key={action} className="px-1 text-xs sm:text-sm text-center text-white">{labels[action]}</TableHead>)}
+            <TableHead scope="col" className="py-3.5 text-left text-sm font-semibold text-white sm:pl-6 pl-4 pr-3">Modelo</TableHead>
+            {actions.map(action => <TableHead key={action} scope="col" className="py-3.5 text-sm font-semibold text-white px-3 text-center">{labels[action]}</TableHead>)}
         </TableRow></TableHeader>
-        <TableBody>{[...groups].map(([module, permissions]) => {
+        <TableBody className="bg-white border border-gray">{[...groups].map(([module, permissions]) => {
             const title = initialPermissions[module as keyof typeof initialPermissions]?.description ?? module
-            return <TableRow key={module}><TableCell className="px-1 max-w-32 whitespace-normal break-words">{title}</TableCell>{actions.map(action =>
-                <TableCell key={action} className="px-1 text-center">{permissions.has(action)
-                    ? checkbox(permissions.get(action)!, `${title}: ${labels[action]}`) : null}</TableCell>
+            return <TableRow key={module} className="bg-white"><TableCell className="py-3 px-6 text-left text-black font-medium">{title}</TableCell>{actions.map(action =>
+                <TableCell key={action}><div className="flex justify-center items-center">{permissions.has(action)
+                    ? checkbox(permissions.get(action)!, `${title}: ${labels[action]}`) : null}</div></TableCell>
             )}</TableRow>
         })}
-        {others.map(name => <TableRow key={name}><TableCell>{name}</TableCell>
-            <TableCell colSpan={4}>{checkbox(name, name)}</TableCell></TableRow>)}
+        {others.map(name => <TableRow key={name} className="bg-white"><TableCell className="py-3 px-6 text-left text-black font-medium">{name}</TableCell>
+            <TableCell colSpan={4}><div className="flex justify-center items-center">{checkbox(name, name)}</div></TableCell></TableRow>)}
         </TableBody>
     </Table></div>
 }

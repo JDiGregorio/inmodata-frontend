@@ -27,6 +27,8 @@ async function main() {
         await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).waitFor()
         assert.equal(await page.getByRole('checkbox').count(), 38)
         assert.equal(await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).getAttribute('data-state'), 'checked')
+        assert.equal(await page.getByRole('columnheader', { name: 'Modelo', exact: true }).count(), 1)
+        assert.match(await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).getAttribute('class'), /data-\[state=checked\]:bg-red-700/)
         await page.getByRole('checkbox', { name: 'Preavaluos: Crear', exact: true }).click()
         await page.getByRole('button', { name: 'Guardar', exact: true }).click()
         await page.getByText('Registro actualizado exitosamente!').waitFor()
