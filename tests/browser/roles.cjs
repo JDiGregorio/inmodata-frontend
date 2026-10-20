@@ -1,0 +1,82 @@
+const { chromium } = require('playwright')
+const { build } = require('esbuild')
+const assert = require('node:assert/strict')
+const http = require('node:http')
+const path = require('node:path')
+const fs = require('node:fs')
+const os = require('node:os')
+
+async function main() {
+    const built = await build({ entryPoints: [path.join(__dirname, 'roles-harness.tsx')], bundle: true, write: false, jsx: 'automatic',
+        define: { 'process.env.NODE_ENV': '"test"' }, logLevel: 'silent' })
+    const assets = path.join(__dirname, '../../dist/assets')
+    const css = fs.readFileSync(path.join(assets, fs.readdirSync(assets).find(name => name.endsWith('.css'))), 'utf8')
+    const server = http.createServer((req, res) => {
+        res.setHeader('Content-Type', req.url === '/app.js' ? 'text/javascript' : 'text/html')
+        res.end(req.url === '/app.js' ? built.outputFiles[0].text : `<html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${css}</style></head><body><div id="root"></div><script src="/app.js"></script></body></html>`)
+    })
+    let browser
+    try {
+        await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+        browser = await chromium.launch({ channel: 'chrome', headless: true })
+        const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+        const errors = []
+        page.on('pageerror', error => errors.push(error.message))
+        const base = `http://127.0.0.1:${server.address().port}`
+        await page.goto(base)
+        await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).waitFor()
+        assert.equal(await page.getByRole('checkbox').count(), 38)
+        assert.equal(await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).getAttribute('data-state'), 'checked')
+        await page.getByRole('checkbox', { name: 'Preavaluos: Crear', exact: true }).click()
+        await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+        await page.getByText('Registro actualizado exitosamente!').waitFor()
+        const request = await page.evaluate(() => window.roleTestRequests.find(item => item.name === 'UpdateRole'))
+        assert.ok(request.variables.input.permisos.includes('add-pre-appraisal'))
+        assert.ok(request.variables.input.permisos.includes('approve-report'), 'Unfamiliar registered permissions must be preserved')
+        await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).click()
+        await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+        await page.waitForFunction(() => {
+            const user = JSON.parse(localStorage.getItem('user') ?? 'null')
+            return user && !user.permissions.includes('edit-role')
+        })
+        assert.ok(await page.getByRole('button', { name: 'Guardar', exact: true }).isDisabled())
+        assert.ok(!(await page.evaluate(() => JSON.parse(localStorage.getItem('user')).permissions)).includes('edit-role'))
+
+        await page.goto(`${base}/?create`)
+        await page.getByRole('checkbox', { name: 'approve-report', exact: true }).click()
+        await page.locator('#name').fill('Nuevo rol')
+        await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+        await page.waitForFunction(() => window.roleTestRequests.some(item => item.name === 'CreateRole'))
+        assert.deepEqual((await page.evaluate(() => window.roleTestRequests.find(item => item.name === 'CreateRole'))).variables.input.permisos, ['approve-report'])
+
+        await page.goto(`${base}/?denied`)
+        await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).waitFor()
+        await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+        await page.getByText('No autorizado para administrar este rol.').waitFor()
+        assert.equal(await page.getByText('Registro actualizado exitosamente!').count(), 0)
+        await page.goto(`${base}/?catalogError`)
+        await page.getByRole('alert').waitFor()
+        assert.ok(await page.getByRole('button', { name: 'Guardar', exact: true }).isDisabled())
+        await page.goto(`${base}/?noedit`)
+        await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).waitFor()
+        assert.ok(await page.getByRole('button', { name: 'Guardar', exact: true }).isDisabled())
+        await page.goto(`${base}/?extra`)
+        await page.getByRole('checkbox', { name: 'approve-report', exact: true }).waitFor()
+        assert.equal(await page.getByRole('checkbox').count(), 38)
+
+        const output = fs.mkdtempSync(path.join(os.tmpdir(), 'inmodata-roles-'))
+        await page.goto(base)
+        await page.getByRole('checkbox', { name: 'Roles: Editar', exact: true }).waitFor()
+        await page.screenshot({ path: path.join(output, 'desktop.png'), fullPage: true })
+        await page.setViewportSize({ width: 390, height: 844 })
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+        await page.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true })
+        assert.deepEqual(errors, [])
+        console.log('PASS: 36 catalog permissions + 2 extensions, edit-role mapping, create/edit, preservation, self-revocation, denied mutation, unavailable catalog, user extras, mobile overflow')
+        console.log('Screenshots: ' + output)
+    } finally {
+        await browser?.close()
+        await new Promise(resolve => server.close(resolve))
+    }
+}
+main().catch(error => { console.error(error); process.exitCode = 1 })

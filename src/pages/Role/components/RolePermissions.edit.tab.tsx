@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { PermissionGrid } from '../../User/components/PermissionGrid'
+import { RegisteredPermissionGrid } from '../../User/components/RegisteredPermissionGrid'
 import { Button } from '@/components/ui/button'
 import { AlertConfirm } from '@/components/widgets/Dialog/AlertConfirm'
 import { toast } from '@/utils/toast'
 
 import { usePermissions } from '@/hooks/usePermissions'
-import { initialPermissions } from '@/utils/permissions'
-import { parsePermissions } from '@/utils/parsePermissions'
 import { useAuthContext } from '@/hooks/useAuthContext'
 
 import {
@@ -20,53 +18,14 @@ import {
     useDeleteRoleMutation
 } from '@/generated-types'
 
-type ActionType = 'description' | 'add' | 'delete' | 'edit' | 'view'
-
-type Permission = {
-    description: string;
-    add: boolean;
-    delete: boolean;
-    edit: boolean;
-    view: boolean;
-}
-
-type InitialPermissions = {
-	[key: string]: Permission;
-}
-
-type PermissionKey = keyof typeof initialPermissions
-
 export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement => {
-    const initial = JSON.parse(JSON.stringify(initialPermissions))
-
 	const [name, setName] = useState<string>(role.name)
-	const [permissions, setPermissions] = useState<InitialPermissions>(initial)
+    const [permissions, setPermissions] = useState<string[]>(role.permisos ?? [])
+    const [catalogReady, setCatalogReady] = useState(false)
 
 	const navigate = useNavigate()
 	const userPermissions = usePermissions()
     const { user: storeUser, dispatch } = useAuthContext()
-
-    useEffect(() => {
-        if (!role.permisos) return;
-    
-        setPermissions((prevPermissions) => {
-            const updatedPermissions = { ...prevPermissions }
-    
-            const permisosSet = new Set(role.permisos);
-    
-            (Object.keys(updatedPermissions) as PermissionKey[]).forEach((modelName) => {
-                (Object.keys(updatedPermissions[modelName]) as ActionType[]).forEach((key) => {
-                    if (key !== 'description') {
-                        const permiso = `${key}-${modelName}`;
-    
-                        updatedPermissions[modelName][key]  = permisosSet.has(permiso)
-                    }
-                })
-            })
-    
-            return updatedPermissions
-        })
-    }, [role.permisos])
 
     const [getUserData] = useGetUserByIdLazyQuery({
         onCompleted: (data) => {
@@ -89,6 +48,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
     })
 
     const [ deleteRole ] = useDeleteRoleMutation({
+        errorPolicy: 'none',
         onError: () => {
             toast.error('Lo sentimos, el registro no pudo ser eliminado.')
         }
@@ -110,13 +70,6 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
             toast.error(error.graphQLErrors[0]?.message ?? 'Lo sentimos, sus cambios no pudieron ser aplicados.')
         }
     })
-
-	const handleCheckboxChanged = (model: string, field: 'add' | 'delete' | 'edit' | 'view') => {
-        const newPermissions = {...permissions}
-        newPermissions[model][field] = !newPermissions[model][field]
-    
-        setPermissions(newPermissions)
-    }
 
     const handleDeleteRole = () => {
         AlertConfirm({
@@ -147,7 +100,8 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
             return
         }
 
-        const permisos = parsePermissions(permissions)
+        if (!catalogReady || !userPermissions.canEdit('role')) return
+        const permisos = permissions
 
         const result = await updateRole({
             variables: {
@@ -207,10 +161,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
                             </div>
                         </div>
 
-                        <PermissionGrid
-                            permissions={permissions}
-                            handleCheckboxChanged={handleCheckboxChanged}
-                        />
+                        <RegisteredPermissionGrid selected={permissions} onChange={setPermissions} onReady={setCatalogReady} />
                     </div>
 
                     <div className="mt-6 flex items-center justify-end gap-x-4">
@@ -224,7 +175,7 @@ export const RolePermissionsTab = ({ role }: { role: Role }): React.ReactElement
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateRole} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleUpdateRole} disabled={result.loading || !catalogReady || !userPermissions.canEdit('role')}>
                             Guardar
                         </Button>
                     </div>

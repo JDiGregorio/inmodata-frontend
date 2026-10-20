@@ -25,14 +25,14 @@ const RoleEdit = (): React.ReactElement => {
         return <Spinner />
     }
 
+    if (error) {
+        return <p role="alert">No se pudo cargar el rol. {error.graphQLErrors[0]?.message}</p>
+    }
+
     if (!data?.roleById?.id) {
         return (
             <Page404 />
         )
-    }
-
-    if (error) {
-        return <>Oops, algo sucedió.</>
     }
 
     const role = data.roleById as Role
@@ -43,7 +43,7 @@ const RoleEdit = (): React.ReactElement => {
             name: 'Rol y Permisos',
             hash: '#rol-permisos',
             active: true, 
-            content: <RolePermissionsTab role={role} />
+            content: <RolePermissionsTab key={role.id} role={role} />
         }
     ]
 

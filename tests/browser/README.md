@@ -54,3 +54,13 @@ It does not access a database or authenticate against a real backend.
 `node tests/browser/login-transport.cjs` verifies HTTPS normalization of Axios
 URLs on HTTPS pages and preservation of local HTTP, using a fake adapter with no
 network access. This does not test server-generated redirects.
+
+## Reserved Administrator UI
+
+After `npm run build`, run:
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/roles.cjs`
+
+Uses the actual role forms and extra-permissions form with isolated Apollo responses.
+Covers all 36 catalog entries, additional/custom entries, Roles > Editar mapping,
+creation/editing, permission preservation, self-revocation refresh, denied mutations,
+catalog failures, and mobile overflow. Prints desktop/mobile screenshot paths.

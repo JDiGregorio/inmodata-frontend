@@ -51,7 +51,7 @@ const UserEdit = (): React.ReactElement => {
             name: 'Permisos Extra',
             hash: '#permisos-extra',
             active: false, 
-            content: <ExtraPermissionsTab user={user} />
+            content: <ExtraPermissionsTab key={user.id} user={user} />
         }
     ]
 

@@ -3,42 +3,28 @@ import { useNavigate } from 'react-router'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { PermissionGrid } from '../../User/components/PermissionGrid'
+import { RegisteredPermissionGrid } from '../../User/components/RegisteredPermissionGrid'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/utils/toast'
 
-import { initialPermissions } from '@/utils/permissions'
-import { parsePermissions } from '@/utils/parsePermissions'
-import { Permission } from '@/pages/User/components/ExtraPermissions.tab'
 
 import {
     useCreateRoleMutation
 } from '@/generated-types'
 
-type InitialPermissions = {
-	[key: string]: Permission;
-}
-
 export const RolePermissionsTab = (): React.ReactElement => {
-    const initial = JSON.parse(JSON.stringify(initialPermissions))
-
 	const [name, setName] = useState<string>("")
-	const [permissions, setPermissions] = useState<InitialPermissions>(initial)
+    const [permissions, setPermissions] = useState<string[]>([])
+    const [catalogReady, setCatalogReady] = useState(false)
 
 	const navigate = useNavigate()
 
     const [ createRole, result ] = useCreateRoleMutation({
-        onError: () => {
-            toast.error('Error al crear el rol.')
+        errorPolicy: 'none',
+        onError: (error) => {
+            toast.error(error.graphQLErrors[0]?.message ?? 'Error al crear el rol.')
         }
     })
-
-	const handleCheckboxChanged = (model: string, field: 'add' | 'delete' | 'edit' | 'view') => {
-        const newPermissions = {...permissions}
-        newPermissions[model][field] = !newPermissions[model][field]
-    
-        setPermissions(newPermissions)
-    }
 
     const handleCreateRole = async () => {
         if (!name || name === "") {
@@ -46,7 +32,8 @@ export const RolePermissionsTab = (): React.ReactElement => {
             return
         }
 
-        const permisos = parsePermissions(permissions)
+        if (!catalogReady) return
+        const permisos = permissions
 
         const result = await createRole({
             variables: {
@@ -57,7 +44,7 @@ export const RolePermissionsTab = (): React.ReactElement => {
             }
         })
 
-        if (result.data) {
+        if (result.data?.createRole) {
             toast.success('Registro creado exitosamente!')
 
             const newRoleId = result.data.createRole.id
@@ -112,10 +99,7 @@ export const RolePermissionsTab = (): React.ReactElement => {
                                 </div>
                             </div>
 
-                            <PermissionGrid
-                                permissions={permissions}
-                                handleCheckboxChanged={handleCheckboxChanged} 								
-                            />
+                            <RegisteredPermissionGrid selected={permissions} onChange={setPermissions} onReady={setCatalogReady} />
                         </div>
                     </div>
 
@@ -124,7 +108,7 @@ export const RolePermissionsTab = (): React.ReactElement => {
                             Cancelar
                         </Button>
                         
-                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleCreateRole} disabled={result.loading}>
+                        <Button type="button" variant={'default'} size={'default'} className={'w-auto px-4 cursor-pointer bg-green-700 hover:bg-green-900'} onClick={handleCreateRole} disabled={result.loading || !catalogReady}>
                             Guardar
                         </Button>
                     </div>

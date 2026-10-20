@@ -88,7 +88,8 @@ const PropertiesActionsDropdown = ({ loading, progress, permissions, onDownloadT
                     </MenuItem>
                 )}
 
-                {permissions.canView("import-data") && (
+                {permissions.canView("import-data") && permissions.canCreate("import-data")
+                    && permissions.canCreate("property") && permissions.canCreate("valuation") && (
                     <MenuItem>
                         {({ close }) => (
                             <button type="button" onClick={() => { onImport(); close() }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
