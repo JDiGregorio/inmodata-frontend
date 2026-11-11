@@ -1,0 +1,35 @@
+query ListUsers($first: Int!, $page: Int, $search: String) {
+    users(first: $first, page: $page, search: $search) {
+        data {
+            id
+            name
+            roles {
+                id
+                name
+            }
+        }
+        paginatorInfo {
+            currentPage
+            lastPage
+            total
+        }
+    }
+}
+
+query GetUserById($id: ID!) {
+    userById(id: $id) {
+        institutions {
+            id
+            name
+        }
+        id
+        name
+        email
+        roles {
+            id
+            name
+        }
+        permisos
+        permisosExtra
+    }
+}

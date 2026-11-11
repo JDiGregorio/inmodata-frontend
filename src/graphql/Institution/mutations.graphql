@@ -1,0 +1,19 @@
+mutation CreateInstitution($input: CreateInstitutionInput!) {
+	createInstitution(input: $input) {
+		id
+		name
+	}
+}
+
+mutation UpdateInstitution($input: UpdateInstitutionInput!) {
+	updateInstitution(input: $input) {
+		id
+		name
+	}
+}
+
+mutation DeleteInstitution($id: ID!) {
+	deleteInstitution(id: $id) {
+		id
+	}
+}

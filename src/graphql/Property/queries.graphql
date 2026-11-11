@@ -1,0 +1,164 @@
+query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int, $includeValuations: Boolean! = true) {
+    properties(first: $first, page: $page, search: $search, valuationYear: $valuationYear) {
+        data {
+            id
+            name
+            exactAddress
+            cadastralKey
+            latitude
+            longitude
+            latestValuation @include(if: $includeValuations) {
+                measuredAt
+                institution {
+                    name
+                }
+            }
+            quantity
+        }
+        paginatorInfo {
+            currentPage
+            lastPage
+            total
+        }
+    }
+}
+
+query GetPropertyById($id: ID!, $includeValuations: Boolean! = true) {
+    propertyById(id: $id) {
+        valuationHistory @include(if: $includeValuations) {
+            ownCount externalCount isGlobalScope
+            total financialCount controlCount otherCount valueChange valueChangePercent
+            valuePoints { id date sector value }
+            riskPoints { id date sector value }
+        }
+        canEdit
+        canDelete
+        id
+        name
+        exactAddress
+        cadastralKey
+        latitude
+        longitude
+        quantity
+        latestValuation @include(if: $includeValuations) {
+            id
+        }
+        valuations @include(if: $includeValuations) {
+            canEdit
+            canDelete
+            id
+            reference
+            owner
+            applicant
+            phone
+            sector
+            averageValue
+            measuredAt
+            landArea
+            improvementArea
+            landValue
+            utilizationRatio
+            averageSquareYard
+            averageSquareMeter
+            riskProfile
+            institution {
+                id
+                name
+            }
+            user {
+                id
+                name
+            }
+        }
+    }
+}
+
+query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMeters: Int!) {
+    propertiesWithinRadius(latitude: $latitude, longitude: $longitude, radiusMeters: $radiusMeters) {
+        canView
+        id
+        name
+        cadastralKey
+        exactAddress
+        latitude
+        longitude
+    }
+}
+
+fragment PropertyPointFields on Property {
+    canViewHistory
+    latestAuthorizedValuationDate
+    id
+    name
+    exactAddress
+    cadastralKey
+    latitude
+    longitude
+    quantity
+    latestFinancialValuation: mapValuation {
+        institution {
+            id
+            name
+        }
+        reference
+        sector
+        averageValue
+        landArea
+        improvementArea
+        landValue
+        utilizationRatio
+        averageSquareYard
+        averageSquareMeter
+        riskProfile
+        measuredAt
+    }
+}
+
+query PropertyValuationYears {
+    propertyValuationYears
+}
+
+query PropertyMapSummary($id: ID!) {
+    propertyMapDetails(id: $id) {
+        id
+        externalValuationSummary {
+            count
+            hasNewer
+        }
+    }
+}
+
+query PropertyExternalValuations($id: ID!, $page: Int!) {
+    propertyMapDetails(id: $id) {
+        id
+        externalValuations(first: 10, page: $page) {
+            currentPage
+            hasMorePages
+            data {
+                id
+                institutionName
+                measuredAt
+                sector
+                averageValue
+                averageSquareYard
+                landArea
+                riskProfile
+                isNewer
+            }
+        }
+    }
+}
+
+query ValuationInstitutionOptions {
+    hasGlobalInstitutionScope
+    valuationInstitutions {
+        id
+        name
+    }
+}
+
+query PropertiesWithinBounds($northLatitude: Float!, $eastLongitude: Float!, $southLatitude: Float!, $westLongitude: Float!, $limit: Int) {
+    propertiesWithinBounds(northLatitude: $northLatitude, eastLongitude: $eastLongitude, southLatitude: $southLatitude, westLongitude: $westLongitude, limit: $limit) {
+        ...PropertyPointFields
+    }
+}

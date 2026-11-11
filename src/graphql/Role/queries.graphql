@@ -1,0 +1,21 @@
+query ListRoles($first: Int!, $page: Int, $search: String) {
+    roles(first: $first, page: $page, search: $search) {
+        data {
+            id
+            name
+        }
+        paginatorInfo {
+            currentPage
+            lastPage
+            total
+        }
+    }
+}
+
+query GetRoleById($id: ID!) {
+    roleById(id: $id) {
+        id
+        name
+        permisos
+    }
+}

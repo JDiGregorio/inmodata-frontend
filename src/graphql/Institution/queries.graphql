@@ -1,0 +1,20 @@
+query ListInstitutions($first: Int!, $page: Int, $search: String) {
+    institutions(first: $first, page: $page, search: $search) {
+        data {
+            id
+            name
+        }
+        paginatorInfo {
+            currentPage
+            lastPage
+            total
+        }
+    }
+}
+
+query GetInstitutionById($id: ID!) {
+    institutionById(id: $id) {
+        id
+        name
+    }
+}

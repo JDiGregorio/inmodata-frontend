@@ -1,0 +1,37 @@
+mutation CreateProperty($input: CreatePropertyInput!) {
+	createProperty(input: $input) {
+		id
+		name
+	}
+}
+
+mutation UpdateProperty($input: UpdatePropertyInput!) {
+	updateProperty(input: $input) {
+		id
+		name
+	}
+}
+
+mutation AddPropertyValuation($propertyId: ID!, $input: AddValuationInput!) {
+	addPropertyValuation(propertyId: $propertyId, input: $input) {
+		id
+	}
+}
+
+mutation UpdatePropertyValuation($input: UpdateValuationInput!) {
+	updateValuation(input: $input) {
+		id
+	}
+}
+
+mutation DeleteProperty($id: ID!) {
+	deleteProperty(id: $id) {
+		id
+	}
+}
+
+mutation DeleteValuation($id: ID!) {
+	deleteValuation(id: $id) {
+		id
+	}
+}
