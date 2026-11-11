@@ -1,19 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/widgets/Dialog/ConfirmDialog'
 import { toast } from '@/utils/toast'
-import { useDebounce } from '@/utils/useDebounce'
+import { useCurrentPreAppraisalPreview } from './components/useCurrentPreAppraisalPreview'
 
 import {
     CreatePreAppraisalInput,
     PreAppraisalCalculationInput,
     PreAppraisalCreateAction,
     PreAppraisalSectorFilter,
-    useCreatePreAppraisalMutation,
-    usePreviewPreAppraisalLazyQuery
+    useCreatePreAppraisalMutation
 } from '@/generated-types'
 
 import { PreAppraisalConfigurationPanel } from './components/PreAppraisalConfigurationPanel'
@@ -39,19 +38,6 @@ const PreAppraisalCreateView = (): React.ReactElement => {
     const [savingAction, setSavingAction] = useState<PreAppraisalCreateAction | null>(null)
     const [addressAutofillLoading, setAddressAutofillLoading] = useState(false)
 
-    const previewFingerprint = JSON.stringify({
-        targetLatitude: form.targetLatitude,
-        targetLongitude: form.targetLongitude,
-        radiusMeters: form.radiusMeters,
-        sectorFilter: form.sectorFilter
-    })
-    const debouncedPreviewFingerprint = useDebounce(previewFingerprint, 650)
-
-    const [previewPreAppraisal, previewResult] = usePreviewPreAppraisalLazyQuery({
-        fetchPolicy: 'network-only',
-        notifyOnNetworkStatusChange: true
-    })
-
     const [createPreAppraisal] = useCreatePreAppraisalMutation({
         errorPolicy: 'none',
         onError: () => {
@@ -76,17 +62,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
         }
     }, [form])
 
-    useEffect(() => {
-        if (!previewInput) {
-            return
-        }
-
-        void previewPreAppraisal({
-            variables: {
-                input: previewInput
-            }
-        })
-    }, [debouncedPreviewFingerprint])
+    const previewResult = useCurrentPreAppraisalPreview(previewInput)
 
     const handleChange = (patch: Partial<PreAppraisalCreateForm>) => {
         setForm((currentForm) => ({
@@ -185,11 +161,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
             return
         }
 
-        void previewPreAppraisal({
-            variables: {
-                input: previewInput
-            }
-        })
+        previewResult.recalculate()
     }
 
     const handleSave = async (action: PreAppraisalCreateAction) => {
@@ -239,7 +211,7 @@ const PreAppraisalCreateView = (): React.ReactElement => {
                             </h1>
                         </div>
                         <p className="text-sm text-slate-500">
-                            Configura el punto de interés y el radio para generar el reporte de vecindad.
+                            Configura el punto de interés y el radio para generar los comparativos.
                         </p>
                     </div>
                 </div>

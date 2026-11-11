@@ -7,15 +7,14 @@ import Spinner from '@/components/layouts/Spinner'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/widgets/Dialog/ConfirmDialog'
 import { toast } from '@/utils/toast'
-import { useDebounce } from '@/utils/useDebounce'
+import { useCurrentPreAppraisalPreview } from './components/useCurrentPreAppraisalPreview'
 
 import {
     PreAppraisalCalculationInput,
     PreAppraisalCreateAction,
     PreAppraisalSectorFilter,
     PreAppraisalStatus,
-    RiskAggregates,
-    usePreviewPreAppraisalLazyQuery
+    RiskAggregates
 } from '@/generated-types'
 
 import Page404 from '../404'
@@ -23,7 +22,7 @@ import { Badge } from './components/Badge'
 import { PreAppraisalConfigurationPanel } from './components/PreAppraisalConfigurationPanel'
 import { PreAppraisalCreateMap } from './components/PreAppraisalCreateMap'
 import { PreAppraisalPreviewTabs } from './components/PreAppraisalPreviewTabs'
-import { PreAppraisalCreateForm, PreAppraisalPreview, PreAppraisalPreviewSample } from './components/createTypes'
+import { PreAppraisalCreateForm, PreAppraisalPreviewSample } from './components/createTypes'
 import { statusMeta } from './components/constants'
 import { DEFAULT_RADIUS_METERS, DEFAULT_TIME_FACTOR, isValidPreviewInput } from './components/createUtils'
 
@@ -156,6 +155,7 @@ type GetPreAppraisalByIdVariables = {
 
 type UpdatePreAppraisalInput = {
     id: string;
+    valuationDate?: string | null;
     institutionId?: string | null;
     targetPropertyId?: string | null;
     targetAddress?: string | null;
@@ -189,34 +189,6 @@ const initialFormFromPreAppraisal = (preAppraisal: EditPreAppraisal): PreApprais
     sectorFilter: preAppraisal.sectorFilter
 })
 
-const preAppraisalToPreview = (preAppraisal: EditPreAppraisal): PreAppraisalPreview => {
-    const filters = preAppraisal.filters ?? {}
-    const excludedCount = Number(filters.excluded_without_valid_valuation_count ?? 0)
-
-    return {
-        __typename: 'PreAppraisalPreviewPayload',
-        targetPropertyId: preAppraisal.targetPropertyId ?? null,
-        targetLatitude: Number(preAppraisal.targetLatitude),
-        targetLongitude: Number(preAppraisal.targetLongitude),
-        radiusMeters: Number(preAppraisal.radiusMeters),
-        sectorFilter: preAppraisal.sectorFilter,
-        valuationDate: preAppraisal.valuationDate,
-        timeFactor: Number(preAppraisal.timeFactor ?? DEFAULT_TIME_FACTOR),
-        candidateCount: Number(preAppraisal.candidateCount),
-        sampleCount: Number(preAppraisal.sampleCount),
-        excludedWithoutValidValuationCount: Number.isFinite(excludedCount) ? excludedCount : 0,
-        minAverageSquareYard: preAppraisal.minAverageSquareYard ?? null,
-        maxAverageSquareYard: preAppraisal.maxAverageSquareYard ?? null,
-        recommendedAverageSquareYard: preAppraisal.recommendedAverageSquareYard ?? null,
-        expectedRiskScore: preAppraisal.expectedRiskScore ?? null,
-        expectedRiskProfile: preAppraisal.expectedRiskProfile ?? null,
-        annualAppreciationRate: preAppraisal.annualAppreciationRate ?? null,
-        priceByYear: preAppraisal.priceByYear ?? null,
-        riskByYear: preAppraisal.riskByYear ?? null,
-        samples: preAppraisal.samples
-    } as PreAppraisalPreview
-}
-
 const PreAppraisalEditView = (): React.ReactElement => {
     const navigate = useNavigate()
     const { id } = useParams()
@@ -233,11 +205,6 @@ const PreAppraisalEditView = (): React.ReactElement => {
             id: id ?? ''
         },
         skip: !id
-    })
-
-    const [previewPreAppraisal, previewResult] = usePreviewPreAppraisalLazyQuery({
-        fetchPolicy: 'network-only',
-        notifyOnNetworkStatusChange: true
     })
 
     const [updatePreAppraisal] = useMutation<UpdatePreAppraisalData, UpdatePreAppraisalVariables>(EDIT_UPDATE_PRE_APPRAISAL, {
@@ -258,14 +225,6 @@ const PreAppraisalEditView = (): React.ReactElement => {
         setFormPreAppraisalId(preAppraisal.id)
     }, [preAppraisal?.id, formPreAppraisalId])
 
-    const previewFingerprint = JSON.stringify({
-        targetLatitude: form?.targetLatitude,
-        targetLongitude: form?.targetLongitude,
-        radiusMeters: form?.radiusMeters,
-        sectorFilter: form?.sectorFilter
-    })
-    const debouncedPreviewFingerprint = useDebounce(previewFingerprint, 650)
-
     const previewInput = useMemo<PreAppraisalCalculationInput | null>(() => {
         if (!form || !isValidPreviewInput(form.targetLatitude, form.targetLongitude, form.radiusMeters)) {
             return null
@@ -278,22 +237,13 @@ const PreAppraisalEditView = (): React.ReactElement => {
             targetLongitude: form.targetLongitude!,
             radiusMeters: Number(form.radiusMeters),
             sectorFilter: form.sectorFilter as PreAppraisalSectorFilter,
+            valuationDate: preAppraisal?.valuationDate,
             timeFactor: Number(preAppraisal?.timeFactor ?? DEFAULT_TIME_FACTOR),
             includeTargetProperty: false
         }
-    }, [form, preAppraisal?.timeFactor])
+    }, [form, preAppraisal?.timeFactor, preAppraisal?.valuationDate])
 
-    useEffect(() => {
-        if (!previewInput) {
-            return
-        }
-
-        void previewPreAppraisal({
-            variables: {
-                input: previewInput
-            }
-        })
-    }, [debouncedPreviewFingerprint])
+    const previewResult = useCurrentPreAppraisalPreview(previewInput)
 
     const handleChange = (patch: Partial<PreAppraisalCreateForm>) => {
         setForm((currentForm) => currentForm ? ({
@@ -384,6 +334,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
         targetLongitude: form!.targetLongitude!,
         radiusMeters: Number(form!.radiusMeters),
         sectorFilter: form!.sectorFilter as PreAppraisalSectorFilter,
+        valuationDate: preAppraisal?.valuationDate,
         timeFactor: Number(preAppraisal?.timeFactor ?? DEFAULT_TIME_FACTOR),
         includeTargetProperty: false
     })
@@ -394,11 +345,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
             return
         }
 
-        void previewPreAppraisal({
-            variables: {
-                input: previewInput
-            }
-        })
+        previewResult.recalculate()
     }
 
     const handleSave = async (action: PreAppraisalCreateAction) => {
@@ -449,8 +396,7 @@ const PreAppraisalEditView = (): React.ReactElement => {
     }
 
     const radiusMeters = Number(form.radiusMeters)
-    const savedPreview = preAppraisalToPreview(preAppraisal)
-    const preview = previewResult.data?.previewPreAppraisal ?? savedPreview
+    const preview = previewResult.data?.previewPreAppraisal
     const previewSamples = preview?.samples ?? []
     const saveDraftLoading = savingAction === PreAppraisalCreateAction.SaveDraft
     const generateLoading = savingAction === PreAppraisalCreateAction.Generate

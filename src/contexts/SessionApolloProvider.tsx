@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client'
+import { ApolloClient, ApolloProvider, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 import Cookies from 'js-cookie'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { expireSession, isExpiredStatus, sessionGeneration } from '../lib/session'
+import { createApolloCache } from '../lib/apolloCache'
 
 export function SessionApolloProvider({ children }: { children: ReactNode }) {
     const { sessionVersion, user } = useAuthContext()
@@ -29,7 +30,7 @@ function SessionClient({ children }: { children: ReactNode }) {
             headers: { ...headers, 'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN') ?? '' },
         }))
         return new ApolloClient({
-            cache: new InMemoryCache(),
+            cache: createApolloCache(),
             link: errors.concat(auth).concat(new HttpLink({ uri: `${import.meta.env.APP_BASE_URL}/graphql` })),
             connectToDevTools: import.meta.env.DEV,
             defaultOptions: { query: { errorPolicy: 'all' }, mutate: { errorPolicy: 'all' } },

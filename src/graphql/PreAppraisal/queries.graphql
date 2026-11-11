@@ -118,6 +118,7 @@ query PreviewPreAppraisal($input: PreAppraisalCalculationInput!) {
         candidateCount
         sampleCount
         excludedWithoutValidValuationCount
+        candidateLimitReached
 
         minAverageSquareYard
         maxAverageSquareYard

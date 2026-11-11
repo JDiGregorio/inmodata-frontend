@@ -15,7 +15,9 @@ import {
     useCreatePropertyMutation
 } from '@/generated-types'
 
-export const GeneralInformationTab = (): React.ReactElement => {
+export const GeneralInformationTab = ({ onCreated }: {
+    onCreated: (property: { id: string; name?: string | null }) => void;
+}): React.ReactElement => {
     const [exactAddress, setExactAddress] = useState<string | null>(null)
     const [cadastralKey, setCadastralKey] = useState<string | null>(null)
     const [latitude, setLatitude] = useState<number | undefined>()
@@ -54,11 +56,7 @@ export const GeneralInformationTab = (): React.ReactElement => {
         if (result.data) {
             toast.success('Registro creado exitosamente!')
 
-            const newPropertyId = result.data?.createProperty.id
-
-            navigate(`/inmuebles/${newPropertyId}/editar`, {
-                replace: true
-            })
+            onCreated(result.data.createProperty)
         }
     }
 

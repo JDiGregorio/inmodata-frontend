@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { ChevronDownIcon, DownloadIcon, UploadIcon, MapPinnedIcon } from 'lucide-react'
+import { ChevronDownIcon, DownloadIcon, UploadIcon, MapPinnedIcon, EyeIcon } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import moment from 'moment'
@@ -117,7 +117,8 @@ const PropertiesListView = (): React.ReactElement => {
         fetchPolicy: 'network-only',
         variables: {
             ...tableArgs,
-            valuationYear: year
+            valuationYear: permissions.canView('valuation') ? year : undefined,
+            includeValuations: permissions.canView('valuation')
         }
     })
 
@@ -128,8 +129,13 @@ const PropertiesListView = (): React.ReactElement => {
     const applyYear = (value?: number) => {
         setTableArgs(previous => ({ ...previous, page: 1 }))
         const next = new URLSearchParams(searchParams)
-        if (value) next.set('valuationYear', String(value))
-        else next.delete('valuationYear')
+
+        if (value) {
+            next.set('valuationYear', String(value))
+        } else {
+            next.delete('valuationYear')
+        }
+
         setSearchParams(next)
     }
 
@@ -179,14 +185,17 @@ const PropertiesListView = (): React.ReactElement => {
                     title="Inmuebles"
                     toolbarActions={
                         <div className="flex flex-wrap items-center gap-2">
-                        {permissions.canView('valuation') && <PropertyFilters year={year} onApply={applyYear} />}
-                        <PropertiesActionsDropdown
-                            loading={loadingDownload}
-                            progress={progress}
-                            permissions={permissions}
-                            onDownloadTemplate={handleDownloadTemplate}
-                            onImport={handleImport}
-                        />
+                            {permissions.canView('valuation') && (
+                                <PropertyFilters year={year} onApply={applyYear} />
+                            )}
+                            
+                            <PropertiesActionsDropdown
+                                loading={loadingDownload}
+                                progress={progress}
+                                permissions={permissions}
+                                onDownloadTemplate={handleDownloadTemplate}
+                                onImport={handleImport}
+                            />
                         </div>
                     }
                     canCreate={permissions.canCreate("property")}
@@ -215,6 +224,16 @@ const PropertiesListView = (): React.ReactElement => {
                                         <MapPinnedIcon size={17} />
                                     </Link>
                                 )
+                            }
+                        },
+                        {
+                            key: 'view-property',
+                            label: 'Ver inmueble',
+                            content: (row) => {
+                                return row.row ? (
+                                    <Link to={`/inmuebles/${row.row.id}`} title="Ver inmueble" aria-label="Ver inmueble" className="text-gray-600 hover:text-gray-900">
+                                    <EyeIcon size={17} /></Link> 
+                                ) : (null)
                             }
                         }
                     ]}

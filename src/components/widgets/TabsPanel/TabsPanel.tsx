@@ -33,7 +33,7 @@ const TabsPanel = ({ tabs, actions }: TabsPanelProps): React.ReactElement => {
     };
 
     const getActiveTabContents = (hash: string): React.ReactElement => {
-        return tabs.find((tab) => tab.hash === hash)?.content ?? <></>
+        return tabs.find((tab) => tab.view && tab.hash === hash)?.content ?? tabs.find(tab => tab.view)?.content ?? <></>
     }
 
     return (

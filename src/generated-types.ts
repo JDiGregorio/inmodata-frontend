@@ -16,7 +16,9 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Date: { input: any; output: any; }
+  /** A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`. */
   DateTime: { input: any; output: any; }
+  /** Arbitrary data encoded in JavaScript Object Notation. See https://www.json.org. */
   JSON: { input: any; output: any; }
 };
 
@@ -569,6 +571,7 @@ export type Property = {
   cadastralKey?: Maybe<Scalars['String']['output']>;
   canDelete?: Maybe<Scalars['Boolean']['output']>;
   canEdit?: Maybe<Scalars['Boolean']['output']>;
+  canView: Scalars['Boolean']['output'];
   canViewHistory: Scalars['Boolean']['output'];
   exactAddress?: Maybe<Scalars['String']['output']>;
   externalValuationSummary: ExternalValuationSummary;
@@ -629,8 +632,11 @@ export type PropertyValuation = {
 export type PropertyValuationHistory = {
   __typename?: 'PropertyValuationHistory';
   controlCount: Scalars['Int']['output'];
+  externalCount?: Maybe<Scalars['Int']['output']>;
   financialCount: Scalars['Int']['output'];
+  isGlobalScope: Scalars['Boolean']['output'];
   otherCount: Scalars['Int']['output'];
+  ownCount?: Maybe<Scalars['Int']['output']>;
   riskPoints: Array<ValuationHistoryPoint>;
   total: Scalars['Int']['output'];
   valueChange?: Maybe<Scalars['Float']['output']>;
@@ -643,6 +649,7 @@ export type Query = {
   hasGlobalInstitutionScope: Scalars['Boolean']['output'];
   institutionById?: Maybe<Institution>;
   institutions: InstitutionPaginator;
+  permissionCatalog: Array<Scalars['String']['output']>;
   preAppraisalById?: Maybe<PreAppraisal>;
   preAppraisalInstitutionOptions: PreAppraisalInstitutionOptions;
   preAppraisalSampleLinks: Array<PreAppraisalSampleLink>;
@@ -1021,7 +1028,7 @@ export type PreviewPreAppraisalQueryVariables = Exact<{
 }>;
 
 
-export type PreviewPreAppraisalQuery = { __typename?: 'Query', previewPreAppraisal: { __typename?: 'PreAppraisalPreviewPayload', targetPropertyId?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate: any, timeFactor: number, candidateCount: number, sampleCount: number, excludedWithoutValidValuationCount: number, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, samples: Array<{ __typename?: 'PreAppraisalPreviewSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } };
+export type PreviewPreAppraisalQuery = { __typename?: 'Query', previewPreAppraisal: { __typename?: 'PreAppraisalPreviewPayload', targetPropertyId?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate: any, timeFactor: number, candidateCount: number, sampleCount: number, excludedWithoutValidValuationCount: number, candidateLimitReached: boolean, minAverageSquareYard?: number | null, maxAverageSquareYard?: number | null, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, priceByYear?: any | null, riskByYear?: any | null, samples: Array<{ __typename?: 'PreAppraisalPreviewSample', tag?: string | null, propertyId?: string | null, propertyValuationId?: string | null, institutionId?: string | null, propertyName?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude?: number | null, longitude?: number | null, valuationReference?: string | null, valuationSector?: ValuationSector | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, riskScore?: number | null, measuredAt?: any | null, distanceMeters?: number | null, isWithinRadius: boolean, valuationAgeYears?: number | null, timeWeight?: number | null, distanceWeight?: number | null, factor?: number | null, weightedPrice?: number | null, weightedRisk?: number | null }> } };
 
 export type CreatePropertyMutationVariables = Exact<{
   input: CreatePropertyInput;
@@ -1071,6 +1078,7 @@ export type ListPropertiesQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
   valuationYear?: InputMaybe<Scalars['Int']['input']>;
+  includeValuations?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -1078,10 +1086,11 @@ export type ListPropertiesQuery = { __typename?: 'Query', properties: { __typena
 
 export type GetPropertyByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  includeValuations?: Scalars['Boolean']['input'];
 }>;
 
 
-export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', canEdit?: boolean | null, canDelete?: boolean | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, valuationHistory?: { __typename?: 'PropertyValuationHistory', total: number, financialCount: number, controlCount: number, otherCount: number, valueChange?: number | null, valueChangePercent?: number | null, valuePoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }>, riskPoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }> } | null, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', canEdit?: boolean | null, canDelete?: boolean | null, id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue?: number | null, measuredAt?: any | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
+export type GetPropertyByIdQuery = { __typename?: 'Query', propertyById?: { __typename?: 'Property', canEdit?: boolean | null, canDelete?: boolean | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, valuationHistory?: { __typename?: 'PropertyValuationHistory', ownCount?: number | null, externalCount?: number | null, isGlobalScope: boolean, total: number, financialCount: number, controlCount: number, otherCount: number, valueChange?: number | null, valueChangePercent?: number | null, valuePoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }>, riskPoints: Array<{ __typename?: 'ValuationHistoryPoint', id: string, date: any, sector?: string | null, value: number }> } | null, latestValuation?: { __typename?: 'PropertyValuation', id: string } | null, valuations?: Array<{ __typename?: 'PropertyValuation', canEdit?: boolean | null, canDelete?: boolean | null, id: string, reference?: string | null, owner?: string | null, applicant?: string | null, phone?: string | null, sector?: string | null, averageValue?: number | null, measuredAt?: any | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, institution?: { __typename?: 'Institution', id: string, name: string } | null, user?: { __typename?: 'User', id: string, name: string } | null } | null> | null } | null };
 
 export type GetPropertiesWithinRadiusQueryVariables = Exact<{
   latitude: Scalars['Float']['input'];
@@ -1090,7 +1099,7 @@ export type GetPropertiesWithinRadiusQueryVariables = Exact<{
 }>;
 
 
-export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
+export type GetPropertiesWithinRadiusQuery = { __typename?: 'Query', propertiesWithinRadius: Array<{ __typename?: 'Property', canView: boolean, id: string, name?: string | null, cadastralKey?: string | null, exactAddress?: string | null, latitude: number, longitude: number }> };
 
 export type PropertyPointFieldsFragment = { __typename?: 'Property', canViewHistory: boolean, latestAuthorizedValuationDate?: any | null, id: string, name?: string | null, exactAddress?: string | null, cadastralKey?: string | null, latitude: number, longitude: number, quantity: number, latestFinancialValuation?: { __typename?: 'PropertyValuation', reference?: string | null, sector?: string | null, averageValue?: number | null, landArea?: number | null, improvementArea?: number | null, landValue?: number | null, utilizationRatio?: number | null, averageSquareYard?: number | null, averageSquareMeter?: number | null, riskProfile?: RiskAggregates | null, measuredAt?: any | null, institution?: { __typename?: 'Institution', id: string, name: string } | null } | null };
 
@@ -1279,6 +1288,11 @@ export type EditUpdatePreAppraisalMutationVariables = Exact<{
 
 
 export type EditUpdatePreAppraisalMutation = { __typename?: 'Mutation', updatePreAppraisal: { __typename?: 'PreAppraisal', id: string, uuid: string, reference?: string | null, name?: string | null, targetAddress?: string | null, targetLatitude: number, targetLongitude: number, radiusMeters: number, sectorFilter: PreAppraisalSectorFilter, valuationDate?: any | null, candidateCount: number, sampleCount: number, recommendedAverageSquareYard?: number | null, expectedRiskScore?: number | null, expectedRiskProfile?: RiskAggregates | null, annualAppreciationRate?: number | null, status: PreAppraisalStatus, generatedAt?: any | null, createdAt: any } };
+
+export type PermissionCatalogQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PermissionCatalogQuery = { __typename?: 'Query', permissionCatalog: Array<string> };
 
 export const PropertyPointFieldsFragmentDoc = gql`
     fragment PropertyPointFields on Property {
@@ -1965,6 +1979,7 @@ export const PreviewPreAppraisalDocument = gql`
     candidateCount
     sampleCount
     excludedWithoutValidValuationCount
+    candidateLimitReached
     minAverageSquareYard
     maxAverageSquareYard
     recommendedAverageSquareYard
@@ -2237,7 +2252,7 @@ export type DeleteValuationMutationHookResult = ReturnType<typeof useDeleteValua
 export type DeleteValuationMutationResult = Apollo.MutationResult<DeleteValuationMutation>;
 export type DeleteValuationMutationOptions = Apollo.BaseMutationOptions<DeleteValuationMutation, DeleteValuationMutationVariables>;
 export const ListPropertiesDocument = gql`
-    query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int) {
+    query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int, $includeValuations: Boolean! = true) {
   properties(
     first: $first
     page: $page
@@ -2251,7 +2266,7 @@ export const ListPropertiesDocument = gql`
       cadastralKey
       latitude
       longitude
-      latestValuation {
+      latestValuation @include(if: $includeValuations) {
         measuredAt
         institution {
           name
@@ -2284,6 +2299,7 @@ export const ListPropertiesDocument = gql`
  *      page: // value for 'page'
  *      search: // value for 'search'
  *      valuationYear: // value for 'valuationYear'
+ *      includeValuations: // value for 'includeValuations'
  *   },
  * });
  */
@@ -2304,9 +2320,12 @@ export type ListPropertiesLazyQueryHookResult = ReturnType<typeof useListPropert
 export type ListPropertiesSuspenseQueryHookResult = ReturnType<typeof useListPropertiesSuspenseQuery>;
 export type ListPropertiesQueryResult = Apollo.QueryResult<ListPropertiesQuery, ListPropertiesQueryVariables>;
 export const GetPropertyByIdDocument = gql`
-    query GetPropertyById($id: ID!) {
+    query GetPropertyById($id: ID!, $includeValuations: Boolean! = true) {
   propertyById(id: $id) {
-    valuationHistory {
+    valuationHistory @include(if: $includeValuations) {
+      ownCount
+      externalCount
+      isGlobalScope
       total
       financialCount
       controlCount
@@ -2335,10 +2354,10 @@ export const GetPropertyByIdDocument = gql`
     latitude
     longitude
     quantity
-    latestValuation {
+    latestValuation @include(if: $includeValuations) {
       id
     }
-    valuations {
+    valuations @include(if: $includeValuations) {
       canEdit
       canDelete
       id
@@ -2382,6 +2401,7 @@ export const GetPropertyByIdDocument = gql`
  * const { data, loading, error } = useGetPropertyByIdQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      includeValuations: // value for 'includeValuations'
  *   },
  * });
  */
@@ -2408,6 +2428,7 @@ export const GetPropertiesWithinRadiusDocument = gql`
     longitude: $longitude
     radiusMeters: $radiusMeters
   ) {
+    canView
     id
     name
     cadastralKey
@@ -3623,3 +3644,40 @@ export function useEditUpdatePreAppraisalMutation(baseOptions?: Apollo.MutationH
 export type EditUpdatePreAppraisalMutationHookResult = ReturnType<typeof useEditUpdatePreAppraisalMutation>;
 export type EditUpdatePreAppraisalMutationResult = Apollo.MutationResult<EditUpdatePreAppraisalMutation>;
 export type EditUpdatePreAppraisalMutationOptions = Apollo.BaseMutationOptions<EditUpdatePreAppraisalMutation, EditUpdatePreAppraisalMutationVariables>;
+export const PermissionCatalogDocument = gql`
+    query PermissionCatalog {
+  permissionCatalog
+}
+    `;
+
+/**
+ * __usePermissionCatalogQuery__
+ *
+ * To run a query within a React component, call `usePermissionCatalogQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePermissionCatalogQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePermissionCatalogQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePermissionCatalogQuery(baseOptions?: Apollo.QueryHookOptions<PermissionCatalogQuery, PermissionCatalogQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PermissionCatalogQuery, PermissionCatalogQueryVariables>(PermissionCatalogDocument, options);
+      }
+export function usePermissionCatalogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PermissionCatalogQuery, PermissionCatalogQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PermissionCatalogQuery, PermissionCatalogQueryVariables>(PermissionCatalogDocument, options);
+        }
+export function usePermissionCatalogSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PermissionCatalogQuery, PermissionCatalogQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PermissionCatalogQuery, PermissionCatalogQueryVariables>(PermissionCatalogDocument, options);
+        }
+export type PermissionCatalogQueryHookResult = ReturnType<typeof usePermissionCatalogQuery>;
+export type PermissionCatalogLazyQueryHookResult = ReturnType<typeof usePermissionCatalogLazyQuery>;
+export type PermissionCatalogSuspenseQueryHookResult = ReturnType<typeof usePermissionCatalogSuspenseQuery>;
+export type PermissionCatalogQueryResult = Apollo.QueryResult<PermissionCatalogQuery, PermissionCatalogQueryVariables>;

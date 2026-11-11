@@ -99,9 +99,10 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
                         <SummaryCard label="Plusvalía Anual" value={formatPercent(preview.annualAppreciationRate)} strong />
                     </div>
 
+                    {preview.candidateLimitReached && <p role="status" className="text-sm text-amber-800">Se alcanzó el límite de candidatos. Reduce el radio para consultar un conjunto completo.</p>}
                     {preview.excludedWithoutValidValuationCount > 0 && (
                         <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                            {preview.excludedWithoutValidValuationCount} properties no fueron consideradas porque no tienen una valuación válida para el sector seleccionado.
+                            {preview.excludedWithoutValidValuationCount} inmuebles excluidos por no tener una valuación elegible.
                         </div>
                     )}
 
@@ -110,11 +111,12 @@ export const PreAppraisalPreviewTabs = ({ preview, previewLoading, previewError 
                             <BarChart3Icon className="h-5 w-5" />
                         </div>
                         <p className="text-sm font-medium text-gray-900">
-                            {preview.sampleCount} Propiedades encontradas
+                            {preview.sampleCount} muestras utilizadas de {preview.candidateCount} inmuebles candidatos
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
                             Dentro del radio de {preview.radiusMeters}m en el sector {sectorLabels[preview.sectorFilter].toLowerCase()}.
                         </p>
+                        <p className="mt-1 text-xs text-slate-500">{preview.samples.filter(sample => sample.latitude != null && sample.longitude != null).length} marcadores; las ubicaciones coincidentes pueden superponerse.</p>
                     </div>
                 </div>
             )}

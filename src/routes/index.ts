@@ -14,6 +14,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const PropertiesIndex = lazy(() => import('@/pages/Property'))
 const PropertyCreate = lazy(() => import('@/pages/Property/create'))
 const PropertyEdit = lazy(() => import('@/pages/Property/edit'))
+const PropertyDetail = lazy(() => import('@/pages/Property/detail'))
 const PreAppraisalIndex = lazy(() => import('@/pages/PreAppraisal'))
 const PreAppraisalCreate = lazy(() => import('@/pages/PreAppraisal/create'))
 const PreAppraisalEdit = lazy(() => import('@/pages/PreAppraisal/edit'))
@@ -56,10 +57,16 @@ const routes = (permissions: PermissionHelpers) => [
         label: 'Crear'
     },
     {
-        view: permissions.canEdit("property") || (permissions.canView("property") && permissions.canView("valuation")),
+        view: permissions.canView("property") && (permissions.canEdit("property") || permissions.canEdit("valuation")),
         path: '/inmuebles/:id/editar',
         component: PropertyEdit,
         label: 'Editar'
+    },
+    {
+        view: permissions.canView("property"),
+        path: '/inmuebles/:id',
+        component: PropertyDetail,
+        label: 'Detalle'
     },
     {
         view: permissions.canView("pre-appraisal"),

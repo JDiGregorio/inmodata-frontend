@@ -15,6 +15,18 @@ export default function DashboardMapView() {
     const [searchPlace, setSearchPlace] = React.useState<SelectedPlace | null>(null)
     const [limit, setLimit] = React.useState<number>(500)
     const [expanded, setExpanded] = React.useState<boolean>(false)
+    const [expandedToolbar, setExpandedToolbar] = React.useState<HTMLDivElement | null>(null)
+
+    React.useEffect(() => {
+        const toolbar = expandedToolbar
+        if (!expanded || !toolbar) return
+
+        const updateHeight = () => toolbar.parentElement?.style.setProperty('--map-toolbar-height', `${toolbar.offsetHeight}px`)
+        const observer = new ResizeObserver(updateHeight)
+        observer.observe(toolbar)
+        updateHeight()
+        return () => observer.disconnect()
+    }, [expanded, expandedToolbar])
     const [selectedId, setSelectedId] = React.useState<string | null>(null)
     const [focusTarget, setFocusTarget] = React.useState<{ lat: number; lng: number; zoom: number } | null>(null)
 
@@ -112,7 +124,7 @@ export default function DashboardMapView() {
                                 <FunnelXIcon className="size-4" />
                             </button>
 
-                            <button type="button" onClick={() => handleToggleExpand(true)} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                            <button type="button" aria-label="Expandir mapa" title="Expandir mapa" onClick={() => handleToggleExpand(true)} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
                                 {expanded ? <Minimize2Icon className="size-4" /> : <ExpandIcon className="size-4" />}
                             </button>
                         </div>
@@ -139,7 +151,7 @@ export default function DashboardMapView() {
 
                 <div className="fixed inset-0 p-3 sm:p-6">
                     <DialogPanel className="relative h-full w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 sm:left-6 sm:right-6 sm:top-6">
+                        <div ref={setExpandedToolbar} data-testid="expanded-map-toolbar" className="pointer-events-none absolute left-3 right-3 top-3 z-10 sm:left-6 sm:right-6 sm:top-6">
                             <div className="pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
                                 <div className="flex justify-between flex-wrap items-center gap-2">
                                     <div>
@@ -189,7 +201,7 @@ export default function DashboardMapView() {
                                             <FunnelXIcon className="size-4" />
                                         </button>
 
-                                        <button type="button" onClick={() => handleToggleExpand(false)} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
+                                        <button type="button" aria-label="Contraer mapa" title="Contraer mapa" onClick={() => handleToggleExpand(false)} className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">
                                             <Minimize2Icon className="size-4" />
                                         </button>
                                     </div>

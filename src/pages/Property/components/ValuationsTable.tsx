@@ -1,6 +1,6 @@
 import React from 'react'
 import moment from 'moment'
-import { SquarePenIcon } from 'lucide-react'
+import { EyeIcon, SquarePenIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
@@ -20,11 +20,12 @@ interface ValuationsTableProps {
     canEdit: boolean;
     property: Property;
     valuations?: Maybe<Maybe<PropertyValuation>[]> | undefined;
-    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    handleUpdate: (mutation: Partial<Valuation>, view?: string) => void;
+    setModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+    handleUpdate?: (mutation: Partial<Valuation>, view?: string) => void;
+    onView?: (valuation: PropertyValuation) => void;
 }
 
-export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setModalOpen, handleUpdate }: ValuationsTableProps): React.ReactElement => {
+export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setModalOpen, handleUpdate, onView }: ValuationsTableProps): React.ReactElement => {
     const handleUpdateLine = (valuation: Maybe<PropertyValuation>) => {
         if (valuation) {
             if (!valuation.canEdit) return
@@ -49,7 +50,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                 riskProfile: risks.find(risk => risk.value === valuation.riskProfile)
             }
 
-            handleUpdate(editValuation, "edit")
+            handleUpdate?.(editValuation, "edit")
         }
     }
 
@@ -69,7 +70,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
 
                 {canCreate && (
                     <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                        <Button type="button" variant={'default'} size="default" onClick={() => setModalOpen(true)} className="cursor-pointer bg-green-700 hover:bg-green-900">
+                        <Button type="button" variant={'default'} size="default" onClick={() => setModalOpen?.(true)} className="cursor-pointer bg-green-700 hover:bg-green-900">
                             Añadir
                         </Button>
                     </div>
@@ -135,7 +136,7 @@ export const ValuationsTable = ({ canCreate, canEdit, property, valuations, setM
                                                 </TableCell>
                                                 
                                                 <TableCell className="flex justify-center whitespace-nowrap py-2 pl-3 pr-4 sm:pr-6 items-center">
-                                                    {canEdit && valuation?.canEdit ? (
+                                                    {onView && valuation ? <Button variant="ghost" title="Ver valuación" aria-label="Ver valuación" onClick={() => onView(valuation)}><EyeIcon size={16} /></Button> : canEdit && valuation?.canEdit ? (
                                                         <Button variant="ghost" onClick={() => handleUpdateLine(valuation)} className="text-orange-600 hover:text-orange-900 cursor-pointer">
                                                             <SquarePenIcon size={16} color="#646464" />
                                                         </Button>

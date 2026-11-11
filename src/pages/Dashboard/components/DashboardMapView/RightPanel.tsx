@@ -78,16 +78,16 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
     }, [point?.id])
 
     return (
-        <div className={[
-            'absolute right-4 z-20 w-[370px] max-w-[calc(100%-2rem)]',
-            expanded ? 'bottom-4 top-[94px]' : 'bottom-4 top-4',
+        <div data-testid="map-right-panel" className={[
+            'absolute z-20 w-[370px] max-w-[calc(100%-2rem)]',
+            expanded ? 'bottom-4 right-3 sm:right-6 top-[calc(0.75rem+var(--map-toolbar-height,70px)+1rem)] sm:top-[calc(1.5rem+var(--map-toolbar-height,70px)+1rem)]' : 'right-4 bottom-4 top-4',
             'transition-all duration-200',
             point ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0'
         ].join(' ')}>
             <div className="flex h-auto max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95  shadow-2xl ring-1 ring-black/5 backdrop-blur-sm">
                 <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                        {canViewHistory ? <Tooltip content="Ver historial"><a href={`/inmuebles/${point?.id}/editar#valuaciones`} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
+                        {canViewHistory ? <Tooltip content="Ver historial"><a href={`/inmuebles/${point?.id}#valuaciones`} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-md font-semibold text-gray-900 hover:text-gray-500">
                             <span>
                                 {point?.name ?? 'Detalle'}
                             </span>
@@ -188,8 +188,6 @@ export function RightPanel({ point, expanded = false, onClose }: RightPanelProps
                             <Item label="Valor Promedio de Mejoras L/m&sup2;:" value={formatNumber(valuation?.averageSquareMeter)} />
 
                             <Item label="Ratio de Utilización:" value={formatNumber(valuation?.utilizationRatio)} />
-
-                            <Item label="Última Actualización:" value={formatDate(valuation?.measuredAt)} />
                         </div>
                     )}
                     {point && <ExternalValuations key={point.id} propertyId={point.id} />}

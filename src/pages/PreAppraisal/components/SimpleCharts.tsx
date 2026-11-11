@@ -10,6 +10,9 @@ interface LineChartProps {
     showValues?: boolean;
     showYAxis?: boolean;
     domain?: [number, number];
+    invertYAxis?: boolean;
+    ticks?: number[];
+    formatPointLabel?: (point: ChartPoint, index: number) => string;
 }
 
 interface BarChartProps {
@@ -45,19 +48,33 @@ const getYearPosition = (year: number, minYear: number, maxYear: number, leftPad
     return leftPadding + ((year - minYear) / (maxYear - minYear)) * (width - leftPadding - rightPadding)
 }
 
-export const LineChart = ({ data, width = chartWidth, height = chartHeight, formatValue, showValues = true, showYAxis = false, domain }: LineChartProps): React.ReactElement => {
+export const LineChart = ({ data, width = chartWidth, height = chartHeight, formatValue, showValues = true, showYAxis = false, domain, invertYAxis = false, ticks, formatPointLabel }: LineChartProps): React.ReactElement => {
     if (data.length < 2) {
         return <ChartEmptyState />
     }
 
     const sortedData = getSortedData(data)
-    const range = domain ? { min: domain[0], max: domain[1] } : getRange(sortedData)
-    const leftPadding = showYAxis ? 95 : padding
+    const rawRange = domain ? { min: domain[0], max: domain[1] } : getRange(sortedData)
+    const stepMagnitude = 10 ** Math.floor(Math.log10((rawRange.max - rawRange.min) / 4))
+    const step = [1, 2, 5, 10].map(value => value * stepMagnitude).find(value => value >= (rawRange.max - rawRange.min) / 4) ?? stepMagnitude
+    const range = showYAxis && !domain ? { min: Math.floor(rawRange.min / step) * step, max: Math.ceil(rawRange.max / step) * step } : rawRange
+    const axisTicks = ticks ?? (showYAxis && !domain
+        ? Array.from({ length: Math.round((range.max - range.min) / step) + 1 }, (_, index) => range.min + index * step)
+        : [range.min, (range.min + range.max) / 2, range.max])
+    const leftPadding = showYAxis ? Math.max(65, ...axisTicks.map(value => (formatValue?.(value) ?? valueFormatter.format(value)).length * 6 + 16)) : padding
+    const pointLabels = sortedData.map((point, index) => formatPointLabel?.(point, index) ?? `L. ${valueFormatter.format(point.value)}`)
+    const labelWidth = Math.max(60, ...pointLabels.map(label => label.length * 6.3 + 14))
+    const plotWidth = showYAxis && showValues ? Math.max(width, leftPadding + (data.length - 1) * (labelWidth + 16) + labelWidth) : width
+    const topPadding = showValues ? 40 : padding
+    const yPosition = (value: number) => {
+        const ratio = (value - range.min) / (range.max - range.min)
+        return topPadding + (invertYAxis ? ratio : 1 - ratio) * (height - topPadding - padding)
+    }
     const minYear = Math.min(...sortedData.map((item) => item.year))
     const maxYear = Math.max(...sortedData.map((item) => item.year))
     const points = sortedData.map((item) => {
-        const x = getYearPosition(item.year, minYear, maxYear, leftPadding, padding, width)
-        const y = height - padding - ((item.value - range.min) / (range.max - range.min)) * (height - padding * 2)
+        const x = getYearPosition(item.year, minYear, maxYear, showYAxis && showValues ? leftPadding + labelWidth / 2 + 8 : leftPadding, showYAxis && showValues ? labelWidth / 2 + 8 : padding, plotWidth)
+        const y = yPosition(item.value)
 
         return { ...item, x, y }
     })
@@ -65,17 +82,17 @@ export const LineChart = ({ data, width = chartWidth, height = chartHeight, form
     const path = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ')
 
     return (
-        <svg viewBox={`0 0 ${width} ${height}`} className={showYAxis ? 'block' : 'h-44 w-full'} style={showYAxis ? { width, height } : undefined} role="img" aria-label="Gráfica histórica">
-            <line x1={leftPadding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#e5e7eb" />
-            {showYAxis && [range.min, (range.min + range.max) / 2, range.max].map(value => {
-                const y = height - padding - (value - range.min) / (range.max - range.min) * (height - padding * 2)
-                return <g key={value}><line x1={leftPadding} x2={width - padding} y1={y} y2={y} stroke="#e5e7eb" /><text x={leftPadding - 8} y={y + 3} textAnchor="end" className="fill-slate-500 text-[10px]">{formatValue?.(value) ?? valueFormatter.format(value)}</text></g>
+        <svg viewBox={`0 0 ${plotWidth} ${height}`} className={showYAxis ? 'block' : 'h-44 w-full'} style={showYAxis ? { width: plotWidth, height } : undefined} role="img" aria-label="Gráfica histórica">
+            <line x1={leftPadding} y1={height - padding} x2={plotWidth - padding} y2={height - padding} stroke="#e5e7eb" />
+            {showYAxis && axisTicks.map(value => {
+                const y = yPosition(value)
+                return <g key={value}><line x1={leftPadding} x2={plotWidth - padding} y1={y} y2={y} stroke="#e5e7eb" /><text x={leftPadding - 8} y={y + 3} textAnchor="end" className="fill-slate-500 text-[10px]">{formatValue?.(value) ?? valueFormatter.format(value)}</text></g>
             })}
             <path d={path} fill="none" stroke="#155a7c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            {points.map((point) => (
+            {points.map((point, index) => (
                 <g key={point.year}>
                     <ChartPointTitle point={point} />
-                    {showValues && <ChartValueLabel point={point} />}
+                    {showValues && <ChartValueLabel point={point} label={pointLabels[index]} width={plotWidth} />}
                     <circle cx={point.x} cy={point.y} r="3" fill="#155a7c" />
                     <text x={point.x} y={height - 8} textAnchor="middle" className="fill-slate-500 text-[10px]">
                         {point.label ?? point.year}
@@ -139,11 +156,10 @@ const ChartPointTitle = ({ point }: { point: ChartPoint }): React.ReactElement =
     return <title>{point.tooltip ?? metadata}</title>
 }
 
-const ChartValueLabel = ({ point }: { point: ChartPoint & { x: number; y: number } }): React.ReactElement => {
-    const label = valueFormatter.format(point.value)
-    const labelWidth = Math.max(label.length * 5.6 + 8, 42)
+const ChartValueLabel = ({ point, label, width }: { point: ChartPoint & { x: number; y: number }; label: string; width: number }): React.ReactElement => {
+    const labelWidth = Math.max(label.length * 6.3 + 12, 42)
     const labelHeight = 16
-    const labelX = Math.min(Math.max(point.x, labelWidth / 2 + 2), chartWidth - labelWidth / 2 - 2)
+    const labelX = Math.min(Math.max(point.x, labelWidth / 2 + 2), width - labelWidth / 2 - 2)
     const labelY = Math.max(point.y - 10, labelHeight)
 
     return (
@@ -159,7 +175,7 @@ const ChartValueLabel = ({ point }: { point: ChartPoint & { x: number; y: number
                 strokeOpacity="0.22"
             />
             <text x={labelX} y={labelY - 3} textAnchor="middle" className="fill-slate-800 text-[9px] font-semibold">
-                L. {label}
+                {label}
             </text>
         </g>
     )

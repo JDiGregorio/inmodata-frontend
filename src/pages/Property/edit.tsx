@@ -1,13 +1,13 @@
 import React from 'react'
-import { Link, useParams } from 'react-router'
-import { MapPinnedIcon } from 'lucide-react'
+import { Navigate, useParams } from 'react-router'
+import { usePermissions } from '@/hooks/usePermissions'
 
 import TabsPanel, { TabPanel } from '@/components/widgets/TabsPanel/TabsPanel'
 import Spinner from '@/components/layouts/Spinner'
 import Page404 from '../404'
 import { GeneralInformationTab } from './components/tabs/GeneralInformation.edit.tab'
 import { ValuationsTab } from './components/tabs/Valuations.edit.tab'
-import { buildMapViewFocusHref } from './utils/mapViewLink'
+import { PropertyMapLink } from './components/PropertyMapLink'
 
 import {
     Property,
@@ -16,11 +16,12 @@ import {
 
 const PropertyEdit = (): React.ReactElement => {
     const { id } = useParams()
+    const permissions = usePermissions()
 
     const { data, loading, error, refetch } = useGetPropertyByIdQuery({
         fetchPolicy: 'network-only',
         variables: {
-            id: id!
+            id: id!, includeValuations: permissions.canView('valuation')
         }
     })
 
@@ -39,6 +40,7 @@ const PropertyEdit = (): React.ReactElement => {
     }
 
     const property = data.propertyById as Property
+    if (!property.canEdit && !property.valuations?.some(value => value?.canEdit)) return <Navigate to={`/inmuebles/${property.id}`} replace />
 
     const tabs: TabPanel[] = [
         {
@@ -49,7 +51,7 @@ const PropertyEdit = (): React.ReactElement => {
             content: <GeneralInformationTab property={property} />
         },
         {
-            view: true,
+            view: permissions.canView('valuation'),
             name: 'Valuaciones',
             hash: '#valuaciones',
             active: true,
@@ -62,21 +64,7 @@ const PropertyEdit = (): React.ReactElement => {
             <div className="pt-6">
                 <TabsPanel
                     tabs={tabs}
-                    actions={(
-                        <Link
-                            to={buildMapViewFocusHref({
-                                id: property.id,
-                                latitude: property.latitude,
-                                longitude: property.longitude
-                            })}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            <MapPinnedIcon size={16} />
-                            Ver en mapa
-                        </Link>
-                    )}
+                    actions={<PropertyMapLink property={property} />}
                 />
             </div>
         </div>

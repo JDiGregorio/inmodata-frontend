@@ -270,7 +270,8 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
                 gestureHandling="greedy"
                 mapTypeId={'hybrid'}
                 mapId={MAP_ID}
-                style={{ width: '100%', height: '100%' }}
+                // Keep Google's internal panes below sibling panels and controls.
+                style={{ width: '100%', height: '100%', position: 'relative', zIndex: 0 }}
                 disableDefaultUI={true}
                 zoomControl={true}
                 zoomControlOptions={{ position: google.maps.ControlPosition.LEFT_BOTTOM }}
@@ -285,6 +286,11 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
                 {points.map((point) => {
                     const isSelected = selectedId === point.id
                     const markerColor = getRiskProfileColor(point.latestFinancialValuation?.riskProfile)
+                    const selectPoint = () => {
+                        setSelected(point.id)
+                        setSelectedSnapshot(point)
+                        setIsPanelOpen(true)
+                    }
 
                     return (
                         <AdvancedMarker
@@ -292,11 +298,10 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
                             position={{ lat: point.latitude, lng: point.longitude }}
                             zIndex={isSelected ? 200 : 100}
                             clickable
-                            onClick={() => {
-                                setSelected(point.id)
-                                setSelectedSnapshot(point)
-                            }}
+                            onClick={selectPoint}
                         >
+                            {/* DialogPanel stops bubbling before SDK-level delegated clicks. */}
+                            <div onClickCapture={selectPoint} className="cursor-pointer" title={`Ver detalle de ${point.name}`}>
                             {isSelected ? (
                                 <img
                                     src={markerPrimary}
@@ -312,6 +317,7 @@ export function MapCanvas({ limit, expanded, searchPlace, selectedId, focusTarge
                                     glyphColor="#ffffff"
                                 />
                             )}
+                            </div>
                         </AdvancedMarker>
                     )
                 })}

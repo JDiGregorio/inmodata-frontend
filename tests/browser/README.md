@@ -64,3 +64,67 @@ Uses the actual role forms and extra-permissions form with isolated Apollo respo
 Covers all 36 catalog entries, additional/custom entries, Roles > Editar mapping,
 creation/editing, permission preservation, self-revocation refresh, denied mutations,
 catalog failures, and mobile overflow. Prints desktop/mobile screenshot paths.
+
+## Bank Analyst Workflow
+
+After `npm run build`, run:
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/bank-workflow.cjs`
+
+Uses real View, charts, create flow and preview hook with synthetic Apollo responses.
+Checks readonly valuation modal/deep links, missing IDs, property-only permissions,
+L/v2 point labels, financial/control tooltips, R1-at-top risk transitions, horizontal
+chart scrolling without page overflow at 390/768px, and rejection of stale previews.
+Also checks that a creator without edit permissions can start the first valuation
+inside the creation workflow without entering Edit. The map is stubbed; no real
+Google requests, business records or production credentials are used.
+
+## Property View and Price Cache Regression
+
+```sh
+node tests/browser/valuation-cache.cjs
+NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/property-view.cjs
+NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/bank-workflow.cjs
+```
+
+The cache regression reproduces the price/risk collision using identical GraphQL
+`__typename`/IDs, then verifies the production cache policy keeps both measurements
+separate. Bank workflow fixtures now include those typenames and exercise small,
+thousand, ten-thousand, decimal, negative/zero-change, repeated-date and single-point
+cases with full monetary labels and consistent absolute variation.
+
+Property View checks field order and responsive layout, one reference, private and
+missing-coordinate states, the shared Edit/View map button and readonly map events.
+It runs the actual InmuebleMapPreview; only the Google SDK and Circle rendering are
+mocked. It checks marker image loading, initial coordinates/zoom and that neither
+map clicks nor marker drags can change View coordinates or dispatch mutations.
+The editable variant is tested separately to preserve click/drag behavior.
+Google tiles and real API authorization are not tested by these offline fixtures.
+
+## Expanded Dashboard Map
+
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/dashboard-expanded.cjs`
+
+Runs the real DashboardMapView, Headless UI dialog, MapCanvas and RightPanel with
+synthetic GraphQL data and a Google SDK boundary double. The double includes a
+high-z-index map pane to verify that internal map layers cannot cover the panel.
+Checks hit-testing (not just DOM presence), point selection in both modes, retained
+selection when expanding/collapsing, details, close and Escape. Google tiles are not
+requested. `MAP_LAYER_BASELINE=1` removes only the new stacking style in the test
+bundle and reproduces the failed panel hit-test without editing application files.
+
+The marker double delegates native clicks to document, so the real DialogPanel's
+stopPropagation behavior is exercised. `MARKER_EVENT_BASELINE=1` removes the React
+capture handler only in the test bundle: selecting a different marker after closing
+the expanded panel then fails. The fixed version also tests expanding with no
+selection and reopening a closed panel.
+
+## Login Visual Layout
+
+After `npm run build`:
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/login-visual.cjs`
+
+Uses the real login layout and form with intercepted HTTP. Checks loaded assets,
+320/390/768/1024/1440px layouts, no horizontal overflow, brand colors, transparent
+map radius, marker size, remembered email, password visibility and keyboard checkbox
+operation. Screenshots are written to an isolated temporary directory. Run
+`login.cjs` separately for authentication error and submission regressions.

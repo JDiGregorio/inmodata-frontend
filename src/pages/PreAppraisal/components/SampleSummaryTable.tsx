@@ -46,7 +46,7 @@ export function SampleSummaryTable({ samples }: { samples: Sample[] }) {
                         <TableCell className="break-words whitespace-normal px-2 py-2 text-xs sm:px-3">
                             {canOpen ? <Link target="_blank" rel="noopener noreferrer"
                                 className="font-medium text-[#155a7c] underline underline-offset-2"
-                                to={`/inmuebles/${encodeURIComponent(propertyId)}/editar?valuation=${encodeURIComponent(sample.propertyValuationId!)}#valuaciones`}>
+                                to={`/inmuebles/${encodeURIComponent(propertyId)}?valuation=${encodeURIComponent(sample.propertyValuationId!)}#valuaciones`}>
                                 {sample.valuationReference || '-'}
                             </Link> : sample.valuationReference || '-'}
                         </TableCell>

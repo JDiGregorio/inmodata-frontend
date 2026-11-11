@@ -22,10 +22,10 @@ export function ValuationHistoryDashboard({ history }: { history?: PropertyValua
     const riskComparable = history.riskPoints.length >= 2
     const change = history.valueChangePercent
     const points = expanded === 'value' ? history.valuePoints : history.riskPoints
-    const currency = (value: number) => `L. ${formatNumber(value)}`
+    const currency = (value: number) => `L ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/v²`
     const cards = [
-        { key: null, title: 'Total de valuaciones', value: String(history.total), detail: `${history.financialCount} financieras · ${history.controlCount} control${history.otherCount ? ` · ${history.otherCount} otras` : ''}`, Icon: CopyIcon },
-        { key: 'value' as const, title: 'Variación del valor', value: change == null ? '-' : `${change > 0 ? '+' : ''}${formatNumber(change, 1)}%`, detail: change == null ? 'Sin suficientes valores comparables' : 'Valor total de valuaciones financieras', Icon: TrendingUpIcon },
+        { key: null, title: 'Total de valuaciones', value: String(history.total), detail: `${!history.isGlobalScope ? `${history.ownCount ?? 0} propias · ${history.externalCount ?? 0} externas · ` : ''}${history.financialCount} financieras · ${history.controlCount} control${history.otherCount ? ` · ${history.otherCount} otras` : ''}`, Icon: CopyIcon },
+        { key: 'value' as const, title: 'Variación del valor', value: change == null ? '-' : `${change > 0 ? '+' : ''}${formatNumber(change, 1)}%`, detail: change == null ? 'Sin suficientes valores comparables' : 'Precio del terreno L/v²', Icon: TrendingUpIcon },
         { key: 'risk' as const, title: 'Evolución del riesgo', value: riskComparable ? `R${riskFirst} → R${riskLast}` : riskFirst ? `R${riskFirst}` : '-', detail: riskComparable ? `${riskLabel(riskFirst)} → ${riskLabel(riskLast)}` : 'Sin suficientes datos históricos', Icon: ShieldCheckIcon },
     ]
     return <section className="mb-6" aria-label="Indicadores históricos">
@@ -41,11 +41,13 @@ export function ValuationHistoryDashboard({ history }: { history?: PropertyValua
             })}
         </div>
         {expanded && <div id="valuation-history-chart" className="mt-4 border-b border-gray-200 pb-4">
-            <h3 className="text-sm font-semibold text-gray-900">{expanded === 'value' ? 'Valor total del inmueble (L.)' : 'Historial del riesgo'}</h3>
+            <h3 className="text-sm font-semibold text-gray-900">{expanded === 'value' ? 'Evolución del precio del terreno (L/v²)' : 'Historial del riesgo'}</h3>
             {expanded === 'value' && history.valueChange != null && <p className="mt-1 text-xs text-gray-500">Variación absoluta: {history.valueChange > 0 ? '+' : ''}{currency(history.valueChange)}</p>}
             {expanded === 'risk' && riskComparable && riskLast !== undefined && <p className="mt-1 text-xs text-gray-500">{riskLast < riskFirst ? 'El riesgo mejoró' : riskLast > riskFirst ? 'El riesgo aumentó' : 'El riesgo se mantuvo'}</p>}
             <div ref={chartContainer} className="mt-3 overflow-x-auto">
-                <LineChart showYAxis showValues={false} width={Math.max(chartWidth, points.length * 95 + 110)} height={220}
+                <LineChart showYAxis showValues width={Math.max(chartWidth, points.length * 95 + 110)} height={240}
+                    invertYAxis={expanded === 'risk'} ticks={expanded === 'risk' ? [1, 2, 3, 4, 5] : undefined}
+                    formatPointLabel={(point, index) => expanded === 'value' ? currency(point.value) : index > 0 && points[index - 1].value !== point.value ? `R${points[index - 1].value} → R${point.value}` : `R${point.value}`}
                     domain={expanded === 'risk' ? [1, 5] : undefined} formatValue={expanded === 'value' ? currency : value => `R${value}`}
                     data={points.map((point, index) => ({ year: index, value: Number(point.value), label: formatDate(point.date),
                         tooltip: `${formatDate(point.date)} | ${point.sector === 'financiero' ? 'Financiera' : point.sector === 'control' ? 'Control' : 'Sin sector'} | ${expanded === 'value' ? currency(point.value) : `R${point.value} - ${riskLabel(point.value)}`}` }))} />

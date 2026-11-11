@@ -1,4 +1,4 @@
-query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int) {
+query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: Int, $includeValuations: Boolean! = true) {
     properties(first: $first, page: $page, search: $search, valuationYear: $valuationYear) {
         data {
             id
@@ -7,7 +7,7 @@ query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: 
             cadastralKey
             latitude
             longitude
-            latestValuation {
+            latestValuation @include(if: $includeValuations) {
                 measuredAt
                 institution {
                     name
@@ -23,9 +23,10 @@ query ListProperties($first: Int!, $page: Int, $search: String, $valuationYear: 
     }
 }
 
-query GetPropertyById($id: ID!) {
+query GetPropertyById($id: ID!, $includeValuations: Boolean! = true) {
     propertyById(id: $id) {
-        valuationHistory {
+        valuationHistory @include(if: $includeValuations) {
+            ownCount externalCount isGlobalScope
             total financialCount controlCount otherCount valueChange valueChangePercent
             valuePoints { id date sector value }
             riskPoints { id date sector value }
@@ -39,10 +40,10 @@ query GetPropertyById($id: ID!) {
         latitude
         longitude
         quantity
-        latestValuation {
+        latestValuation @include(if: $includeValuations) {
             id
         }
-        valuations {
+        valuations @include(if: $includeValuations) {
             canEdit
             canDelete
             id
@@ -74,6 +75,7 @@ query GetPropertyById($id: ID!) {
 
 query GetPropertiesWithinRadius($latitude: Float!, $longitude: Float!, $radiusMeters: Int!) {
     propertiesWithinRadius(latitude: $latitude, longitude: $longitude, radiusMeters: $radiusMeters) {
+        canView
         id
         name
         cadastralKey

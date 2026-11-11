@@ -30,7 +30,7 @@ interface ValuationModalProps {
     open: boolean;
     title: string;
     valuation: Valuation;
-    property: Property;
+    property: Pick<Property, 'id' | 'name'>;
     canDelete: boolean;
     setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleUpdate: (mutation: Partial<Valuation>, view?: string) => void;

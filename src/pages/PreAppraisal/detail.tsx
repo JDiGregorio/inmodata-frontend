@@ -377,7 +377,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                     </button>
 
                     <h1 className="text-lg font-semibold text-gray-900">
-                        Reporte de Vecindad
+                        Comparativos
                     </h1>
 
                     <Badge className={status.className}>
@@ -438,7 +438,7 @@ const PreAppraisalDetailView = (): React.ReactElement => {
                     <div className="flex items-start justify-between gap-6">
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-                                Reporte de Vecindad
+                                Comparativos
                             </h2>
                             <p className="mt-4 text-sm text-slate-500">
                                 Fecha: {formatDate(preAppraisal.valuationDate ?? preAppraisal.createdAt)}
