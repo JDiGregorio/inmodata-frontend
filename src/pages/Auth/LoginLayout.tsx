@@ -1,8 +1,10 @@
 import type { ComponentType } from 'react'
-import { MapPinHouseIcon, ShieldCheckIcon, HandshakeIcon } from 'lucide-react'
+import { MapPinCheckIcon, FileChartPieIcon, ShieldCheckIcon } from 'lucide-react'
+
 import logo from '@/assets/logo.png'
 import map from '@/assets/login-map.png'
 import pin from '@/assets/marker9.png'
+
 import './login.css'
 
 export const withLoginLayout = (Form: ComponentType) => function LoginLayout() {
@@ -11,6 +13,7 @@ export const withLoginLayout = (Form: ComponentType) => function LoginLayout() {
             <header className="login-header">
                 <a href="/" aria-label="Inicio — Inmodata"><img src={logo} alt="Inmodata" /></a>
             </header>
+            
             <main className="login-columns" aria-labelledby="login-title">
                 <aside className="login-card login-benefits">
                     <figure className="login-map">
@@ -20,9 +23,9 @@ export const withLoginLayout = (Form: ComponentType) => function LoginLayout() {
                         <figcaption>Tegucigalpa, Honduras</figcaption>
                     </figure>
                     <ul className="login-benefit-list">
-                        <li><MapPinHouseIcon aria-hidden="true" /><div><p>Georreferenciación de precisión</p><span>Alinee sus activos con la realidad del terreno con precisión.</span></div></li>
-                        <li><ShieldCheckIcon aria-hidden="true" /><div><p>Seguridad de nivel empresarial</p><span>Acceso cifrado y controles de auditoría integrados.</span></div></li>
-                        <li><HandshakeIcon aria-hidden="true" /><div><p>Evaluaciones perspicaces</p><span>Convierta los datos espaciales en claridad financiera.</span></div></li>
+                        <li><MapPinCheckIcon aria-hidden="true" color="#707070" /><div><p>Avalúos inmobiliarios más ágiles.</p><span>Automatizamos el proceso para entregar avalúos a nuestros clientes en menor tiempo.</span></div></li>
+                        <li><FileChartPieIcon aria-hidden="true" color="#707070" /><div><p>Información inmobiliaria más precisa.</p><span>Referencias y comparativos basados en investigaciones de mercado constantemente actualizadas.</span></div></li>
+                        <li><ShieldCheckIcon aria-hidden="true" color="#707070" /><div><p>Seguridad y mejora continua.</p><span>Plataforma segura que evoluciona con sus sugerencias y solicitudes de desarrollo.</span></div></li>
                     </ul>
                     <footer>© <time dateTime={String(new Date().getFullYear())}>{new Date().getFullYear()}</time> <strong>INMODATA</strong></footer>
                 </aside>
