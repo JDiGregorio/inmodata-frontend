@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { MapPinHouseIcon, ShieldCheckIcon, HandshakeIcon } from 'lucide-react'
+import { MapPinCheckIcon, FileChartPieIcon, ShieldCheckIcon } from 'lucide-react'
 import moment from 'moment'
 
 import logo from '@/assets/logo.png'
@@ -31,47 +31,47 @@ export const withLayout = (WrappedComponent: ComponentType) => {
                             <ul className="space-y-4 text-sm">
                                 <li className="flex items-start gap-3">
                                     <span aria-hidden="true" className="mt-0.5">
-                                        <MapPinHouseIcon size={24} color="#7C0A02" />
+                                        <MapPinCheckIcon size={24} color="#707070" />
                                     </span>
 
                                     <div>
                                         <p className="font-semibold">
-                                            Georreferenciación de precisión
+                                            Avalúos inmobiliarios más ágiles.
                                         </p>
 
                                         <p className="opacity-80">
-                                            Alinee sus activos con la realidad del terreno con precisión.
+                                            Automatizamos el proceso para entregar avalúos a nuestros clientes en menor tiempo.
                                         </p>
                                     </div>
                                 </li>
 
                                 <li className="flex items-start gap-3">
                                     <span aria-hidden="true" className="mt-0.5">
-                                        <ShieldCheckIcon size={24} color="#708238" />
+                                        <FileChartPieIcon size={24} color="#707070" />
                                     </span>
 
                                     <div>
                                         <p className="font-semibold">
-                                            Seguridad de nivel empresarial
+                                            Información inmobiliaria más precisa.
                                         </p>
 
                                         <p className="opacity-80">
-                                            Acceso cifrado y controles de auditoría integrados.
+                                            Referencias y comparativos basados en investigaciones de mercado constantemente actualizadas.
                                         </p>
                                     </div>
                                 </li>
 
                                 <li className="flex items-start gap-3">
                                     <span aria-hidden="true" className="mt-0.5">
-                                        <HandshakeIcon size={24} color="#707070" />
+                                        <ShieldCheckIcon size={24} color="#707070" />
                                     </span>
 
                                     <div>
                                         <p className="font-semibold">
-                                            Evaluaciones perspicaces
+                                            Seguridad y mejora continua.
                                         </p>
                                         <p className="opacity-80">
-                                            Convierta los datos espaciales en claridad financiera.
+                                            Plataforma segura que evoluciona con sus sugerencias y solicitudes de desarrollo.
                                         </p>
                                     </div>
                                 </li>
