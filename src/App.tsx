@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from 'react-router'
 import Spinner from '@/components/layouts/Spinner.tsx'
 import { useAuthContext } from '@/hooks/useAuthContext'
 import { withLayout } from '@/pages/Auth/Layout'
-import { withLoginLayout } from '@/pages/Auth/LoginLayout'
 import { ProtectRoutes } from '@/hooks/useProtectRoutes'
 import Layout from '@/components/layouts/Layout'
 
@@ -12,7 +11,7 @@ const wLogin = lazy(() => import('@/pages/Auth/Login'))
 const wForgotPassword = lazy(() => import('@/pages/Auth/ForgotPassword'))
 const wResetPassword = lazy(() => import('@/pages/Auth/ResetPassword'))
 
-const Login = withLoginLayout(wLogin)
+const Login = withLayout(wLogin)
 const ForgotPassword = withLayout(wForgotPassword)
 const ResetPassword = withLayout(wResetPassword)
 

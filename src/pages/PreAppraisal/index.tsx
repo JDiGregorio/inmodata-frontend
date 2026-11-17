@@ -50,7 +50,7 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
         return buildFilter(debouncedSearchTerm, status, sectorFilter, advancedFilters)
     }, [advancedFilters, debouncedSearchTerm, sectorFilter, status])
 
-    const { data, loading, error } = useListPreAppraisalsQuery({
+    const { data, loading, error, refetch } = useListPreAppraisalsQuery({
         fetchPolicy: 'network-only',
         notifyOnNetworkStatusChange: true,
         variables: {
@@ -68,6 +68,14 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
 
     const preAppraisals = data?.preAppraisals.data ?? []
     const paginatorInfo = data?.preAppraisals.paginatorInfo
+
+    const handleDeleted = async () => {
+        if (preAppraisals.length === 1 && currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        } else {
+            await refetch()
+        }
+    }
 
     const handleCreate = () => {
         navigate(CREATE_PATH)
@@ -243,7 +251,7 @@ const PreAppraisalsIndexView = (): React.ReactElement => {
                                                                 </TableCell>
 
                                                                 <TableCell className="px-4 py-4 text-center align-top">
-                                                                    <RowActions preAppraisal={preAppraisal} />
+                                                                    <RowActions preAppraisal={preAppraisal} onDeleted={handleDeleted} />
                                                                 </TableCell>
                                                             </TableRow>
                                                         )
