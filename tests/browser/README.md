@@ -118,7 +118,15 @@ capture handler only in the test bundle: selecting a different marker after clos
 the expanded panel then fails. The fixed version also tests expanding with no
 selection and reopening a closed panel.
 
-## Login Visual Layout
+## Preappraisal Delete
+
+`NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/preappraisal-delete.cjs`
+
+Uses the actual RowActions and shared AlertConfirm with a simulated Apollo mutation.
+Checks server-provided canDelete visibility, report reference, cancel without requests,
+single confirmed deletion and refresh callback. No real records are deleted.
+
+## Login Visual Layout Checks
 
 After `npm run build`:
 `NODE_PATH=/tmp/inmodata-browser-tools/node_modules node tests/browser/login-visual.cjs`
